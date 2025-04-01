@@ -9,18 +9,18 @@ export async function parseRawBody(req: NextApiRequest): Promise<Buffer> {
     // Body already parsed, convert back to buffer
     return Buffer.from(JSON.stringify(req.body));
   }
-  
+
   return new Promise((resolve, reject) => {
     const bodyParts: Buffer[] = [];
-    
-    req.on('data', (chunk) => {
+
+    req.on("data", (chunk) => {
       bodyParts.push(Buffer.from(chunk));
     });
-    
-    req.on('end', () => {
+
+    req.on("end", () => {
       resolve(Buffer.concat(bodyParts));
     });
-    
-    req.on('error', reject);
+
+    req.on("error", reject);
   });
 }
