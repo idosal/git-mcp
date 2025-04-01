@@ -151,7 +151,7 @@ function generateToolDescription(requestHost: string, requestUrl?: string): stri
     // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
     if (requestHost.includes(".gitmcp.io")) {
       const subdomain = requestHost.split(".")[0];
-      description = `Fetch documentation from the ${subdomain} GitHub Pages site.`;
+      description = `Fetch documentation from the ${subdomain}/${path} GitHub Pages.`;
     }
     // Check for github repo pattern: gitmcp.io/{owner}/{repo} or git-mcp.vercel.app/{owner}/{repo}
     else if (requestHost === "gitmcp.io" || requestHost === "git-mcp.vercel.app") {
