@@ -11,6 +11,22 @@ let subscriberClient: ReturnType<typeof createClient> | null = null;
 let publisherClient: ReturnType<typeof createClient> | null = null;
 let regularClient: ReturnType<typeof createClient> | null = null;
 
+// Track active subscriber sessions to detect stale sessions
+const activeSubscriptionSessions = new Set<string>();
+
+// Session TTL in seconds (30 minutes)
+const SESSION_TTL = 60 * 30;
+
+// Key prefix for session storage
+const SESSION_PREFIX = "mcp:session:";
+
+// Channel prefix for requests and responses
+const REQUEST_CHANNEL_PREFIX = "requests:";
+const RESPONSE_CHANNEL_PREFIX = "responses:";
+
+// Key prefix for subscriber counts
+const SUBSCRIBER_COUNT_PREFIX = "mcp:subscribers:";
+
 // Get the Redis subscriber client
 const getSubscriberClient = async () => {
   if (!subscriberClient) {
@@ -37,6 +53,8 @@ const getSubscriberClient = async () => {
 
     subscriberClient.on("end", () => {
       console.info("Redis subscriber connection closed");
+      // Reset the client to null so it can be recreated
+      subscriberClient = null;
     });
     
     console.debug('Connecting Redis subscriber client...');
@@ -45,6 +63,7 @@ const getSubscriberClient = async () => {
       console.info('Redis subscriber client connected successfully');
     } catch (error) {
       console.error('Failed to connect Redis subscriber client:', error);
+      subscriberClient = null;
       throw error;
     }
   }
@@ -77,6 +96,8 @@ const getPublisherClient = async () => {
 
     publisherClient.on("end", () => {
       console.info("Redis publisher connection closed");
+      // Reset the client to null so it can be recreated
+      publisherClient = null;
     });
     
     console.debug('Connecting Redis publisher client...');
@@ -85,6 +106,7 @@ const getPublisherClient = async () => {
       console.info('Redis publisher client connected successfully');
     } catch (error) {
       console.error('Failed to connect Redis publisher client:', error);
+      publisherClient = null;
       throw error;
     }
   }
@@ -117,6 +139,8 @@ const getRegularClient = async () => {
 
     regularClient.on("end", () => {
       console.info("Redis regular client connection closed");
+      // Reset the client to null so it can be recreated
+      regularClient = null;
     });
     
     console.debug('Connecting Redis regular client...');
@@ -125,21 +149,12 @@ const getRegularClient = async () => {
       console.info('Redis regular client connected successfully');
     } catch (error) {
       console.error('Failed to connect Redis regular client:', error);
+      regularClient = null;
       throw error;
     }
   }
   return regularClient;
 };
-
-// Session TTL in seconds (30 minutes)
-const SESSION_TTL = 60 * 30;
-
-// Key prefix for session storage
-const SESSION_PREFIX = "mcp:session:";
-
-// Channel prefix for requests and responses
-const REQUEST_CHANNEL_PREFIX = "requests:";
-const RESPONSE_CHANNEL_PREFIX = "responses:";
 
 export interface SessionMessage {
   timestamp: number;
@@ -202,6 +217,75 @@ export async function sessionExists(sessionId: string): Promise<boolean> {
 }
 
 /**
+ * Track subscriber count for a session
+ */
+async function incrementSubscriberCount(sessionId: string): Promise<number> {
+  try {
+    const redis = await getRegularClient();
+    const key = `${SUBSCRIBER_COUNT_PREFIX}${sessionId}`;
+    const count = await redis.incr(key);
+    await redis.expire(key, SESSION_TTL);
+    console.debug(`Incremented subscriber count for ${sessionId} to ${count}`);
+    return count;
+  } catch (error) {
+    console.error(`Failed to increment subscriber count for ${sessionId}:`, error);
+    return -1; // Indicate error
+  }
+}
+
+/**
+ * Decrement subscriber count for a session
+ */
+async function decrementSubscriberCount(sessionId: string): Promise<number> {
+  try {
+    const redis = await getRegularClient();
+    const key = `${SUBSCRIBER_COUNT_PREFIX}${sessionId}`;
+    const count = await redis.decr(key);
+    
+    // If count <= 0, consider the session has no subscribers
+    if (count <= 0) {
+      await redis.del(key);
+      return 0;
+    }
+    
+    return count;
+  } catch (error) {
+    console.error(`Failed to decrement subscriber count for ${sessionId}:`, error);
+    return -1; // Indicate error
+  }
+}
+
+/**
+ * Get the current number of active subscribers for a session
+ */
+export async function getActiveSubscribers(sessionId: string): Promise<number> {
+  try {
+    const redis = await getRegularClient();
+    const key = `${SUBSCRIBER_COUNT_PREFIX}${sessionId}`;
+    const count = await redis.get(key);
+    
+    if (!count) {
+      // Check if we have a local subscription for this session
+      if (activeSubscriptionSessions.has(sessionId)) {
+        console.debug(`No Redis count but local subscription exists for ${sessionId}, setting count to 1`);
+        await redis.set(key, "1", { EX: SESSION_TTL });
+        return 1;
+      }
+      return 0;
+    }
+    
+    return parseInt(count, 10);
+  } catch (error) {
+    console.error(`Failed to get subscriber count for ${sessionId}:`, error);
+    // If Redis fails but we have a local subscription, assume it's active
+    if (activeSubscriptionSessions.has(sessionId)) {
+      return 1;
+    }
+    return 0;
+  }
+}
+
+/**
  * Publish a message to a session's request channel
  */
 export async function queueMessage(
@@ -214,6 +298,12 @@ export async function queueMessage(
   try {
     const publisher = await getPublisherClient();
     const requestId = crypto.randomUUID();
+    
+    // Ensure Redis client is still connected
+    if (!publisher.isReady) {
+      await publisher.connect();
+      console.info('Redis publisher reconnected');
+    }
     
     const request: SerializedRequest = {
       requestId,
@@ -247,6 +337,18 @@ export async function subscribeToSessionMessages(
     
     console.debug(`Subscribing to channel ${channel}...`);
     
+    // Add to local tracking
+    activeSubscriptionSessions.add(sessionId);
+    
+    // Increment subscriber count in Redis
+    await incrementSubscriberCount(sessionId);
+    
+    // Ensure Redis client is still connected
+    if (!subscriber.isReady) {
+      await subscriber.connect();
+      console.info('Redis subscriber reconnected');
+    }
+    
     await subscriber.subscribe(channel, (message) => {
       try {
         console.debug(`Received message on ${channel}`, message.substring(0, 100) + (message.length > 100 ? "..." : ""));
@@ -264,10 +366,27 @@ export async function subscribeToSessionMessages(
     return async () => {
       try {
         console.debug(`Unsubscribing from channel ${channel}...`);
-        await subscriber.unsubscribe(channel);
-        console.info(`Successfully unsubscribed from ${channel}`);
+        
+        // Ensure Redis client is still connected before unsubscribing
+        if (!subscriber?.isReady) {
+          console.debug(`Redis subscriber not ready, skipping explicit unsubscribe for ${channel}`);
+        } else {
+          await subscriber.unsubscribe(channel);
+          console.info(`Successfully unsubscribed from ${channel}`);
+        }
+        
+        // Remove from local tracking
+        activeSubscriptionSessions.delete(sessionId);
+        
+        // Decrement subscriber count in Redis
+        await decrementSubscriberCount(sessionId);
       } catch (error) {
         console.error(`Error unsubscribing from ${channel}:`, error);
+        
+        // Still try to clean up counter and local tracking even if unsubscribe fails
+        activeSubscriptionSessions.delete(sessionId);
+        await decrementSubscriberCount(sessionId);
+        
         throw error;
       }
     };
@@ -291,6 +410,12 @@ export async function subscribeToResponse(
     
     console.debug(`Subscribing to response channel ${responseChannel}...`);
     
+    // Ensure Redis client is still connected
+    if (!subscriber.isReady) {
+      await subscriber.connect();
+      console.info('Redis subscriber reconnected');
+    }
+    
     await subscriber.subscribe(responseChannel, (message) => {
       try {
         console.debug(`Received response on channel ${responseChannel}`, message.substring(0, 100) + (message.length > 100 ? "..." : ""));
@@ -308,6 +433,13 @@ export async function subscribeToResponse(
     return async () => {
       try {
         console.debug(`Unsubscribing from response channel ${responseChannel}...`);
+        
+        // Ensure Redis client is still connected before unsubscribing
+        if (!subscriber?.isReady) {
+          console.debug(`Redis subscriber not ready, skipping explicit unsubscribe for ${responseChannel}`);
+          return;
+        }
+        
         await subscriber.unsubscribe(responseChannel);
         console.info(`Successfully unsubscribed from response channel ${responseChannel}`);
       } catch (error) {
@@ -334,6 +466,12 @@ export async function publishResponse(
   
   try {
     const publisher = await getPublisherClient();
+    
+    // Ensure Redis client is still connected
+    if (!publisher.isReady) {
+      await publisher.connect();
+      console.info('Redis publisher reconnected');
+    }
     
     console.debug(`Publishing response to ${responseChannel} with status ${status}`);
     await publisher.publish(responseChannel, JSON.stringify({ 

@@ -9,18 +9,20 @@ import {
   subscribeToSessionMessages,
   subscribeToResponse,
   publishResponse,
-  SerializedRequest
+  SerializedRequest,
+  getActiveSubscribers
 } from "./utils/sessionStore.js";
 import { parseRawBody } from "./utils/bodyParser.js";
 import { Socket } from "net";
 import { Readable } from "stream";
 import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http";
+import vercelJson from "../vercel.json";
 
 // For local instances only - doesn't work across serverless invocations
 let activeTransports: { [sessionId: string]: SSEServerTransport } = {};
 
 // Get max duration from vercel.json config
-const maxDuration = 59;
+const maxDuration = vercelJson?.functions?.["api/server.ts"]?.maxDuration || 60;
 
 export default async function handler(
   req: NextApiRequest,
@@ -37,10 +39,10 @@ export default async function handler(
       console.info(`[${requestId}] Handling GET request for SSE connection`);
       
       // Add response headers for SSE
-      // res.setHeader('Content-Type', 'text/event-stream');
-      // res.setHeader('Cache-Control', 'no-cache');
-      // res.setHeader('Connection', 'keep-alive');
-      // console.debug(`[${requestId}] SSE headers set`);
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      console.debug(`[${requestId}] SSE headers set`);
       
       // Instantiate the MCP server.
       const mcp = new McpServer({
@@ -61,7 +63,6 @@ export default async function handler(
       const endpoint = "/message";
       const transport = new SSEServerTransport(endpoint, res);
       console.debug(`[${requestId}] SSE transport created`);
-      
 
       try {
         console.debug(`[${requestId}] Connecting MCP server to transport`);
@@ -150,7 +151,14 @@ export default async function handler(
               
               // Process the message with the transport
               logInContext("debug", `Processing request with transport: ${request.requestId}`);
-              await transport.handlePostMessage(fReq, syntheticRes);
+              try {
+                await transport.handlePostMessage(fReq, syntheticRes);
+                logInContext("debug", `Transport processed message successfully: ${request.requestId}`);
+              } catch (e) {
+                logInContext("error", `Transport error processing message ${request.requestId}:`, e);
+                status = 500;
+                body = JSON.stringify({ error: e instanceof Error ? e.message : String(e) });
+              }
               
               // Publish the response back to Redis
               logInContext("debug", `Publishing response for ${request.requestId} with status ${status}`);
@@ -164,16 +172,21 @@ export default async function handler(
             } catch (error) {
               logInContext("error", `Error processing message:`, error);
               // Publish error response
-              await publishResponse(
-                sessionId, 
-                request.requestId, 
-                500, 
-                JSON.stringify({ error: error instanceof Error ? error.message : String(error) })
-              );
+              try {
+                await publishResponse(
+                  sessionId, 
+                  request.requestId, 
+                  500, 
+                  JSON.stringify({ error: error instanceof Error ? error.message : String(error) })
+                );
+                logInContext("info", `Published error response for ${request.requestId}`);
+              } catch (pubError) {
+                logInContext("error", `Failed to publish error response: ${pubError}`);
+              }
             }
           }
         );
-        logInContext("info", `Subscribed successfully to messages`);
+        logInContext("info", `Subscribed successfully to messages. Session ID: ${sessionId}`);
         
         // Clean up when the connection closes
         req.on("close", async () => {
@@ -273,6 +286,18 @@ export default async function handler(
         return;
       }
 
+      // Check if there are active subscribers for this session
+      const activeSubscribers = await getActiveSubscribers(sessionId);
+      console.info(`[${requestId}] Session ${sessionId} has ${activeSubscribers} active subscribers`);
+      
+      if (activeSubscribers === 0) {
+        console.error(`[${requestId}] No active subscribers for session ${sessionId}`);
+        res.status(503).json({ 
+          error: "The session exists but has no active subscribers. The SSE connection may have been terminated." 
+        });
+        return;
+      }
+
       console.debug(`[${requestId}] Session ${sessionId} exists, parsing message body`);
       const rawBody = await parseRawBody(req);
       const message = JSON.parse(rawBody.toString("utf8"));
@@ -316,7 +341,7 @@ export default async function handler(
       responseTimeout = setTimeout(async () => {
         console.error(`[${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId}`);
         await unsubscribe();
-        res.status(408).json({ error: "Request timed out waiting for response" });
+        res.status(408).json({ error: "Request timed out waiting for response. The SSE handler may have been terminated." });
       }, 10000); // 10 seconds timeout
       
       // Clean up subscription when request is closed
