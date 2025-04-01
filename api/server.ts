@@ -17,8 +17,15 @@ import { Socket } from "net";
 import { Readable } from "stream";
 import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http";
 
+// Generate a unique instance ID for this serverless function
+const INSTANCE_ID = `instance-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+console.info(`Server initialized with instance ID: ${INSTANCE_ID}`);
+
 // For local instances only - doesn't work across serverless invocations
 let activeTransports: { [sessionId: string]: SSEServerTransport } = {};
+
+// Track session health
+let sessionHealthChecks: { [sessionId: string]: NodeJS.Timeout } = {};
 
 // Get max duration from vercel.json config
 const maxDuration = 59;
@@ -28,27 +35,27 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const requestId = Math.random().toString(36).substring(2, 15);
-  console.info(`[${requestId}] New request: ${req.method} ${req.url}`);
+  console.info(`[${INSTANCE_ID}:${requestId}] New request: ${req.method} ${req.url}`);
   
   const adjustedUrl = new URL(req.url || "", `http://${req.headers.host}`);
-  console.debug(`[${requestId}] Adjusted URL: ${adjustedUrl.toString()}`);
+  console.debug(`[${INSTANCE_ID}:${requestId}] Adjusted URL: ${adjustedUrl.toString()}`);
 
   if (req.method === "GET") {
     try {
-      console.info(`[${requestId}] Handling GET request for SSE connection`);
+      console.info(`[${INSTANCE_ID}:${requestId}] Handling GET request for SSE connection`);
       
       // Add response headers for SSE
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
-      console.debug(`[${requestId}] SSE headers set`);
+      console.debug(`[${INSTANCE_ID}:${requestId}] SSE headers set`);
       
       // Instantiate the MCP server.
       const mcp = new McpServer({
         name: `MCP SSE Server for ${req.url}`,
         version: "1.0.0",
       });
-      console.debug(`[${requestId}] MCP server instantiated`);
+      console.debug(`[${INSTANCE_ID}:${requestId}] MCP server instantiated`);
 
       if (!req.headers.host) {
         throw new Error("Missing host header");
@@ -56,28 +63,28 @@ export default async function handler(
 
       // Register the "fetch_documentation" tool.
       registerTools(mcp, req.headers.host, req.url);
-      console.debug(`[${requestId}] Tools registered`);
+      console.debug(`[${INSTANCE_ID}:${requestId}] Tools registered`);
 
       // Create an SSE transport.
       const endpoint = "/message";
       const transport = new SSEServerTransport(endpoint, res);
-      console.debug(`[${requestId}] SSE transport created`);
-
+      console.debug(`[${INSTANCE_ID}:${requestId}] SSE transport created`);
+      
       try {
-        console.debug(`[${requestId}] Connecting MCP server to transport`);
+        console.debug(`[${INSTANCE_ID}:${requestId}] Connecting MCP server to transport`);
         await mcp.connect(transport);
-        console.info(`[${requestId}] MCP server connected to transport`);
+        console.info(`[${INSTANCE_ID}:${requestId}] MCP server connected to transport`);
       } catch (error) {
-        console.error(`[${requestId}] Failed to connect MCP server to transport:`, error);
+        console.error(`[${INSTANCE_ID}:${requestId}] Failed to connect MCP server to transport:`, error);
         throw error;
       }
 
       const sessionId = transport.sessionId;
-      console.info(`[${requestId}] Session established: ${sessionId}`);
+      console.info(`[${INSTANCE_ID}:${requestId}] Session established: ${sessionId}`);
 
       // Store in local map (for same-instance handling)
       activeTransports[sessionId] = transport;
-      console.debug(`[${requestId}] Transport stored in map. Active transports: ${Object.keys(activeTransports).length}`);
+      console.debug(`[${INSTANCE_ID}:${requestId}] Transport stored in map. Active transports: ${Object.keys(activeTransports).length}`);
 
       // Setup context-based logging for this session
       // This collects logs from async operations and flushes them periodically
@@ -88,7 +95,7 @@ export default async function handler(
       function logInContext(severity: "log" | "info" | "debug" | "error", ...messages: any[]) {
         logs.push({
           type: severity,
-          messages: [`[${requestId}:${sessionId}]`, ...messages]
+          messages: [`[${INSTANCE_ID}:${requestId}:${sessionId}]`, ...messages]
         });
       }
       
@@ -109,6 +116,7 @@ export default async function handler(
           host: req.headers.host,
           userAgent: req.headers["user-agent"],
           createdAt: new Date().toISOString(),
+          instanceId: INSTANCE_ID,
           requestId
         });
         logInContext("debug", `Session stored in Redis`);
@@ -124,7 +132,7 @@ export default async function handler(
           sessionId,
           async (request: SerializedRequest) => {
             try {
-              logInContext("info", `Processing message: ${request.requestId}`);
+              logInContext("info", `Processing message: ${request.requestId} on instance ${INSTANCE_ID}`);
               // Create a fake IncomingMessage object with the stored data
               const fReq = createFakeIncomingMessage({
                 method: request.method || "POST",
@@ -149,7 +157,7 @@ export default async function handler(
               };
               
               // Process the message with the transport
-              logInContext("debug", `Processing request with transport: ${request.requestId}`);
+              logInContext("debug", `Processing request ${request.requestId} on instance ${INSTANCE_ID}`);
               try {
                 await transport.handlePostMessage(fReq, syntheticRes);
                 logInContext("debug", `Transport processed message successfully: ${request.requestId}`);
@@ -160,7 +168,7 @@ export default async function handler(
               }
               
               // Publish the response back to Redis
-              logInContext("debug", `Publishing response for ${request.requestId} with status ${status}`);
+              logInContext("debug", `Publishing response for ${request.requestId} with status ${status} from instance ${INSTANCE_ID}`);
               await publishResponse(sessionId, request.requestId, status, body);
               
               if (status >= 200 && status < 300) {
@@ -185,13 +193,19 @@ export default async function handler(
             }
           }
         );
-        logInContext("info", `Subscribed successfully to messages. Session ID: ${sessionId}`);
+        logInContext("info", `Subscribed successfully to messages on instance ${INSTANCE_ID}. Session ID: ${sessionId}`);
         
         // Clean up when the connection closes
         req.on("close", async () => {
-          logInContext("info", `SSE connection closing`);
+          logInContext("info", `SSE connection closing on instance ${INSTANCE_ID}`);
           clearInterval(logInterval);
           delete activeTransports[sessionId];
+          
+          // Clean up health check if it exists
+          if (sessionHealthChecks[sessionId]) {
+            clearInterval(sessionHealthChecks[sessionId]);
+            delete sessionHealthChecks[sessionId];
+          }
           
           if (unsubscribe) {
             try {
@@ -207,10 +221,10 @@ export default async function handler(
             console[log.type].apply(console, log.messages);
           }
           
-          console.info(`[${requestId}] SSE connection closed, sessionId: ${sessionId}`);
+          console.info(`[${INSTANCE_ID}:${requestId}] SSE connection closed, sessionId: ${sessionId}`);
         });
       } catch (error) {
-        console.error(`[${requestId}] Failed to subscribe to messages for session ${sessionId}:`, error);
+        console.error(`[${INSTANCE_ID}:${requestId}] Failed to subscribe to messages for session ${sessionId}:`, error);
         throw error;
       }
       
@@ -230,7 +244,7 @@ export default async function handler(
       
       // Wait for either timeout or client disconnect
       const closeReason = await waitPromise;
-      console.info(`[${requestId}] Connection closed: ${closeReason}`);
+      console.info(`[${INSTANCE_ID}:${requestId}] Connection closed: ${closeReason}`);
       
       // Final cleanup
       clearInterval(logInterval);
@@ -238,7 +252,7 @@ export default async function handler(
       // Return a proper response to end the function
       res.status(200).end();
     } catch (error) {
-      console.error(`[${requestId}] MCP SSE Server error:`, error);
+      console.error(`[${INSTANCE_ID}:${requestId}] MCP SSE Server error:`, error);
       
       try {
         res.write(
@@ -248,7 +262,7 @@ export default async function handler(
         );
         res.end();
       } catch (writeError) {
-        console.error(`[${requestId}] Failed to write error response:`, writeError);
+        console.error(`[${INSTANCE_ID}:${requestId}] Failed to write error response:`, writeError);
       }
     }
     return;
@@ -257,34 +271,34 @@ export default async function handler(
   // POST /message?sessionId=...: handle incoming messages.
   if (req.method === "POST" && adjustedUrl.pathname.endsWith("/message")) {
     const sessionId = adjustedUrl.searchParams.get("sessionId");
-    console.info(`[${requestId}] POST message for session ${sessionId}`);
+    console.info(`[${INSTANCE_ID}:${requestId}] POST message for session ${sessionId}`);
 
     if (!sessionId) {
-      console.error(`[${requestId}] Missing sessionId parameter`);
+      console.error(`[${INSTANCE_ID}:${requestId}] Missing sessionId parameter`);
       res.status(400).json({ error: "Missing sessionId parameter" });
       return;
     }
 
-    // try {
-    //   // Check if we have the transport in this instance
-    //   if (activeTransports[sessionId]) {
-    //     // We can handle it directly in this instance
-    //     console.info(`[${requestId}] Handling POST message for session ${sessionId} directly in this instance`);
-    //     try {
-    //       await activeTransports[sessionId].handlePostMessage(req, res);
-    //       console.info(`[${requestId}] Successfully handled direct message for session ${sessionId}`);
-    //       return;
-    //     } catch (directError) {
-    //       console.error(`[${requestId}] Error handling direct message for ${sessionId}:`, directError);
-    //       // Fall through to Redis handling if direct handling fails
-    //     }
-    //   }
     try {
-      console.debug(`[${requestId}] Checking if session ${sessionId} exists in Redis`);
+      // Check if we have the transport in this instance - re-enable direct handling
+      if (activeTransports[sessionId]) {
+        // We can handle it directly in this instance
+        console.info(`[${INSTANCE_ID}:${requestId}] Handling POST message for session ${sessionId} directly in this instance`);
+        try {
+          await activeTransports[sessionId].handlePostMessage(req, res);
+          console.info(`[${INSTANCE_ID}:${requestId}] Successfully handled direct message for session ${sessionId}`);
+          return;
+        } catch (directError) {
+          console.error(`[${INSTANCE_ID}:${requestId}] Error handling direct message for ${sessionId}:`, directError);
+          // Fall through to Redis handling if direct handling fails
+        }
+      }
+
+      console.debug(`[${INSTANCE_ID}:${requestId}] Checking if session ${sessionId} exists in Redis`);
       const sessionValid = await sessionExists(sessionId);
 
       if (!sessionValid) {
-        console.error(`[${requestId}] No active SSE session found for ${sessionId}`);
+        console.error(`[${INSTANCE_ID}:${requestId}] No active SSE session found for ${sessionId}`);
         res
           .status(400)
           .json({ error: "No active SSE session for the provided sessionId" });
@@ -293,37 +307,37 @@ export default async function handler(
 
       // Check if there are active subscribers for this session
       const activeSubscribers = await getActiveSubscribers(sessionId);
-      console.info(`[${requestId}] Session ${sessionId} has ${activeSubscribers} active subscribers`);
+      console.info(`[${INSTANCE_ID}:${requestId}] Session ${sessionId} has ${activeSubscribers} active subscribers`);
       
       if (activeSubscribers === 0) {
-        console.error(`[${requestId}] No active subscribers for session ${sessionId}`);
+        console.error(`[${INSTANCE_ID}:${requestId}] No active subscribers for session ${sessionId}`);
         res.status(503).json({ 
           error: "The session exists but has no active subscribers. The SSE connection may have been terminated." 
         });
         return;
       }
 
-      console.debug(`[${requestId}] Session ${sessionId} exists, parsing message body`);
+      console.debug(`[${INSTANCE_ID}:${requestId}] Session ${sessionId} exists, parsing message body`);
       const rawBody = await parseRawBody(req);
       const message = JSON.parse(rawBody.toString("utf8"));
-      console.debug(`[${requestId}] Parsed message for session ${sessionId}`);
+      console.debug(`[${INSTANCE_ID}:${requestId}] Parsed message for session ${sessionId}`);
 
       // Queue the message via Redis PubSub
-      console.debug(`[${requestId}] Queueing message for session ${sessionId}`);
+      console.debug(`[${INSTANCE_ID}:${requestId}] Queueing message for session ${sessionId} from instance ${INSTANCE_ID}`);
       const messageRequestId = await queueMessage(sessionId, message, req.headers, req.method, req.url);
-      console.info(`[${requestId}] Message queued for session ${sessionId}, requestId: ${messageRequestId}`);
+      console.info(`[${INSTANCE_ID}:${requestId}] Message queued for session ${sessionId}, requestId: ${messageRequestId}`);
       
       // Set up a subscription to listen for a response
       let responseTimeout: NodeJS.Timeout;
       let responseReceived = false;
       
-      console.debug(`[${requestId}] Setting up response subscription for ${sessionId}:${messageRequestId}`);
+      console.debug(`[${INSTANCE_ID}:${requestId}] Setting up response subscription for ${sessionId}:${messageRequestId}`);
       const unsubscribe = await subscribeToResponse(
         sessionId,
         messageRequestId, 
         (response) => {
           responseReceived = true;
-          console.info(`[${requestId}] Response received for ${sessionId}:${messageRequestId}, status: ${response.status}`);
+          console.info(`[${INSTANCE_ID}:${requestId}] Response received for ${sessionId}:${messageRequestId}, status: ${response.status}`);
           
           if (responseTimeout) {
             clearTimeout(responseTimeout);
@@ -332,14 +346,14 @@ export default async function handler(
           // Return the response to the client
           try {
             res.status(response.status).send(response.body);
-            console.debug(`[${requestId}] Response sent to client for ${sessionId}:${messageRequestId}`);
+            console.debug(`[${INSTANCE_ID}:${requestId}] Response sent to client for ${sessionId}:${messageRequestId}`);
           } catch (error) {
-            console.error(`[${requestId}] Error sending response to client:`, error);
+            console.error(`[${INSTANCE_ID}:${requestId}] Error sending response to client:`, error);
           }
           
           // Clean up the subscription
           unsubscribe().catch(err => {
-            console.error(`[${requestId}] Error unsubscribing from response channel:`, err);
+            console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing from response channel:`, err);
           });
         }
       );
@@ -347,29 +361,38 @@ export default async function handler(
       // Set a timeout for the response
       responseTimeout = setTimeout(async () => {
         if (!responseReceived) {
-          console.error(`[${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId}`);
-          await unsubscribe();
+          console.error(`[${INSTANCE_ID}:${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId}`);
           
+          // Return 202 to indicate message was accepted but is still being processed
+          // This prevents the client from seeing an error when the message handling
+          // is happening in a different instance than the POST handler
+          res.status(202).json({ 
+            status: "accepted", 
+            message: "Message accepted but processing in another instance",
+            requestId: messageRequestId 
+          });
           
-          res.status(200).json({ requestId: messageRequestId });
-
-          // res.status(408).json({ 
-          //   error: "Request timed out waiting for response. The SSE handler may have been terminated or is not responding.",
-          //   requestId: messageRequestId
-          // });
+          // Clean up the subscription after responding
+          await unsubscribe().catch(err => {
+            console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing after timeout:`, err);
+          });
         }
-      }, 10000); // 10 seconds timeout
+      }, 5000); // 5 seconds timeout - shorter than before to be more responsive
       
       // Clean up subscription when request is closed
       req.on("close", async () => {
-        console.debug(`[${requestId}] Client closed connection for ${sessionId}:${messageRequestId}`);
+        console.debug(`[${INSTANCE_ID}:${requestId}] Client closed connection for ${sessionId}:${messageRequestId}`);
         if (responseTimeout) {
           clearTimeout(responseTimeout);
         }
-        await unsubscribe();
+        if (!responseReceived) {
+          await unsubscribe().catch(err => {
+            console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing on close:`, err);
+          });
+        }
       });
     } catch (error) {
-      console.error(`[${requestId}] Error handling POST message:`, error);
+      console.error(`[${INSTANCE_ID}:${requestId}] Error handling POST message:`, error);
       res.status(500).json({
         error: error instanceof Error ? error.message : String(error),
       });
@@ -377,7 +400,7 @@ export default async function handler(
     return;
   }
 
-  console.error(`[${requestId}] Not found: ${req.method} ${req.url}`);
+  console.error(`[${INSTANCE_ID}:${requestId}] Not found: ${req.method} ${req.url}`);
   res.status(404).end("Not found");
 }
 

@@ -14,6 +14,14 @@ let regularClient: ReturnType<typeof createClient> | null = null;
 // Track active subscriber sessions to detect stale sessions
 const activeSubscriptionSessions = new Set<string>();
 
+// Track last usage of Redis clients for health checks
+let lastSubscriberUsage = 0;
+let lastPublisherUsage = 0;
+let lastRegularUsage = 0;
+
+// Redis client health check interval (in ms)
+const CLIENT_HEALTH_CHECK_INTERVAL = 10000; // 10 seconds
+
 // Session TTL in seconds (30 minutes)
 const SESSION_TTL = 60 * 30;
 
@@ -27,132 +35,214 @@ const RESPONSE_CHANNEL_PREFIX = "responses:";
 // Key prefix for subscriber counts
 const SUBSCRIBER_COUNT_PREFIX = "mcp:subscribers:";
 
+// Key prefix for instance tracking
+const INSTANCE_PREFIX = "mcp:instance:";
+
+// Generate a unique instance ID for this serverless function
+const INSTANCE_ID = `instance-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+console.info(`Initialized session store with instance ID: ${INSTANCE_ID}`);
+
 // Get the Redis subscriber client
 const getSubscriberClient = async () => {
-  if (!subscriberClient) {
-    console.info('Creating new Redis subscriber client');
+  const now = Date.now();
+  
+  // Check if client exists and if it's been too long since last usage
+  if (subscriberClient && subscriberClient.isReady && now - lastSubscriberUsage < CLIENT_HEALTH_CHECK_INTERVAL) {
+    lastSubscriberUsage = now;
+    return subscriberClient;
+  }
+  
+  // Create new client or reconnect existing one
+  if (!subscriberClient || !subscriberClient.isReady) {
+    console.info(`[${INSTANCE_ID}] Creating new Redis subscriber client`);
+    
+    // Clean up old client if it exists
+    if (subscriberClient) {
+      try {
+        await subscriberClient.quit().catch(err => console.error('Error quitting old subscriber client:', err));
+      } catch (e) {
+        // Ignore errors during cleanup
+      }
+      subscriberClient = null;
+    }
+    
     subscriberClient = createClient({ 
       url: redisUrl,
       socket: {
-        keepAlive: 30000, // Keep the socket alive with 30s interval
-        reconnectStrategy: (retries) => Math.min(retries * 100, 3000)
+        keepAlive: 20000, // Keep the socket alive every 20s
+        reconnectStrategy: (retries) => {
+          const delay = Math.min(retries * 100, 3000);
+          console.info(`[${INSTANCE_ID}] Subscriber reconnecting in ${delay}ms, attempt ${retries}`);
+          return delay;
+        }
       }
     });
     
     subscriberClient.on("error", (err) => {
-      console.error("Redis subscriber error:", err);
+      console.error(`[${INSTANCE_ID}] Redis subscriber error:`, err);
     });
 
     subscriberClient.on("connect", () => {
-      console.info("Redis subscriber connected");
+      console.info(`[${INSTANCE_ID}] Redis subscriber connected`);
     });
     
     subscriberClient.on("reconnecting", () => {
-      console.info("Redis subscriber reconnecting...");
+      console.info(`[${INSTANCE_ID}] Redis subscriber reconnecting...`);
     });
 
     subscriberClient.on("end", () => {
-      console.info("Redis subscriber connection closed");
-      // Reset the client to null so it can be recreated
+      console.info(`[${INSTANCE_ID}] Redis subscriber connection closed`);
       subscriberClient = null;
     });
     
-    console.debug('Connecting Redis subscriber client...');
+    console.debug(`[${INSTANCE_ID}] Connecting Redis subscriber client...`);
     try {
       await subscriberClient.connect();
-      console.info('Redis subscriber client connected successfully');
+      console.info(`[${INSTANCE_ID}] Redis subscriber client connected successfully`);
     } catch (error) {
-      console.error('Failed to connect Redis subscriber client:', error);
+      console.error(`[${INSTANCE_ID}] Failed to connect Redis subscriber client:`, error);
       subscriberClient = null;
       throw error;
     }
   }
+  
+  lastSubscriberUsage = now;
   return subscriberClient;
 };
 
 // Get the Redis publisher client
 const getPublisherClient = async () => {
-  if (!publisherClient) {
-    console.info('Creating new Redis publisher client');
+  const now = Date.now();
+  
+  // Check if client exists and if it's been too long since last usage
+  if (publisherClient && publisherClient.isReady && now - lastPublisherUsage < CLIENT_HEALTH_CHECK_INTERVAL) {
+    lastPublisherUsage = now;
+    return publisherClient;
+  }
+  
+  // Create new client or reconnect existing one
+  if (!publisherClient || !publisherClient.isReady) {
+    console.info(`[${INSTANCE_ID}] Creating new Redis publisher client`);
+    
+    // Clean up old client if it exists
+    if (publisherClient) {
+      try {
+        await publisherClient.quit().catch(err => console.error('Error quitting old publisher client:', err));
+      } catch (e) {
+        // Ignore errors during cleanup
+      }
+      publisherClient = null;
+    }
+    
     publisherClient = createClient({ 
       url: redisUrl,
       socket: {
-        keepAlive: 30000,
-        reconnectStrategy: (retries) => Math.min(retries * 100, 3000)
+        keepAlive: 20000,
+        reconnectStrategy: (retries) => {
+          const delay = Math.min(retries * 100, 3000);
+          console.info(`[${INSTANCE_ID}] Publisher reconnecting in ${delay}ms, attempt ${retries}`);
+          return delay;
+        }
       }
     });
     
     publisherClient.on("error", (err) => {
-      console.error("Redis publisher error:", err);
+      console.error(`[${INSTANCE_ID}] Redis publisher error:`, err);
     });
 
     publisherClient.on("connect", () => {
-      console.info("Redis publisher connected");
+      console.info(`[${INSTANCE_ID}] Redis publisher connected`);
     });
     
     publisherClient.on("reconnecting", () => {
-      console.info("Redis publisher reconnecting...");
+      console.info(`[${INSTANCE_ID}] Redis publisher reconnecting...`);
     });
 
     publisherClient.on("end", () => {
-      console.info("Redis publisher connection closed");
-      // Reset the client to null so it can be recreated
+      console.info(`[${INSTANCE_ID}] Redis publisher connection closed`);
       publisherClient = null;
     });
     
-    console.debug('Connecting Redis publisher client...');
+    console.debug(`[${INSTANCE_ID}] Connecting Redis publisher client...`);
     try {
       await publisherClient.connect();
-      console.info('Redis publisher client connected successfully');
+      console.info(`[${INSTANCE_ID}] Redis publisher client connected successfully`);
     } catch (error) {
-      console.error('Failed to connect Redis publisher client:', error);
+      console.error(`[${INSTANCE_ID}] Failed to connect Redis publisher client:`, error);
       publisherClient = null;
       throw error;
     }
   }
+  
+  lastPublisherUsage = now;
   return publisherClient;
 };
 
 // Get the Redis regular client for key-value operations
 const getRegularClient = async () => {
-  if (!regularClient) {
-    console.info('Creating new Redis regular client');
+  const now = Date.now();
+  
+  // Check if client exists and if it's been too long since last usage
+  if (regularClient && regularClient.isReady && now - lastRegularUsage < CLIENT_HEALTH_CHECK_INTERVAL) {
+    lastRegularUsage = now;
+    return regularClient;
+  }
+  
+  // Create new client or reconnect existing one
+  if (!regularClient || !regularClient.isReady) {
+    console.info(`[${INSTANCE_ID}] Creating new Redis regular client`);
+    
+    // Clean up old client if it exists
+    if (regularClient) {
+      try {
+        await regularClient.quit().catch(err => console.error('Error quitting old regular client:', err));
+      } catch (e) {
+        // Ignore errors during cleanup
+      }
+      regularClient = null;
+    }
+    
     regularClient = createClient({ 
       url: redisUrl,
       socket: {
-        keepAlive: 30000,
-        reconnectStrategy: (retries) => Math.min(retries * 100, 3000)
+        keepAlive: 20000,
+        reconnectStrategy: (retries) => {
+          const delay = Math.min(retries * 100, 3000);
+          console.info(`[${INSTANCE_ID}] Regular client reconnecting in ${delay}ms, attempt ${retries}`);
+          return delay;
+        }
       }
     });
     
     regularClient.on("error", (err) => {
-      console.error("Redis regular client error:", err);
+      console.error(`[${INSTANCE_ID}] Redis regular client error:`, err);
     });
 
     regularClient.on("connect", () => {
-      console.info("Redis regular client connected");
+      console.info(`[${INSTANCE_ID}] Redis regular client connected`);
     });
     
     regularClient.on("reconnecting", () => {
-      console.info("Redis regular client reconnecting...");
+      console.info(`[${INSTANCE_ID}] Redis regular client reconnecting...`);
     });
 
     regularClient.on("end", () => {
-      console.info("Redis regular client connection closed");
-      // Reset the client to null so it can be recreated
+      console.info(`[${INSTANCE_ID}] Redis regular client connection closed`);
       regularClient = null;
     });
     
-    console.debug('Connecting Redis regular client...');
+    console.debug(`[${INSTANCE_ID}] Connecting Redis regular client...`);
     try {
       await regularClient.connect();
-      console.info('Redis regular client connected successfully');
+      console.info(`[${INSTANCE_ID}] Redis regular client connected successfully`);
     } catch (error) {
-      console.error('Failed to connect Redis regular client:', error);
+      console.error(`[${INSTANCE_ID}] Failed to connect Redis regular client:`, error);
       regularClient = null;
       throw error;
     }
   }
+  
+  lastRegularUsage = now;
   return regularClient;
 };
 
