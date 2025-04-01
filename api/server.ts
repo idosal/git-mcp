@@ -267,12 +267,12 @@ export default async function handler(
 
     try {
       // Check if we have the transport in this instance
-      if (activeTransports[sessionId]) {
-        // We can handle it directly in this instance
-        console.info(`[${requestId}] Handling POST message for session ${sessionId} directly`);
-        await activeTransports[sessionId].handlePostMessage(req, res);
-        return;
-      }
+      // if (activeTransports[sessionId]) {
+      //   // We can handle it directly in this instance
+      //   console.info(`[${requestId}] Handling POST message for session ${sessionId} directly`);
+      //   await activeTransports[sessionId].handlePostMessage(req, res);
+      //   return;
+      // }
 
       console.debug(`[${requestId}] Checking if session ${sessionId} exists in Redis`);
       const sessionValid = await sessionExists(sessionId);
