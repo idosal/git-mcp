@@ -281,18 +281,18 @@ export default async function handler(
 
     try {
       // Check if we have the transport in this instance - re-enable direct handling
-      if (activeTransports[sessionId]) {
-        // We can handle it directly in this instance
-        console.info(`[${INSTANCE_ID}:${requestId}] Handling POST message for session ${sessionId} directly in this instance`);
-        try {
-          await activeTransports[sessionId].handlePostMessage(req, res);
-          console.info(`[${INSTANCE_ID}:${requestId}] Successfully handled direct message for session ${sessionId}`);
-          return;
-        } catch (directError) {
-          console.error(`[${INSTANCE_ID}:${requestId}] Error handling direct message for ${sessionId}:`, directError);
-          // Fall through to Redis handling if direct handling fails
-        }
-      }
+      // if (activeTransports[sessionId]) {
+      //   // We can handle it directly in this instance
+      //   console.info(`[${INSTANCE_ID}:${requestId}] Handling POST message for session ${sessionId} directly in this instance`);
+      //   try {
+      //     await activeTransports[sessionId].handlePostMessage(req, res);
+      //     console.info(`[${INSTANCE_ID}:${requestId}] Successfully handled direct message for session ${sessionId}`);
+      //     return;
+      //   } catch (directError) {
+      //     console.error(`[${INSTANCE_ID}:${requestId}] Error handling direct message for ${sessionId}:`, directError);
+      //     // Fall through to Redis handling if direct handling fails
+      //   }
+      // }
 
       console.debug(`[${INSTANCE_ID}:${requestId}] Checking if session ${sessionId} exists in Redis`);
       const sessionValid = await sessionExists(sessionId);
