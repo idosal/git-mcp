@@ -418,7 +418,7 @@ export async function subscribeToResponse(
     
     await subscriber.subscribe(responseChannel, (message) => {
       try {
-        console.debug(`Received response on channel ${responseChannel}`, message.substring(0, 100) + (message.length > 100 ? "..." : ""));
+        console.debug(`Received response on channel ${responseChannel}`);
         const response = JSON.parse(message) as { status: number; body: string };
         console.debug(`Successfully parsed response with status ${response.status}`);
         callback(response);
@@ -463,25 +463,70 @@ export async function publishResponse(
   body: string
 ): Promise<void> {
   const responseChannel = `${RESPONSE_CHANNEL_PREFIX}${sessionId}:${requestId}`;
+  const startTime = Date.now();
+  
+  console.info(`[RESPONSE] Publishing to ${responseChannel} with status ${status}`);
   
   try {
     const publisher = await getPublisherClient();
+    console.debug(`[RESPONSE] Got publisher client for ${responseChannel}, took ${Date.now() - startTime}ms`);
     
     // Ensure Redis client is still connected
     if (!publisher.isReady) {
+      console.warn(`[RESPONSE] Publisher not ready for ${responseChannel}, reconnecting...`);
       await publisher.connect();
-      console.info('Redis publisher reconnected');
+      console.info(`[RESPONSE] Redis publisher reconnected for ${responseChannel}`);
     }
     
-    console.debug(`Publishing response to ${responseChannel} with status ${status}`);
-    await publisher.publish(responseChannel, JSON.stringify({ 
+    const payload = JSON.stringify({ 
       status, 
-      body 
-    }));
-    console.debug(`Successfully published response to ${responseChannel}`);
+      body,
+      timestamp: Date.now()
+    });
+    console.debug(`[RESPONSE] Prepared payload for ${responseChannel}, size: ${payload.length} bytes, payload: ${payload}`);
+    
+    // Use PUBLISH command directly
+    const publishResult = await publisher.publish(responseChannel, payload);
+    const duration = Date.now() - startTime;
+    
+    console.info(
+      `[RESPONSE] Published response to ${responseChannel}, ` +
+      `status: ${status}, receivers: ${publishResult}, ` + 
+      `duration: ${duration}ms, body length: ${body.length}`
+    );
+    
+    // If no receivers, log a warning
+    if (publishResult === 0) {
+      console.warn(`[RESPONSE] No receivers for ${responseChannel}! The request might time out.`);
+      
+      // Try publishing again after a short delay
+      setTimeout(async () => {
+        try {
+          console.debug(`[RESPONSE] Re-attempting publish to ${responseChannel}...`);
+          const retryResult = await publisher.publish(responseChannel, payload);
+          console.info(`[RESPONSE] Re-publish attempt to ${responseChannel} reached ${retryResult} receivers`);
+        } catch (e) {
+          console.error(`[RESPONSE] Failed in retry publish to ${responseChannel}:`, e);
+        }
+      }, 100);
+    }
   } catch (error) {
-    console.error(`Error publishing response to ${responseChannel}:`, error);
-    throw error;
+    console.error(`[RESPONSE] Error publishing response to ${responseChannel} (after ${Date.now() - startTime}ms):`, error);
+    
+    // Try with a new publisher as a last resort
+    try {
+      console.warn(`[RESPONSE] Attempting to publish with new client to ${responseChannel}...`);
+      publisherClient = null;
+      const newPublisher = await getPublisherClient();
+      
+      const payload = JSON.stringify({ status, body });
+      const retryResult = await newPublisher.publish(responseChannel, payload);
+      
+      console.info(`[RESPONSE] Emergency publish to ${responseChannel} reached ${retryResult} receivers`);
+    } catch (retryError) {
+      console.error(`[RESPONSE] Emergency publish failed for ${responseChannel}:`, retryError);
+      throw error;
+    }
   }
 }
 

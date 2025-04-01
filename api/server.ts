@@ -265,15 +265,21 @@ export default async function handler(
       return;
     }
 
+    // try {
+    //   // Check if we have the transport in this instance
+    //   if (activeTransports[sessionId]) {
+    //     // We can handle it directly in this instance
+    //     console.info(`[${requestId}] Handling POST message for session ${sessionId} directly in this instance`);
+    //     try {
+    //       await activeTransports[sessionId].handlePostMessage(req, res);
+    //       console.info(`[${requestId}] Successfully handled direct message for session ${sessionId}`);
+    //       return;
+    //     } catch (directError) {
+    //       console.error(`[${requestId}] Error handling direct message for ${sessionId}:`, directError);
+    //       // Fall through to Redis handling if direct handling fails
+    //     }
+    //   }
     try {
-      // Check if we have the transport in this instance
-      // if (activeTransports[sessionId]) {
-      //   // We can handle it directly in this instance
-      //   console.info(`[${requestId}] Handling POST message for session ${sessionId} directly`);
-      //   await activeTransports[sessionId].handlePostMessage(req, res);
-      //   return;
-      // }
-
       console.debug(`[${requestId}] Checking if session ${sessionId} exists in Redis`);
       const sessionValid = await sessionExists(sessionId);
 
@@ -309,12 +315,14 @@ export default async function handler(
       
       // Set up a subscription to listen for a response
       let responseTimeout: NodeJS.Timeout;
+      let responseReceived = false;
       
       console.debug(`[${requestId}] Setting up response subscription for ${sessionId}:${messageRequestId}`);
       const unsubscribe = await subscribeToResponse(
         sessionId,
         messageRequestId, 
         (response) => {
+          responseReceived = true;
           console.info(`[${requestId}] Response received for ${sessionId}:${messageRequestId}, status: ${response.status}`);
           
           if (responseTimeout) {
@@ -338,9 +346,17 @@ export default async function handler(
       
       // Set a timeout for the response
       responseTimeout = setTimeout(async () => {
-        console.error(`[${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId}`);
-        await unsubscribe();
-        res.status(408).json({ error: "Request timed out waiting for response. The SSE handler may have been terminated." });
+        if (!responseReceived) {
+          console.error(`[${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId}`);
+          await unsubscribe();
+          
+          
+          
+          res.status(408).json({ 
+            error: "Request timed out waiting for response. The SSE handler may have been terminated or is not responding.",
+            requestId: messageRequestId
+          });
+        }
       }, 10000); // 10 seconds timeout
       
       // Clean up subscription when request is closed
