@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { registerTools } from "./tools/index.js";
-import { storeSession, sessionExists, queueMessage, subscribeToSessionMessages, subscribeToResponse, publishResponse } from "./utils/sessionStore.js";
+import { storeSession, sessionExists, queueMessage, subscribeToSessionMessages, subscribeToResponse, publishResponse, getActiveSubscribers } from "./utils/sessionStore.js";
 import { parseRawBody } from "./utils/bodyParser.js";
 import { Socket } from "net";
 import { Readable } from "stream";
@@ -39,9 +39,6 @@ export default async function handler(req, res) {
             const endpoint = "/message";
             const transport = new SSEServerTransport(endpoint, res);
             console.debug(`[${requestId}] SSE transport created`);
-            // Start sending immediate heartbeats to keep the connection alive
-            console.debug(`[${requestId}] Sending initial heartbeat`);
-            res.write(": heartbeat\n\n");
             try {
                 console.debug(`[${requestId}] Connecting MCP server to transport`);
                 await mcp.connect(transport);
@@ -76,17 +73,6 @@ export default async function handler(req, res) {
                     logs = [];
                 }
             }, 100);
-            // Set up heartbeat interval to keep the connection alive
-            const heartbeatInterval = setInterval(() => {
-                try {
-                    res.write(": heartbeat\n\n");
-                    logInContext("debug", `Heartbeat sent`);
-                }
-                catch (error) {
-                    logInContext("error", `Failed to send heartbeat:`, error);
-                    clearInterval(heartbeatInterval);
-                }
-            }, 3000); // Send heartbeat every 3 seconds
             try {
                 // Store in Redis (for cross-instance handling)
                 logInContext("debug", `Storing session in Redis`);
@@ -129,7 +115,15 @@ export default async function handler(req, res) {
                         };
                         // Process the message with the transport
                         logInContext("debug", `Processing request with transport: ${request.requestId}`);
-                        await transport.handlePostMessage(fReq, syntheticRes);
+                        try {
+                            await transport.handlePostMessage(fReq, syntheticRes);
+                            logInContext("debug", `Transport processed message successfully: ${request.requestId}`);
+                        }
+                        catch (e) {
+                            logInContext("error", `Transport error processing message ${request.requestId}:`, e);
+                            status = 500;
+                            body = JSON.stringify({ error: e instanceof Error ? e.message : String(e) });
+                        }
                         // Publish the response back to Redis
                         logInContext("debug", `Publishing response for ${request.requestId} with status ${status}`);
                         await publishResponse(sessionId, request.requestId, status, body);
@@ -143,14 +137,19 @@ export default async function handler(req, res) {
                     catch (error) {
                         logInContext("error", `Error processing message:`, error);
                         // Publish error response
-                        await publishResponse(sessionId, request.requestId, 500, JSON.stringify({ error: error instanceof Error ? error.message : String(error) }));
+                        try {
+                            await publishResponse(sessionId, request.requestId, 500, JSON.stringify({ error: error instanceof Error ? error.message : String(error) }));
+                            logInContext("info", `Published error response for ${request.requestId}`);
+                        }
+                        catch (pubError) {
+                            logInContext("error", `Failed to publish error response: ${pubError}`);
+                        }
                     }
                 });
-                logInContext("info", `Subscribed successfully to messages`);
+                logInContext("info", `Subscribed successfully to messages. Session ID: ${sessionId}`);
                 // Clean up when the connection closes
                 req.on("close", async () => {
                     logInContext("info", `SSE connection closing`);
-                    clearInterval(heartbeatInterval);
                     clearInterval(logInterval);
                     delete activeTransports[sessionId];
                     if (unsubscribe) {
@@ -188,7 +187,6 @@ export default async function handler(req, res) {
             const closeReason = await waitPromise;
             console.info(`[${requestId}] Connection closed: ${closeReason}`);
             // Final cleanup
-            clearInterval(heartbeatInterval);
             clearInterval(logInterval);
             // Return a proper response to end the function
             res.status(200).end();
@@ -216,14 +214,21 @@ export default async function handler(req, res) {
             res.status(400).json({ error: "Missing sessionId parameter" });
             return;
         }
+        // try {
+        //   // Check if we have the transport in this instance
+        //   if (activeTransports[sessionId]) {
+        //     // We can handle it directly in this instance
+        //     console.info(`[${requestId}] Handling POST message for session ${sessionId} directly in this instance`);
+        //     try {
+        //       await activeTransports[sessionId].handlePostMessage(req, res);
+        //       console.info(`[${requestId}] Successfully handled direct message for session ${sessionId}`);
+        //       return;
+        //     } catch (directError) {
+        //       console.error(`[${requestId}] Error handling direct message for ${sessionId}:`, directError);
+        //       // Fall through to Redis handling if direct handling fails
+        //     }
+        //   }
         try {
-            // Check if we have the transport in this instance
-            if (activeTransports[sessionId]) {
-                // We can handle it directly in this instance
-                console.info(`[${requestId}] Handling POST message for session ${sessionId} directly`);
-                await activeTransports[sessionId].handlePostMessage(req, res);
-                return;
-            }
             console.debug(`[${requestId}] Checking if session ${sessionId} exists in Redis`);
             const sessionValid = await sessionExists(sessionId);
             if (!sessionValid) {
@@ -231,6 +236,16 @@ export default async function handler(req, res) {
                 res
                     .status(400)
                     .json({ error: "No active SSE session for the provided sessionId" });
+                return;
+            }
+            // Check if there are active subscribers for this session
+            const activeSubscribers = await getActiveSubscribers(sessionId);
+            console.info(`[${requestId}] Session ${sessionId} has ${activeSubscribers} active subscribers`);
+            if (activeSubscribers === 0) {
+                console.error(`[${requestId}] No active subscribers for session ${sessionId}`);
+                res.status(503).json({
+                    error: "The session exists but has no active subscribers. The SSE connection may have been terminated."
+                });
                 return;
             }
             console.debug(`[${requestId}] Session ${sessionId} exists, parsing message body`);
@@ -243,8 +258,10 @@ export default async function handler(req, res) {
             console.info(`[${requestId}] Message queued for session ${sessionId}, requestId: ${messageRequestId}`);
             // Set up a subscription to listen for a response
             let responseTimeout;
+            let responseReceived = false;
             console.debug(`[${requestId}] Setting up response subscription for ${sessionId}:${messageRequestId}`);
             const unsubscribe = await subscribeToResponse(sessionId, messageRequestId, (response) => {
+                responseReceived = true;
                 console.info(`[${requestId}] Response received for ${sessionId}:${messageRequestId}, status: ${response.status}`);
                 if (responseTimeout) {
                     clearTimeout(responseTimeout);
@@ -264,9 +281,15 @@ export default async function handler(req, res) {
             });
             // Set a timeout for the response
             responseTimeout = setTimeout(async () => {
-                console.error(`[${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId}`);
-                await unsubscribe();
-                res.status(408).json({ error: "Request timed out waiting for response" });
+                if (!responseReceived) {
+                    console.error(`[${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId}`);
+                    await unsubscribe();
+                    res.status(200).json({ requestId: messageRequestId });
+                    // res.status(408).json({ 
+                    //   error: "Request timed out waiting for response. The SSE handler may have been terminated or is not responding.",
+                    //   requestId: messageRequestId
+                    // });
+                }
             }, 10000); // 10 seconds timeout
             // Clean up subscription when request is closed
             req.on("close", async () => {

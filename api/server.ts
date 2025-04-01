@@ -351,11 +351,12 @@ export default async function handler(
           await unsubscribe();
           
           
-          
-          res.status(408).json({ 
-            error: "Request timed out waiting for response. The SSE handler may have been terminated or is not responding.",
-            requestId: messageRequestId
-          });
+          res.status(200).json({ requestId: messageRequestId });
+
+          // res.status(408).json({ 
+          //   error: "Request timed out waiting for response. The SSE handler may have been terminated or is not responding.",
+          //   requestId: messageRequestId
+          // });
         }
       }, 10000); // 10 seconds timeout
       
