@@ -139,6 +139,8 @@ export function registerStdioTools(mcp: McpServer) {
  */
 function generateToolDescription(requestHost: string, requestUrl?: string): string {
   try {
+    console.log('Generating tool description for host:', requestUrl);
+
     // Default description as fallback
     let description = "Fetch documentation for the current repository.";
     
