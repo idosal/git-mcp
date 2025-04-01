@@ -138,7 +138,6 @@ export function registerStdioTools(mcp: McpServer) {
       // Generate dynamic description after the URL is provided
       const description = generateToolDescription(requestHost, requestUrl);
       console.log(`Using tool description: ${description}`);
-
       return fetchDocumentation({
         requestHost,
         requestUrl,
@@ -185,7 +184,6 @@ function generateToolDescription(
         description = `Fetch documentation from GitHub repository: ${owner}/${repo}.`;
       }
     }
-
     return description;
   } catch (error) {
     // Return default description if there's any error parsing the URL
