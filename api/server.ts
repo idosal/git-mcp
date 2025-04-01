@@ -37,10 +37,10 @@ export default async function handler(
       console.info(`[${requestId}] Handling GET request for SSE connection`);
       
       // Add response headers for SSE
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-      console.debug(`[${requestId}] SSE headers set`);
+      // res.setHeader('Content-Type', 'text/event-stream');
+      // res.setHeader('Cache-Control', 'no-cache');
+      // res.setHeader('Connection', 'keep-alive');
+      // console.debug(`[${requestId}] SSE headers set`);
       
       // Instantiate the MCP server.
       const mcp = new McpServer({
@@ -62,9 +62,6 @@ export default async function handler(
       const transport = new SSEServerTransport(endpoint, res);
       console.debug(`[${requestId}] SSE transport created`);
       
-      // Start sending immediate heartbeats to keep the connection alive
-      console.debug(`[${requestId}] Sending initial heartbeat`);
-      res.write(": heartbeat\n\n");
 
       try {
         console.debug(`[${requestId}] Connecting MCP server to transport`);
@@ -104,17 +101,6 @@ export default async function handler(
           logs = [];
         }
       }, 100);
-
-      // Set up heartbeat interval to keep the connection alive
-      const heartbeatInterval = setInterval(() => {
-        try {
-          res.write(": heartbeat\n\n");
-          logInContext("debug", `Heartbeat sent`);
-        } catch (error) {
-          logInContext("error", `Failed to send heartbeat:`, error);
-          clearInterval(heartbeatInterval);
-        }
-      }, 3000); // Send heartbeat every 3 seconds
 
       try {
         // Store in Redis (for cross-instance handling)
@@ -192,7 +178,6 @@ export default async function handler(
         // Clean up when the connection closes
         req.on("close", async () => {
           logInContext("info", `SSE connection closing`);
-          clearInterval(heartbeatInterval);
           clearInterval(logInterval);
           delete activeTransports[sessionId];
           
@@ -236,7 +221,6 @@ export default async function handler(
       console.info(`[${requestId}] Connection closed: ${closeReason}`);
       
       // Final cleanup
-      clearInterval(heartbeatInterval);
       clearInterval(logInterval);
       
       // Return a proper response to end the function
