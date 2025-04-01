@@ -99,9 +99,12 @@ export function registerTools(
   requestHost: string,
   requestUrl?: string
 ) {
+  // Generate a dynamic description based on the URL
+  const description = generateToolDescription(requestHost, requestUrl);
+  
   mcp.tool(
     "fetch_documentation",
-    "Fetch documentation for the current repository.",
+    description,
     {},
     async () => fetchDocumentation({ requestHost, requestUrl })
   );
@@ -110,17 +113,58 @@ export function registerTools(
 export function registerStdioTools(mcp: McpServer) {
   mcp.tool(
     "fetch_documentation",
-    "Fetch documentation for the current repository.",
+    "Fetch documentation for a repository (URL will be provided when called).",
     {
       requestUrl: z.string(),
     },
     async ({ requestUrl }) => {
+      const requestHost = new URL(requestUrl).host;
+      // Generate dynamic description after the URL is provided
+      const description = generateToolDescription(requestHost, requestUrl);
+      console.log(`Using tool description: ${description}`);
+      
       return fetchDocumentation({
-        requestHost: new URL(requestUrl).host,
+        requestHost,
         requestUrl,
       });
     }
   );
+}
+
+/**
+ * Generate a dynamic description for the fetch_documentation tool based on the URL
+ * @param requestHost - The host from the request
+ * @param requestUrl - The full request URL (optional)
+ * @returns A descriptive string for the tool
+ */
+function generateToolDescription(requestHost: string, requestUrl?: string): string {
+  try {
+    // Default description as fallback
+    let description = "Fetch documentation for the current repository.";
+    
+    // Parse the URL if provided
+    const url = requestUrl ? new URL(requestUrl) : new URL(`http://${requestHost}`);
+    const path = url.pathname.split("/").filter(Boolean).join("/");
+    
+    // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
+    if (requestHost.includes(".gitmcp.io")) {
+      const subdomain = requestHost.split(".")[0];
+      description = `Fetch documentation from the ${subdomain} GitHub Pages site.`;
+    }
+    // Check for github repo pattern: gitmcp.io/{owner}/{repo} or git-mcp.vercel.app/{owner}/{repo}
+    else if (requestHost === "gitmcp.io" || requestHost === "git-mcp.vercel.app") {
+      // Extract owner/repo from path
+      const [owner, repo] = path.split("/");
+      if (owner && repo) {
+        description = `Fetch documentation from GitHub repository: ${owner}/${repo}.`;
+      }
+    }
+    
+    return description;
+  } catch (error) {
+    // Return default description if there's any error parsing the URL
+    return "Fetch documentation for the current repository.";
+  }
 }
 
 async function fetchDocumentation({
