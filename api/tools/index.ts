@@ -24,10 +24,10 @@ async function fetchFileFromGitHub(
   owner: string,
   repo: string,
   branch: string,
-  path: string,
+  path: string
 ): Promise<string | null> {
   return await fetchFile(
-    `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`,
+    `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`
   );
 }
 
@@ -35,7 +35,7 @@ async function fetchFileFromGitHub(
 async function searchGitHubRepo(
   owner: string,
   repo: string,
-  filename: string,
+  filename: string
 ): Promise<string | null> {
   try {
     // First check the cache
@@ -45,14 +45,14 @@ async function searchGitHubRepo(
         owner,
         repo,
         cachedPath.branch,
-        cachedPath.path,
+        cachedPath.path
       );
       if (content) {
         console.log(`Cache hit for ${filename} in ${owner}/${repo}`);
         return content;
       } else {
         console.log(
-          `Cache hit but file not found anymore for ${filename} in ${owner}/${repo}`,
+          `Cache hit but file not found anymore for ${filename} in ${owner}/${repo}`
         );
       }
     }
@@ -72,7 +72,7 @@ async function searchGitHubRepo(
 
     if (!response.ok) {
       console.warn(
-        `GitHub API search failed: ${response.status} ${response.statusText}`,
+        `GitHub API search failed: ${response.status} ${response.statusText}`
       );
       return null;
     }
@@ -106,7 +106,7 @@ async function searchGitHubRepo(
   } catch (error) {
     console.error(
       `Error searching GitHub repo ${owner}/${repo} for ${filename}:`,
-      error,
+      error
     );
     return null;
   }
@@ -115,14 +115,14 @@ async function searchGitHubRepo(
 export function registerTools(
   mcp: McpServer,
   requestHost: string,
-  requestUrl?: string,
+  requestUrl?: string
 ) {
   // Generate a dynamic description based on the URL
   const description = generateToolDescription(requestHost, requestUrl);
   const toolName = generateToolName(requestHost, requestUrl);
 
   mcp.tool(toolName, description, {}, async () =>
-    fetchDocumentation({ requestHost, requestUrl }),
+    fetchDocumentation({ requestHost, requestUrl })
   );
 }
 
@@ -142,7 +142,7 @@ export function registerStdioTools(mcp: McpServer) {
         requestHost,
         requestUrl,
       });
-    },
+    }
   );
 }
 
@@ -154,7 +154,7 @@ export function registerStdioTools(mcp: McpServer) {
  */
 function generateToolDescription(
   requestHost: string,
-  requestUrl?: string,
+  requestUrl?: string
 ): string {
   try {
     console.log("Generating tool description for host:", requestUrl);
@@ -164,14 +164,14 @@ function generateToolDescription(
 
     // Parse the URL if provided
     const url = requestUrl
-      ? new URL(requestUrl)
+      ? new URL(`http://${requestHost}${requestUrl}`)
       : new URL(`http://${requestHost}`);
     const path = url.pathname.split("/").filter(Boolean).join("/");
 
     // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
     if (requestHost.includes(".gitmcp.io")) {
       const subdomain = requestHost.split(".")[0];
-      description = `Fetch documentation from the ${subdomain} GitHub Pages site.`;
+      description = `Fetch documentation from the ${subdomain}/${path} GitHub Pages.`;
     }
     // Check for github repo pattern: gitmcp.io/{owner}/{repo} or git-mcp.vercel.app/{owner}/{repo}
     else if (
@@ -264,7 +264,7 @@ async function fetchDocumentation({
     const [owner, repo] = path.split("/");
     if (!owner || !repo) {
       throw new Error(
-        "Invalid path format for GitHub repo. Expected: {owner}/{repo}",
+        "Invalid path format for GitHub repo. Expected: {owner}/{repo}"
       );
     }
 
@@ -275,7 +275,7 @@ async function fetchDocumentation({
         owner,
         repo,
         cachedPath.branch,
-        cachedPath.path,
+        cachedPath.path
       );
       if (content) {
         fileUsed = `${cachedPath.path} (${cachedPath.branch} branch, from cache)`;
