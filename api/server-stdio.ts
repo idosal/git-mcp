@@ -11,7 +11,7 @@ import { registerStdioTools } from "./tools/index.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const packageJson = JSON.parse(
-  readFileSync(resolve(__dirname, "../package.json"), "utf8")
+  readFileSync(resolve(__dirname, "../package.json"), "utf8"),
 );
 const VERSION = packageJson.version;
 
@@ -26,7 +26,7 @@ async function main() {
       capabilities: {
         logging: {},
       },
-    }
+    },
   );
 
   // Register tools
