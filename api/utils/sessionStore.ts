@@ -14,11 +14,39 @@ let regularClient: ReturnType<typeof createClient> | null = null;
 // Get the Redis subscriber client
 const getSubscriberClient = async () => {
   if (!subscriberClient) {
-    subscriberClient = createClient({ url: redisUrl });
+    console.info('Creating new Redis subscriber client');
+    subscriberClient = createClient({ 
+      url: redisUrl,
+      socket: {
+        keepAlive: 30000, // Keep the socket alive with 30s interval
+        reconnectStrategy: (retries) => Math.min(retries * 100, 3000)
+      }
+    });
+    
     subscriberClient.on("error", (err) => {
       console.error("Redis subscriber error:", err);
     });
-    await subscriberClient.connect();
+
+    subscriberClient.on("connect", () => {
+      console.info("Redis subscriber connected");
+    });
+    
+    subscriberClient.on("reconnecting", () => {
+      console.info("Redis subscriber reconnecting...");
+    });
+
+    subscriberClient.on("end", () => {
+      console.info("Redis subscriber connection closed");
+    });
+    
+    console.debug('Connecting Redis subscriber client...');
+    try {
+      await subscriberClient.connect();
+      console.info('Redis subscriber client connected successfully');
+    } catch (error) {
+      console.error('Failed to connect Redis subscriber client:', error);
+      throw error;
+    }
   }
   return subscriberClient;
 };
@@ -26,11 +54,39 @@ const getSubscriberClient = async () => {
 // Get the Redis publisher client
 const getPublisherClient = async () => {
   if (!publisherClient) {
-    publisherClient = createClient({ url: redisUrl });
+    console.info('Creating new Redis publisher client');
+    publisherClient = createClient({ 
+      url: redisUrl,
+      socket: {
+        keepAlive: 30000,
+        reconnectStrategy: (retries) => Math.min(retries * 100, 3000)
+      }
+    });
+    
     publisherClient.on("error", (err) => {
       console.error("Redis publisher error:", err);
     });
-    await publisherClient.connect();
+
+    publisherClient.on("connect", () => {
+      console.info("Redis publisher connected");
+    });
+    
+    publisherClient.on("reconnecting", () => {
+      console.info("Redis publisher reconnecting...");
+    });
+
+    publisherClient.on("end", () => {
+      console.info("Redis publisher connection closed");
+    });
+    
+    console.debug('Connecting Redis publisher client...');
+    try {
+      await publisherClient.connect();
+      console.info('Redis publisher client connected successfully');
+    } catch (error) {
+      console.error('Failed to connect Redis publisher client:', error);
+      throw error;
+    }
   }
   return publisherClient;
 };
@@ -38,11 +94,39 @@ const getPublisherClient = async () => {
 // Get the Redis regular client for key-value operations
 const getRegularClient = async () => {
   if (!regularClient) {
-    regularClient = createClient({ url: redisUrl });
-    regularClient.on("error", (err) => {
-      console.error("Redis client error:", err);
+    console.info('Creating new Redis regular client');
+    regularClient = createClient({ 
+      url: redisUrl,
+      socket: {
+        keepAlive: 30000,
+        reconnectStrategy: (retries) => Math.min(retries * 100, 3000)
+      }
     });
-    await regularClient.connect();
+    
+    regularClient.on("error", (err) => {
+      console.error("Redis regular client error:", err);
+    });
+
+    regularClient.on("connect", () => {
+      console.info("Redis regular client connected");
+    });
+    
+    regularClient.on("reconnecting", () => {
+      console.info("Redis regular client reconnecting...");
+    });
+
+    regularClient.on("end", () => {
+      console.info("Redis regular client connection closed");
+    });
+    
+    console.debug('Connecting Redis regular client...');
+    try {
+      await regularClient.connect();
+      console.info('Redis regular client connected successfully');
+    } catch (error) {
+      console.error('Failed to connect Redis regular client:', error);
+      throw error;
+    }
   }
   return regularClient;
 };
@@ -81,25 +165,40 @@ export async function storeSession(
   sessionId: string,
   metadata: any
 ): Promise<void> {
-  const redis = await getRegularClient();
-  const key = `${SESSION_PREFIX}${sessionId}`;
-  console.log(`Storing session ${sessionId} with metadata:`, metadata);
-  await redis.set(
-    key,
-    JSON.stringify({
-      created: Date.now(),
-      lastActive: Date.now(),
-      metadata,
-    }),
-    { EX: SESSION_TTL }
-  );
+  console.debug(`Storing session ${sessionId} with metadata:`, metadata);
+  try {
+    const redis = await getRegularClient();
+    const key = `${SESSION_PREFIX}${sessionId}`;
+    
+    await redis.set(
+      key,
+      JSON.stringify({
+        created: Date.now(),
+        lastActive: Date.now(),
+        metadata,
+      }),
+      { EX: SESSION_TTL }
+    );
+    console.debug(`Successfully stored session ${sessionId} in Redis`);
+  } catch (error) {
+    console.error(`Error storing session ${sessionId} in Redis:`, error);
+    throw error;
+  }
 }
 
 export async function sessionExists(sessionId: string): Promise<boolean> {
-  const redis = await getRegularClient();
-  const key = `${SESSION_PREFIX}${sessionId}`;
-  const session = await redis.get(key);
-  return !!session;
+  console.debug(`Checking if session ${sessionId} exists in Redis`);
+  try {
+    const redis = await getRegularClient();
+    const key = `${SESSION_PREFIX}${sessionId}`;
+    const session = await redis.get(key);
+    const exists = !!session;
+    console.debug(`Session ${sessionId} exists in Redis: ${exists}`);
+    return exists;
+  } catch (error) {
+    console.error(`Error checking if session ${sessionId} exists in Redis:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -112,21 +211,27 @@ export async function queueMessage(
   method?: string,
   url?: string
 ): Promise<string> {
-  const publisher = await getPublisherClient();
-  const requestId = crypto.randomUUID();
-  
-  const request: SerializedRequest = {
-    requestId,
-    url: url || "",
-    method: method || "POST",
-    body: message,
-    headers: headers || {},
-  };
-  
-  console.log(`Publishing message to ${REQUEST_CHANNEL_PREFIX}${sessionId}:`, request);
-  await publisher.publish(`${REQUEST_CHANNEL_PREFIX}${sessionId}`, JSON.stringify(request));
-  
-  return requestId;
+  try {
+    const publisher = await getPublisherClient();
+    const requestId = crypto.randomUUID();
+    
+    const request: SerializedRequest = {
+      requestId,
+      url: url || "",
+      method: method || "POST",
+      body: message,
+      headers: headers || {},
+    };
+    
+    console.debug(`Publishing message to ${REQUEST_CHANNEL_PREFIX}${sessionId} with requestId ${requestId}`);
+    await publisher.publish(`${REQUEST_CHANNEL_PREFIX}${sessionId}`, JSON.stringify(request));
+    console.debug(`Successfully published message to ${REQUEST_CHANNEL_PREFIX}${sessionId}`);
+    
+    return requestId;
+  } catch (error) {
+    console.error(`Error publishing message to ${REQUEST_CHANNEL_PREFIX}${sessionId}:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -136,23 +241,40 @@ export async function subscribeToSessionMessages(
   sessionId: string,
   callback: (message: SerializedRequest) => void
 ): Promise<() => Promise<void>> {
-  const subscriber = await getSubscriberClient();
-  const channel = `${REQUEST_CHANNEL_PREFIX}${sessionId}`;
-  
-  await subscriber.subscribe(channel, (message) => {
-    try {
-      console.log(`Received message on ${channel}:`, message);
-      const parsedMessage = JSON.parse(message) as SerializedRequest;
-      callback(parsedMessage);
-    } catch (error) {
-      console.error("Failed to parse Redis message:", error);
-    }
-  });
-  
-  // Return unsubscribe function
-  return async () => {
-    await subscriber.unsubscribe(channel);
-  };
+  try {
+    const subscriber = await getSubscriberClient();
+    const channel = `${REQUEST_CHANNEL_PREFIX}${sessionId}`;
+    
+    console.debug(`Subscribing to channel ${channel}...`);
+    
+    await subscriber.subscribe(channel, (message) => {
+      try {
+        console.debug(`Received message on ${channel}`, message.substring(0, 100) + (message.length > 100 ? "..." : ""));
+        const parsedMessage = JSON.parse(message) as SerializedRequest;
+        console.debug(`Successfully parsed message with requestId ${parsedMessage.requestId}`);
+        callback(parsedMessage);
+      } catch (error) {
+        console.error(`Failed to parse Redis message on channel ${channel}:`, error);
+      }
+    });
+    
+    console.info(`Successfully subscribed to ${channel}`);
+    
+    // Return unsubscribe function
+    return async () => {
+      try {
+        console.debug(`Unsubscribing from channel ${channel}...`);
+        await subscriber.unsubscribe(channel);
+        console.info(`Successfully unsubscribed from ${channel}`);
+      } catch (error) {
+        console.error(`Error unsubscribing from ${channel}:`, error);
+        throw error;
+      }
+    };
+  } catch (error) {
+    console.error(`Error subscribing to channel ${REQUEST_CHANNEL_PREFIX}${sessionId}:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -163,22 +285,40 @@ export async function subscribeToResponse(
   requestId: string,
   callback: (response: { status: number; body: string }) => void
 ): Promise<() => Promise<void>> {
-  const subscriber = await getSubscriberClient();
-  const responseChannel = `${RESPONSE_CHANNEL_PREFIX}${sessionId}:${requestId}`;
-  
-  await subscriber.subscribe(responseChannel, (message) => {
-    try {
-      const response = JSON.parse(message) as { status: number; body: string };
-      callback(response);
-    } catch (error) {
-      console.error(`Failed to parse response for ${sessionId}:${requestId}:`, error);
-    }
-  });
-  
-  // Return unsubscribe function
-  return async () => {
-    await subscriber.unsubscribe(responseChannel);
-  };
+  try {
+    const subscriber = await getSubscriberClient();
+    const responseChannel = `${RESPONSE_CHANNEL_PREFIX}${sessionId}:${requestId}`;
+    
+    console.debug(`Subscribing to response channel ${responseChannel}...`);
+    
+    await subscriber.subscribe(responseChannel, (message) => {
+      try {
+        console.debug(`Received response on channel ${responseChannel}`, message.substring(0, 100) + (message.length > 100 ? "..." : ""));
+        const response = JSON.parse(message) as { status: number; body: string };
+        console.debug(`Successfully parsed response with status ${response.status}`);
+        callback(response);
+      } catch (error) {
+        console.error(`Failed to parse response for ${sessionId}:${requestId}:`, error);
+      }
+    });
+    
+    console.info(`Successfully subscribed to response channel ${responseChannel}`);
+    
+    // Return unsubscribe function
+    return async () => {
+      try {
+        console.debug(`Unsubscribing from response channel ${responseChannel}...`);
+        await subscriber.unsubscribe(responseChannel);
+        console.info(`Successfully unsubscribed from response channel ${responseChannel}`);
+      } catch (error) {
+        console.error(`Error unsubscribing from response channel ${responseChannel}:`, error);
+        throw error;
+      }
+    };
+  } catch (error) {
+    console.error(`Error subscribing to response channel for ${sessionId}:${requestId}:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -190,13 +330,21 @@ export async function publishResponse(
   status: number,
   body: string
 ): Promise<void> {
-  const publisher = await getPublisherClient();
   const responseChannel = `${RESPONSE_CHANNEL_PREFIX}${sessionId}:${requestId}`;
   
-  await publisher.publish(responseChannel, JSON.stringify({ 
-    status, 
-    body 
-  }));
+  try {
+    const publisher = await getPublisherClient();
+    
+    console.debug(`Publishing response to ${responseChannel} with status ${status}`);
+    await publisher.publish(responseChannel, JSON.stringify({ 
+      status, 
+      body 
+    }));
+    console.debug(`Successfully published response to ${responseChannel}`);
+  } catch (error) {
+    console.error(`Error publishing response to ${responseChannel}:`, error);
+    throw error;
+  }
 }
 
 /**
