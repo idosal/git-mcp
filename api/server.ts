@@ -16,13 +16,12 @@ import { parseRawBody } from "./utils/bodyParser.js";
 import { Socket } from "net";
 import { Readable } from "stream";
 import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http";
-import vercelJson from "../vercel.json";
 
 // For local instances only - doesn't work across serverless invocations
 let activeTransports: { [sessionId: string]: SSEServerTransport } = {};
 
 // Get max duration from vercel.json config
-const maxDuration = vercelJson?.functions?.["api/server.ts"]?.maxDuration || 60;
+const maxDuration = 59;
 
 export default async function handler(
   req: NextApiRequest,
