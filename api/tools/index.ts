@@ -32,64 +32,82 @@ async function fetchFileFromGitHub(
 }
 
 // Helper: search for a file in a GitHub repository using the GitHub Search API
-async function searchGitHubRepo(owner: string, repo: string, filename: string): Promise<string | null> {
+async function searchGitHubRepo(
+  owner: string,
+  repo: string,
+  filename: string
+): Promise<string | null> {
   try {
     // First check the cache
     const cachedPath = await getCachedFilePath(owner, repo, filename);
     if (cachedPath) {
-      const content = await fetchFileFromGitHub(owner, repo, cachedPath.branch, cachedPath.path);
+      const content = await fetchFileFromGitHub(
+        owner,
+        repo,
+        cachedPath.branch,
+        cachedPath.path
+      );
       if (content) {
         console.log(`Cache hit for ${filename} in ${owner}/${repo}`);
         return content;
       } else {
-        console.log(`Cache hit but file not found anymore for ${filename} in ${owner}/${repo}`);
+        console.log(
+          `Cache hit but file not found anymore for ${filename} in ${owner}/${repo}`
+        );
       }
     }
 
     // If not in cache or cached path didn't work, use GitHub Search API
     const searchUrl = `https://api.github.com/search/code?q=filename:${filename}+repo:${owner}/${repo}`;
-    
+
     const response = await fetch(searchUrl, {
       headers: {
-        'Accept': 'application/vnd.github.v3+json',
+        Accept: "application/vnd.github.v3+json",
         // Add GitHub token as environment variable if rate limits become an issue
-        ...(process.env.GITHUB_TOKEN ? { 'Authorization': `token ${process.env.GITHUB_TOKEN}` } : {})
-      }
+        ...(process.env.GITHUB_TOKEN
+          ? { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+          : {}),
+      },
     });
-    
+
     if (!response.ok) {
-      console.warn(`GitHub API search failed: ${response.status} ${response.statusText}`);
+      console.warn(
+        `GitHub API search failed: ${response.status} ${response.statusText}`
+      );
       return null;
     }
-    
+
     const data = await response.json();
-    
+
     // Check if we found any matches
     if (data.total_count === 0 || !data.items || data.items.length === 0) {
       return null;
     }
-    
+
     // Get the first matching file's path
     const filePath = data.items[0].path;
-    
+
     // Try fetching from both main and master branches in parallel
     const [mainContent, masterContent] = await Promise.all([
-      fetchFileFromGitHub(owner, repo, 'main', filePath),
-      fetchFileFromGitHub(owner, repo, 'master', filePath)
+      fetchFileFromGitHub(owner, repo, "main", filePath),
+      fetchFileFromGitHub(owner, repo, "master", filePath),
     ]);
 
     // Cache the successful path
     if (mainContent) {
-      await cacheFilePath(owner, repo, filename, filePath, 'main');
+      await cacheFilePath(owner, repo, filename, filePath, "main");
       return mainContent;
     } else if (masterContent) {
-      await cacheFilePath(owner, repo, filename, filePath, 'master');
+      await cacheFilePath(owner, repo, filename, filePath, "master");
       return masterContent;
     }
-    
+
     return null;
   } catch (error) {
-    console.error(`Error searching GitHub repo ${owner}/${repo} for ${filename}:`, error);
+    console.error(
+      `Error searching GitHub repo ${owner}/${repo} for ${filename}:`,
+      error
+    );
     return null;
   }
 }
@@ -101,12 +119,10 @@ export function registerTools(
 ) {
   // Generate a dynamic description based on the URL
   const description = generateToolDescription(requestHost, requestUrl);
-  
-  mcp.tool(
-    "fetch_documentation",
-    description,
-    {},
-    async () => fetchDocumentation({ requestHost, requestUrl })
+  const toolName = generateToolName(requestHost, requestUrl);
+
+  mcp.tool(toolName, description, {}, async () =>
+    fetchDocumentation({ requestHost, requestUrl })
   );
 }
 
@@ -122,7 +138,7 @@ export function registerStdioTools(mcp: McpServer) {
       // Generate dynamic description after the URL is provided
       const description = generateToolDescription(requestHost, requestUrl);
       console.log(`Using tool description: ${description}`);
-      
+
       return fetchDocumentation({
         requestHost,
         requestUrl,
@@ -137,35 +153,86 @@ export function registerStdioTools(mcp: McpServer) {
  * @param requestUrl - The full request URL (optional)
  * @returns A descriptive string for the tool
  */
-function generateToolDescription(requestHost: string, requestUrl?: string): string {
+function generateToolDescription(
+  requestHost: string,
+  requestUrl?: string
+): string {
   try {
-    console.log('Generating tool description for host:', requestUrl);
+    console.log("Generating tool description for host:", requestUrl);
 
     // Default description as fallback
     let description = "Fetch documentation for the current repository.";
-    
+
     // Parse the URL if provided
-    const url = requestUrl ? new URL(requestUrl) : new URL(`http://${requestHost}`);
+    const url = requestUrl
+      ? new URL(requestUrl)
+      : new URL(`http://${requestHost}`);
     const path = url.pathname.split("/").filter(Boolean).join("/");
-    
+
     // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
     if (requestHost.includes(".gitmcp.io")) {
       const subdomain = requestHost.split(".")[0];
       description = `Fetch documentation from the ${subdomain} GitHub Pages site.`;
     }
     // Check for github repo pattern: gitmcp.io/{owner}/{repo} or git-mcp.vercel.app/{owner}/{repo}
-    else if (requestHost === "gitmcp.io" || requestHost === "git-mcp.vercel.app") {
+    else if (
+      requestHost === "gitmcp.io" ||
+      requestHost === "git-mcp.vercel.app"
+    ) {
       // Extract owner/repo from path
       const [owner, repo] = path.split("/");
       if (owner && repo) {
         description = `Fetch documentation from GitHub repository: ${owner}/${repo}.`;
       }
     }
-    
+
     return description;
   } catch (error) {
     // Return default description if there's any error parsing the URL
     return "Fetch documentation for the current repository.";
+  }
+}
+
+/**
+ * Generate a dynamic tool name for the fetch_documentation tool based on the URL
+ * @param requestHost - The host from the request
+ * @param requestUrl - The full request URL (optional)
+ * @returns A descriptive string for the tool
+ */
+function generateToolName(requestHost: string, requestUrl?: string): string {
+  try {
+    console.log("Generating tool name for host:", requestUrl);
+
+    // Default description as fallback
+    let toolName = "fetch_documentation";
+
+    // Parse the URL if provided
+    const url = requestUrl
+      ? new URL(requestUrl)
+      : new URL(`http://${requestHost}`);
+    const path = url.pathname.split("/").filter(Boolean).join("/");
+
+    // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
+    if (requestHost.includes(".gitmcp.io")) {
+      const subdomain = requestHost.split(".")[0];
+      toolName = `fetch_${subdomain}_documentation`;
+    }
+    // Check for github repo pattern: gitmcp.io/{owner}/{repo} or git-mcp.vercel.app/{owner}/{repo}
+    else if (
+      requestHost === "gitmcp.io" ||
+      requestHost === "git-mcp.vercel.app"
+    ) {
+      // Extract owner/repo from path
+      const [owner, repo] = path.split("/");
+      if (owner && repo) {
+        toolName = `fetch_${owner}_${repo}_documentation`;
+      }
+    }
+
+    return toolName;
+  } catch (error) {
+    // Return default tool name if there's any error parsing the URL
+    return "fetch_documentation";
   }
 }
 
@@ -206,7 +273,12 @@ async function fetchDocumentation({
     // First check if we have a cached path for llms.txt
     const cachedPath = await getCachedFilePath(owner, repo, "llms.txt");
     if (cachedPath) {
-      content = await fetchFileFromGitHub(owner, repo, cachedPath.branch, cachedPath.path);
+      content = await fetchFileFromGitHub(
+        owner,
+        repo,
+        cachedPath.branch,
+        cachedPath.path
+      );
       if (content) {
         fileUsed = `${cachedPath.path} (${cachedPath.branch} branch, from cache)`;
       }
@@ -216,27 +288,27 @@ async function fetchDocumentation({
     if (!content) {
       // Try static paths for llms.txt
       const possibleLocations = [
-        "docs/docs/llms.txt",     // Current default
-        "llms.txt",               // Root directory
-        "docs/llms.txt",          // Common docs folder
+        "docs/docs/llms.txt", // Current default
+        "llms.txt", // Root directory
+        "docs/llms.txt", // Common docs folder
         "documentation/llms.txt", // Alternative docs folder
       ];
 
       // Try each location on 'main' branch first, then 'master' branch
       for (const location of possibleLocations) {
         // Try main branch
-        content = await fetchFileFromGitHub(owner, repo, 'main', location);
-        
+        content = await fetchFileFromGitHub(owner, repo, "main", location);
+
         if (content) {
           fileUsed = `${location} (main branch)`;
           // Cache the successful path
           await cacheFilePath(owner, repo, "llms.txt", location, "main");
           break;
         }
-        
+
         // Try master branch
-        content = await fetchFileFromGitHub(owner, repo, 'master', location);
-        
+        content = await fetchFileFromGitHub(owner, repo, "master", location);
+
         if (content) {
           fileUsed = `${location} (master branch)`;
           // Cache the successful path
@@ -258,12 +330,12 @@ async function fetchDocumentation({
     if (!content) {
       // Only use static approach for README, no search API
       // Try main branch first
-      content = await fetchFileFromGitHub(owner, repo, 'main', 'README.md');
+      content = await fetchFileFromGitHub(owner, repo, "main", "README.md");
       fileUsed = "readme.md (main branch)";
 
       // If not found, try master branch
       if (!content) {
-        content = await fetchFileFromGitHub(owner, repo, 'master', 'README.md');
+        content = await fetchFileFromGitHub(owner, repo, "master", "README.md");
         fileUsed = "readme.md (master branch)";
       }
     }
