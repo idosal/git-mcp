@@ -295,6 +295,9 @@ export default async function handler(
       //   }
       // }
 
+      // Direct handling is explicitly disabled to diagnose Redis-based handling
+      console.debug(`[${INSTANCE_ID}:${requestId}] Direct handling is disabled, using Redis-based message handling (trace: ${messageTraceId})`);
+
       console.debug(`[${INSTANCE_ID}:${requestId}] Checking if session ${sessionId} exists in Redis (trace: ${messageTraceId})`);
       const sessionValid = await sessionExists(sessionId);
 
@@ -369,7 +372,7 @@ export default async function handler(
         }
       );
       
-      // Add a shorter timeout for the response to improve user experience
+      // Add a timeout for the response - using 10 seconds for all requests
       responseTimeout = setTimeout(async () => {
         if (hasResponded) {
           console.debug(`[${INSTANCE_ID}:${requestId}] Already responded for ${messageRequestId}, not sending timeout response (trace: ${messageTraceId})`);
@@ -380,8 +383,6 @@ export default async function handler(
         console.warn(`[${INSTANCE_ID}:${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId} (trace: ${messageTraceId})`);
         
         // Return 202 to indicate message was accepted but is still being processed
-        // This prevents the client from seeing an error when the message handling
-        // is happening in a different instance than the POST handler
         res.status(202).json({ 
           status: "accepted", 
           message: "Message accepted but processing in another instance",
@@ -393,8 +394,7 @@ export default async function handler(
         unsubscribe().catch(err => {
           console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing after timeout for ${messageRequestId} (trace: ${messageTraceId}):`, err);
         });
-      }, 3000); // 3 second timeout for a faster user experience with Cursor
-      
+      }, 10000); // 10 seconds for all requests
       // Clean up subscription when request is closed
       req.on("close", async () => {
         console.debug(`[${INSTANCE_ID}:${requestId}] Client closed connection for ${sessionId}:${messageRequestId} (trace: ${messageTraceId})`);
