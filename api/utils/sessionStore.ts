@@ -26,7 +26,7 @@ let lastRegularUsage = 0;
 const CLIENT_HEALTH_CHECK_INTERVAL = 10000; // 10 seconds
 
 // Session TTL in seconds (30 minutes)
-const SESSION_TTL = 60 * 30;
+const SESSION_TTL = 60 * 60 * 24;
 
 // Key prefix for session storage
 const SESSION_PREFIX = "mcp:session:";
