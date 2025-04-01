@@ -219,7 +219,8 @@ export default async function handler(req, res) {
     // POST /message?sessionId=...: handle incoming messages.
     if (req.method === "POST" && adjustedUrl.pathname.endsWith("/message")) {
         const sessionId = adjustedUrl.searchParams.get("sessionId");
-        console.info(`[${INSTANCE_ID}:${requestId}] POST message for session ${sessionId}`);
+        const messageTraceId = Math.random().toString(36).substring(2, 10);
+        console.info(`[${INSTANCE_ID}:${requestId}] POST message for session ${sessionId} (trace: ${messageTraceId})`);
         if (!sessionId) {
             console.error(`[${INSTANCE_ID}:${requestId}] Missing sessionId parameter`);
             res.status(400).json({ error: "Missing sessionId parameter" });
@@ -227,22 +228,23 @@ export default async function handler(req, res) {
         }
         try {
             // Check if we have the transport in this instance - re-enable direct handling
-            // if (activeTransports[sessionId]) {
-            //   // We can handle it directly in this instance
-            //   console.info(`[${INSTANCE_ID}:${requestId}] Handling POST message for session ${sessionId} directly in this instance`);
-            //   try {
-            //     await activeTransports[sessionId].handlePostMessage(req, res);
-            //     console.info(`[${INSTANCE_ID}:${requestId}] Successfully handled direct message for session ${sessionId}`);
-            //     return;
-            //   } catch (directError) {
-            //     console.error(`[${INSTANCE_ID}:${requestId}] Error handling direct message for ${sessionId}:`, directError);
-            //     // Fall through to Redis handling if direct handling fails
-            //   }
-            // }
-            console.debug(`[${INSTANCE_ID}:${requestId}] Checking if session ${sessionId} exists in Redis`);
+            if (activeTransports[sessionId]) {
+                // We can handle it directly in this instance
+                console.info(`[${INSTANCE_ID}:${requestId}] Handling POST message for session ${sessionId} directly in this instance (trace: ${messageTraceId})`);
+                try {
+                    await activeTransports[sessionId].handlePostMessage(req, res);
+                    console.info(`[${INSTANCE_ID}:${requestId}] Successfully handled direct message for session ${sessionId} (trace: ${messageTraceId})`);
+                    return;
+                }
+                catch (directError) {
+                    console.error(`[${INSTANCE_ID}:${requestId}] Error handling direct message for ${sessionId} (trace: ${messageTraceId}):`, directError);
+                    // Fall through to Redis handling if direct handling fails
+                }
+            }
+            console.debug(`[${INSTANCE_ID}:${requestId}] Checking if session ${sessionId} exists in Redis (trace: ${messageTraceId})`);
             const sessionValid = await sessionExists(sessionId);
             if (!sessionValid) {
-                console.error(`[${INSTANCE_ID}:${requestId}] No active SSE session found for ${sessionId}`);
+                console.error(`[${INSTANCE_ID}:${requestId}] No active SSE session found for ${sessionId} (trace: ${messageTraceId})`);
                 res
                     .status(400)
                     .json({ error: "No active SSE session for the provided sessionId" });
@@ -250,78 +252,89 @@ export default async function handler(req, res) {
             }
             // Check if there are active subscribers for this session
             const activeSubscribers = await getActiveSubscribers(sessionId);
-            console.info(`[${INSTANCE_ID}:${requestId}] Session ${sessionId} has ${activeSubscribers} active subscribers`);
+            console.info(`[${INSTANCE_ID}:${requestId}] Session ${sessionId} has ${activeSubscribers} active subscribers (trace: ${messageTraceId})`);
             if (activeSubscribers === 0) {
-                console.error(`[${INSTANCE_ID}:${requestId}] No active subscribers for session ${sessionId}`);
+                console.error(`[${INSTANCE_ID}:${requestId}] No active subscribers for session ${sessionId} (trace: ${messageTraceId})`);
                 res.status(503).json({
                     error: "The session exists but has no active subscribers. The SSE connection may have been terminated."
                 });
                 return;
             }
-            console.debug(`[${INSTANCE_ID}:${requestId}] Session ${sessionId} exists, parsing message body`);
+            console.debug(`[${INSTANCE_ID}:${requestId}] Session ${sessionId} exists, parsing message body (trace: ${messageTraceId})`);
             const rawBody = await parseRawBody(req);
             const message = JSON.parse(rawBody.toString("utf8"));
-            console.debug(`[${INSTANCE_ID}:${requestId}] Parsed message for session ${sessionId}`);
+            console.debug(`[${INSTANCE_ID}:${requestId}] Parsed message for session ${sessionId} (trace: ${messageTraceId})`);
             // Queue the message via Redis PubSub
-            console.debug(`[${INSTANCE_ID}:${requestId}] Queueing message for session ${sessionId} from instance ${INSTANCE_ID}`);
+            console.debug(`[${INSTANCE_ID}:${requestId}] Queueing message for session ${sessionId} from instance ${INSTANCE_ID} (trace: ${messageTraceId})`);
             const messageRequestId = await queueMessage(sessionId, message, req.headers, req.method, req.url);
-            console.info(`[${INSTANCE_ID}:${requestId}] Message queued for session ${sessionId}, requestId: ${messageRequestId}`);
+            console.info(`[${INSTANCE_ID}:${requestId}] Message queued for session ${sessionId}, requestId: ${messageRequestId} (trace: ${messageTraceId})`);
+            // We need to ensure we don't have concurrent requests competing for the same response
+            // Use a flag to ensure only one response handler updates the response
+            let hasResponded = false;
             // Set up a subscription to listen for a response
             let responseTimeout;
-            let responseReceived = false;
-            console.debug(`[${INSTANCE_ID}:${requestId}] Setting up response subscription for ${sessionId}:${messageRequestId}`);
+            console.debug(`[${INSTANCE_ID}:${requestId}] Setting up response subscription for ${sessionId}:${messageRequestId} (trace: ${messageTraceId})`);
             const unsubscribe = await subscribeToResponse(sessionId, messageRequestId, (response) => {
-                responseReceived = true;
-                console.info(`[${INSTANCE_ID}:${requestId}] Response received for ${sessionId}:${messageRequestId}, status: ${response.status}`);
+                console.info(`[${INSTANCE_ID}:${requestId}] Response received for ${sessionId}:${messageRequestId}, status: ${response.status} (trace: ${messageTraceId})`);
                 if (responseTimeout) {
                     clearTimeout(responseTimeout);
                 }
+                // Ensure we only respond once
+                if (hasResponded) {
+                    console.warn(`[${INSTANCE_ID}:${requestId}] Already responded to client for ${messageRequestId}, skipping duplicate response (trace: ${messageTraceId})`);
+                    return;
+                }
+                hasResponded = true;
                 // Return the response to the client
                 try {
                     res.status(response.status).send(response.body);
-                    console.debug(`[${INSTANCE_ID}:${requestId}] Response sent to client for ${sessionId}:${messageRequestId}`);
+                    console.debug(`[${INSTANCE_ID}:${requestId}] Response sent to client for ${sessionId}:${messageRequestId} (trace: ${messageTraceId})`);
                 }
                 catch (error) {
-                    console.error(`[${INSTANCE_ID}:${requestId}] Error sending response to client:`, error);
+                    console.error(`[${INSTANCE_ID}:${requestId}] Error sending response to client for ${messageRequestId} (trace: ${messageTraceId}):`, error);
                 }
                 // Clean up the subscription
                 unsubscribe().catch(err => {
-                    console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing from response channel:`, err);
+                    console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing from response channel for ${messageRequestId} (trace: ${messageTraceId}):`, err);
                 });
             });
-            // Set a timeout for the response
+            // Add a shorter timeout for the response to improve user experience
             responseTimeout = setTimeout(async () => {
-                if (!responseReceived) {
-                    console.error(`[${INSTANCE_ID}:${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId}`);
-                    // Return 202 to indicate message was accepted but is still being processed
-                    // This prevents the client from seeing an error when the message handling
-                    // is happening in a different instance than the POST handler
-                    res.status(202).json({
-                        status: "accepted",
-                        message: "Message accepted but processing in another instance",
-                        requestId: messageRequestId
-                    });
-                    // Clean up the subscription after responding
-                    await unsubscribe().catch(err => {
-                        console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing after timeout:`, err);
-                    });
+                if (hasResponded) {
+                    console.debug(`[${INSTANCE_ID}:${requestId}] Already responded for ${messageRequestId}, not sending timeout response (trace: ${messageTraceId})`);
+                    return;
                 }
-            }, 5000); // 5 seconds timeout - shorter than before to be more responsive
+                hasResponded = true;
+                console.warn(`[${INSTANCE_ID}:${requestId}] Request timed out waiting for response: ${sessionId}:${messageRequestId} (trace: ${messageTraceId})`);
+                // Return 202 to indicate message was accepted but is still being processed
+                // This prevents the client from seeing an error when the message handling
+                // is happening in a different instance than the POST handler
+                res.status(202).json({
+                    status: "accepted",
+                    message: "Message accepted but processing in another instance",
+                    requestId: messageRequestId,
+                    trace: messageTraceId
+                });
+                // Clean up the subscription after responding, but don't wait for it
+                unsubscribe().catch(err => {
+                    console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing after timeout for ${messageRequestId} (trace: ${messageTraceId}):`, err);
+                });
+            }, 3000); // 3 second timeout for a faster user experience with Cursor
             // Clean up subscription when request is closed
             req.on("close", async () => {
-                console.debug(`[${INSTANCE_ID}:${requestId}] Client closed connection for ${sessionId}:${messageRequestId}`);
+                console.debug(`[${INSTANCE_ID}:${requestId}] Client closed connection for ${sessionId}:${messageRequestId} (trace: ${messageTraceId})`);
                 if (responseTimeout) {
                     clearTimeout(responseTimeout);
                 }
-                if (!responseReceived) {
+                if (!hasResponded) {
                     await unsubscribe().catch(err => {
-                        console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing on close:`, err);
+                        console.error(`[${INSTANCE_ID}:${requestId}] Error unsubscribing on close for ${messageRequestId} (trace: ${messageTraceId}):`, err);
                     });
                 }
             });
         }
         catch (error) {
-            console.error(`[${INSTANCE_ID}:${requestId}] Error handling POST message:`, error);
+            console.error(`[${INSTANCE_ID}:${requestId}] Error handling POST message (trace: ${messageTraceId}):`, error);
             res.status(500).json({
                 error: error instanceof Error ? error.message : String(error),
             });

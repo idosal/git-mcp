@@ -14,6 +14,9 @@ let regularClient: ReturnType<typeof createClient> | null = null;
 // Track active subscriber sessions to detect stale sessions
 const activeSubscriptionSessions = new Set<string>();
 
+// Track active subscriptions by channel to prevent duplicates
+const activeSubscriptions = new Map<string, boolean>();
+
 // Track last usage of Redis clients for health checks
 let lastSubscriberUsage = 0;
 let lastPublisherUsage = 0;
@@ -498,47 +501,70 @@ export async function subscribeToResponse(
     const subscriber = await getSubscriberClient();
     const responseChannel = `${RESPONSE_CHANNEL_PREFIX}${sessionId}:${requestId}`;
     
-    console.debug(`Subscribing to response channel ${responseChannel}...`);
+    console.debug(`[${INSTANCE_ID}] Subscribing to response channel ${responseChannel}...`);
+    
+    // Check if we already have an active subscription to this channel
+    if (activeSubscriptions.has(responseChannel)) {
+      console.warn(`[${INSTANCE_ID}] Already subscribed to ${responseChannel}, skipping duplicate subscription`);
+    }
+    
+    // Mark this channel as having an active subscription
+    activeSubscriptions.set(responseChannel, true);
     
     // Ensure Redis client is still connected
     if (!subscriber.isReady) {
       await subscriber.connect();
-      console.info('Redis subscriber reconnected');
+      console.info(`[${INSTANCE_ID}] Redis subscriber reconnected for ${responseChannel}`);
     }
     
-    await subscriber.subscribe(responseChannel, (message) => {
+    // Define a message handler that validates the requestId
+    const messageHandler = (message: string) => {
       try {
-        console.debug(`Received response on channel ${responseChannel}`);
-        const response = JSON.parse(message) as { status: number; body: string };
-        console.debug(`Successfully parsed response with status ${response.status}`);
+        console.debug(`[${INSTANCE_ID}] Received response on channel ${responseChannel}`);
+        const response = JSON.parse(message) as { status: number; body: string; requestId?: string };
+        
+        // Extra validation to ensure we're processing the right message
+        if (response.requestId && response.requestId !== requestId) {
+          console.warn(`[${INSTANCE_ID}] Received response for wrong request ID! Expected ${requestId}, got ${response.requestId}`);
+          return;
+        }
+        
+        console.debug(`[${INSTANCE_ID}] Successfully parsed response with status ${response.status}`);
         callback(response);
       } catch (error) {
-        console.error(`Failed to parse response for ${sessionId}:${requestId}:`, error);
+        console.error(`[${INSTANCE_ID}] Failed to parse response for ${sessionId}:${requestId}:`, error);
       }
-    });
+    };
     
-    console.info(`Successfully subscribed to response channel ${responseChannel}`);
+    await subscriber.subscribe(responseChannel, messageHandler);
+    
+    console.info(`[${INSTANCE_ID}] Successfully subscribed to response channel ${responseChannel}`);
     
     // Return unsubscribe function
     return async () => {
       try {
-        console.debug(`Unsubscribing from response channel ${responseChannel}...`);
+        console.debug(`[${INSTANCE_ID}] Unsubscribing from response channel ${responseChannel}...`);
         
         // Ensure Redis client is still connected before unsubscribing
         if (!subscriber?.isReady) {
-          console.debug(`Redis subscriber not ready, skipping explicit unsubscribe for ${responseChannel}`);
-          return;
+          console.debug(`[${INSTANCE_ID}] Redis subscriber not ready, skipping explicit unsubscribe for ${responseChannel}`);
+        } else {
+          await subscriber.unsubscribe(responseChannel);
+          console.info(`[${INSTANCE_ID}] Successfully unsubscribed from response channel ${responseChannel}`);
         }
         
-        await subscriber.unsubscribe(responseChannel);
-        console.info(`Successfully unsubscribed from response channel ${responseChannel}`);
+        // Remove from active subscriptions tracking
+        activeSubscriptions.delete(responseChannel);
+        
       } catch (error) {
-        console.error(`Error unsubscribing from response channel ${responseChannel}:`, error);
+        console.error(`[${INSTANCE_ID}] Error unsubscribing from response channel ${responseChannel}:`, error);
+        // Still clean up our tracking
+        activeSubscriptions.delete(responseChannel);
         throw error;
       }
     };
   } catch (error) {
-    console.error(`Error subscribing to response channel for ${sessionId}:${requestId}:`, error);
+    console.error(`[${INSTANCE_ID}] Error subscribing to response channel for ${sessionId}:${requestId}:`, error);
     throw error;
   }
 }
@@ -555,66 +581,69 @@ export async function publishResponse(
   const responseChannel = `${RESPONSE_CHANNEL_PREFIX}${sessionId}:${requestId}`;
   const startTime = Date.now();
   
-  console.info(`[RESPONSE] Publishing to ${responseChannel} with status ${status}`);
+  console.info(`[${INSTANCE_ID}:RESPONSE] Publishing to ${responseChannel} with status ${status}`);
   
   try {
     const publisher = await getPublisherClient();
-    console.debug(`[RESPONSE] Got publisher client for ${responseChannel}, took ${Date.now() - startTime}ms`);
+    console.debug(`[${INSTANCE_ID}:RESPONSE] Got publisher client for ${responseChannel}, took ${Date.now() - startTime}ms`);
     
     // Ensure Redis client is still connected
     if (!publisher.isReady) {
-      console.warn(`[RESPONSE] Publisher not ready for ${responseChannel}, reconnecting...`);
+      console.warn(`[${INSTANCE_ID}:RESPONSE] Publisher not ready for ${responseChannel}, reconnecting...`);
       await publisher.connect();
-      console.info(`[RESPONSE] Redis publisher reconnected for ${responseChannel}`);
+      console.info(`[${INSTANCE_ID}:RESPONSE] Redis publisher reconnected for ${responseChannel}`);
     }
     
+    // Include requestId in the payload for validation
     const payload = JSON.stringify({ 
       status, 
       body,
+      requestId, // Include requestId to validate on the receiving end
       timestamp: Date.now()
     });
-    console.debug(`[RESPONSE] Prepared payload for ${responseChannel}, size: ${payload.length} bytes, payload: ${payload}`);
+    console.debug(`[${INSTANCE_ID}:RESPONSE] Prepared payload for ${responseChannel}, size: ${payload.length} bytes`);
     
     // Use PUBLISH command directly
     const publishResult = await publisher.publish(responseChannel, payload);
     const duration = Date.now() - startTime;
     
     console.info(
-      `[RESPONSE] Published response to ${responseChannel}, ` +
+      `[${INSTANCE_ID}:RESPONSE] Published response to ${responseChannel}, ` +
       `status: ${status}, receivers: ${publishResult}, ` + 
       `duration: ${duration}ms, body length: ${body.length}`
     );
     
     // If no receivers, log a warning
     if (publishResult === 0) {
-      console.warn(`[RESPONSE] No receivers for ${responseChannel}! The request might time out.`);
+      console.warn(`[${INSTANCE_ID}:RESPONSE] No receivers for ${responseChannel}! The request might time out.`);
       
       // Try publishing again after a short delay
       setTimeout(async () => {
         try {
-          console.debug(`[RESPONSE] Re-attempting publish to ${responseChannel}...`);
+          console.debug(`[${INSTANCE_ID}:RESPONSE] Re-attempting publish to ${responseChannel}...`);
           const retryResult = await publisher.publish(responseChannel, payload);
-          console.info(`[RESPONSE] Re-publish attempt to ${responseChannel} reached ${retryResult} receivers`);
+          console.info(`[${INSTANCE_ID}:RESPONSE] Re-publish attempt to ${responseChannel} reached ${retryResult} receivers`);
         } catch (e) {
-          console.error(`[RESPONSE] Failed in retry publish to ${responseChannel}:`, e);
+          console.error(`[${INSTANCE_ID}:RESPONSE] Failed in retry publish to ${responseChannel}:`, e);
         }
       }, 100);
     }
   } catch (error) {
-    console.error(`[RESPONSE] Error publishing response to ${responseChannel} (after ${Date.now() - startTime}ms):`, error);
+    console.error(`[${INSTANCE_ID}:RESPONSE] Error publishing response to ${responseChannel} (after ${Date.now() - startTime}ms):`, error);
     
     // Try with a new publisher as a last resort
     try {
-      console.warn(`[RESPONSE] Attempting to publish with new client to ${responseChannel}...`);
+      console.warn(`[${INSTANCE_ID}:RESPONSE] Attempting to publish with new client to ${responseChannel}...`);
       publisherClient = null;
       const newPublisher = await getPublisherClient();
       
-      const payload = JSON.stringify({ status, body });
+      // Include requestId in payload
+      const payload = JSON.stringify({ status, body, requestId });
       const retryResult = await newPublisher.publish(responseChannel, payload);
       
-      console.info(`[RESPONSE] Emergency publish to ${responseChannel} reached ${retryResult} receivers`);
+      console.info(`[${INSTANCE_ID}:RESPONSE] Emergency publish to ${responseChannel} reached ${retryResult} receivers`);
     } catch (retryError) {
-      console.error(`[RESPONSE] Emergency publish failed for ${responseChannel}:`, retryError);
+      console.error(`[${INSTANCE_ID}:RESPONSE] Emergency publish failed for ${responseChannel}:`, retryError);
       throw error;
     }
   }
