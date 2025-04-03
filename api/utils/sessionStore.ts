@@ -31,7 +31,7 @@ let lastRegularUsage = 0;
 // Redis client health check interval (in ms)
 const CLIENT_HEALTH_CHECK_INTERVAL = 10000; // 10 seconds
 
-// Session TTL in seconds (30 minutes)
+// Session TTL in seconds (24 hrs)
 const SESSION_TTL = 60 * 60 * 24;
 
 // Key prefix for session storage

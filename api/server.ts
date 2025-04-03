@@ -501,8 +501,10 @@ export default async function handler(
         res: NextApiResponse,
         onResponse: (cleanup: () => Promise<void>) => void,
       ) {
+        let unsubscribe: () => Promise<void>;
+
         // First create and await the unsubscribe function BEFORE using it in callbacks
-        const unsubscribe = await subscribeToResponse(
+        unsubscribe = await subscribeToResponse(
           sessionId,
           requestId,
           async (response) => {
@@ -517,14 +519,13 @@ export default async function handler(
               console.debug(
                 `[${INSTANCE_ID}:${logRequestId}] Response sent to client for ${sessionId}:${requestId} (trace: ${traceId})`,
               );
+              onResponse(unsubscribe);
             } catch (error) {
               console.error(
                 `[${INSTANCE_ID}:${logRequestId}] Error sending response to client for ${requestId} (trace: ${traceId}):`,
                 error,
               );
             }
-
-            onResponse(unsubscribe);
           },
         );
 
