@@ -679,6 +679,12 @@ export async function subscribeToResponse(
       }
     };
 
+    await subscriber.subscribe(responseChannel, messageHandler);
+
+    console.info(
+      `[${INSTANCE_ID}] Successfully subscribed to response channel ${responseChannel}`,
+    );
+
     const unsubscribe = async () => {
       // Use the mutex to protect unsubscribe operation
       return subscriberMutex.runExclusive(async () => {
