@@ -46,10 +46,12 @@ export function getRepoData(
 
     return { subdomain, path };
   }
-  // Check for github repo pattern: gitmcp.io/{owner}/{repo} or git-mcp.vercel.app/{owner}/{repo}
+  // Check for github repo pattern: gitmcp.io/{owner}/{repo}, git-mcp.vercel.app/{owner}/{repo},
+  // or git-mcp-git-{preview}-git-mcp.vercel.app/{owner}/{repo}
   else if (
     requestHost === "gitmcp.io" ||
-    requestHost === "git-mcp.vercel.app"
+    requestHost === "git-mcp.vercel.app" ||
+    /^git-mcp-git-.*-git-mcp\.vercel\.app$/.test(requestHost)
   ) {
     // Extract owner/repo from path
     const [owner, repo] = path.split("/");

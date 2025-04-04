@@ -77,7 +77,9 @@ No, GitMCP is a free service to the community with no associated costs.
 
 ## Privacy
 
-GitMCP doesn't store any personally identifiable information or queries.
+GitMCP is deeply conscious of its users' privacy. It doesn't require identification and doesn't store any personally identifiable information or queries.
+
+GitMCP only grants access to content that is already publicly available. Before accessing any Github Pages site, it checks for robots.txt rules and follows the directives set by site owners, allowing them to opt out.
 
 ## Contributing
 

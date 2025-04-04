@@ -1,10 +1,197 @@
 import { getRepoData } from "../../shared/repoData.js";
-import { getCachedFilePath, cacheFilePath } from "../utils/upstash.js";
+import {
+  getCachedFilePath,
+  cacheFilePath,
+  getCachedRobotsTxt,
+  cacheRobotsTxt,
+  RobotsRule,
+} from "../utils/upstash.js";
 import {
   searchDocumentation,
   storeDocumentationVectors,
 } from "../utils/vectorStore.js";
 import htmlToMd from "html-to-md";
+
+/**
+ * Parse robots.txt content into structured rules
+ * @param content - The content of robots.txt
+ * @returns Array of parsed rules
+ */
+function parseRobotsTxt(content: string): RobotsRule[] {
+  const lines = content.split("\n");
+  const rules: RobotsRule[] = [];
+
+  let currentRule: RobotsRule | null = null;
+
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+
+    // Skip comments and empty lines
+    if (!trimmedLine || trimmedLine.startsWith("#")) {
+      continue;
+    }
+
+    // Split into directive and value
+    const [directive, ...valueParts] = trimmedLine.split(":");
+    const value = valueParts.join(":").trim();
+
+    if (!directive || !value) {
+      continue;
+    }
+
+    const directiveLower = directive.trim().toLowerCase();
+
+    // Start a new rule when encountering a User-agent directive
+    if (directiveLower === "user-agent") {
+      if (currentRule && currentRule.userAgent) {
+        rules.push(currentRule);
+      }
+      currentRule = { userAgent: value, disallow: [], allow: [] };
+    }
+    // Add disallow paths
+    else if (directiveLower === "disallow" && currentRule) {
+      currentRule.disallow.push(value);
+    }
+    // Add allow paths
+    else if (directiveLower === "allow" && currentRule) {
+      currentRule.allow.push(value);
+    }
+  }
+
+  // Add the last rule if exists
+  if (currentRule && currentRule.userAgent) {
+    rules.push(currentRule);
+  }
+
+  return rules;
+}
+
+/**
+ * Check if a path is allowed according to robots.txt rules
+ * @param rules - The parsed robots.txt rules
+ * @param path - The path to check
+ * @returns boolean indicating if access is allowed
+ */
+function isPathAllowed(rules: RobotsRule[], path: string): boolean {
+  // Path should start with a slash
+  if (!path.startsWith("/")) {
+    path = "/" + path;
+  }
+
+  // First find the applicable rule set (for * or for our user agent)
+  // We'll use * since we don't specify a specific user agent
+  let applicableRules = rules.find((rule) => rule.userAgent === "*");
+
+  // If no wildcard rules, check if any rules apply at all
+  if (!applicableRules && rules.length > 0) {
+    applicableRules = rules[0]; // Use the first rule as default
+  }
+
+  // If no applicable rules or empty rules, allow access
+  if (
+    !applicableRules ||
+    (applicableRules.disallow.length === 0 &&
+      applicableRules.allow.length === 0)
+  ) {
+    return true;
+  }
+
+  // Check specific allow rules (these take precedence over disallow)
+  for (const allowPath of applicableRules.allow) {
+    if (path.startsWith(allowPath)) {
+      return true;
+    }
+  }
+
+  // Check disallow rules
+  for (const disallowPath of applicableRules.disallow) {
+    if (disallowPath === "/" || path.startsWith(disallowPath)) {
+      return false;
+    }
+  }
+
+  // Default to allow if no disallow rules match
+  return true;
+}
+
+/**
+ * Check if a specific URL is allowed according to robots.txt rules
+ * @param domain - The domain to check
+ * @param path - The complete path to check including the file (should start with /)
+ * @returns boolean indicating if access is allowed
+ */
+async function checkRobotsTxt(domain: string, path: string): Promise<boolean> {
+  try {
+    // Check Upstash cache first
+    const cachedRules = await getCachedRobotsTxt(domain);
+
+    if (cachedRules) {
+      console.log(
+        `Using cached robots.txt rules for ${domain} to check ${path}`,
+      );
+      return isPathAllowed(cachedRules, path);
+    }
+
+    // Fetch robots.txt if not in cache
+    const robotsTxtUrl = `https://${domain}/robots.txt`;
+    console.log(`Fetching robots.txt from ${robotsTxtUrl}`);
+    const response = await fetch(robotsTxtUrl);
+
+    // If robots.txt doesn't exist or can't be accessed, allow access by default
+    if (!response.ok) {
+      console.log(`No robots.txt found for ${domain} or couldn't be accessed`);
+      // Cache empty rules for domains without robots.txt
+      await cacheRobotsTxt(domain, []);
+      return true;
+    }
+
+    const content = await response.text();
+    const rules = parseRobotsTxt(content);
+
+    // Cache the parsed rules in Upstash
+    await cacheRobotsTxt(domain, rules);
+    console.log(`Cached robots.txt rules for ${domain}`);
+
+    return isPathAllowed(rules, path);
+  } catch (error) {
+    console.warn(`Error checking robots.txt for ${domain}:`, error);
+    // In case of errors, allow access by default
+    return true;
+  }
+}
+
+/**
+ * Safely fetch a file after checking robots.txt permissions
+ * @param url - Complete URL to fetch
+ * @returns File content or null if not allowed or not found
+ */
+async function fetchFileWithRobotsTxtCheck(
+  url: string,
+): Promise<{ content: string | null; blockedByRobots: boolean }> {
+  try {
+    const urlObj = new URL(url);
+    // Create path from URL path + filename
+    const path = urlObj.pathname;
+
+    // Check robots.txt before attempting to fetch
+    const isAllowed = await checkRobotsTxt(urlObj.hostname, path);
+
+    if (!isAllowed) {
+      console.log(`Access to ${url} disallowed by robots.txt`);
+      return { content: null, blockedByRobots: true };
+    }
+
+    // If allowed, proceed with fetching
+    const response = await fetch(url);
+    return {
+      content: response.ok ? await response.text() : null,
+      blockedByRobots: false,
+    };
+  } catch (error) {
+    console.warn(`Error fetching ${url}: ${error}`);
+    return { content: null, blockedByRobots: false };
+  }
+}
 
 export async function fetchDocumentation({
   requestHost,
@@ -18,31 +205,67 @@ export async function fetchDocumentation({
   // Initialize fileUsed to prevent "used before assigned" error
   let fileUsed = "unknown";
   let content: string | null = null;
+  let blockedByRobots = false;
 
   // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
   if (subdomain && path) {
     // Map to github.io
-    const baseURL = `https://${subdomain}.github.io/${path}/`;
+    const githubIoDomain = `${subdomain}.github.io`;
+    const pathWithSlash = path ? `/${path}` : "";
+    const baseURL = `https://${githubIoDomain}${pathWithSlash}/`;
 
-    // First try to fetch llms.txt
-    content = await fetchFile(baseURL + "llms.txt");
-    if (content) {
+    // Try to fetch llms.txt with robots.txt check
+    const llmsResult = await fetchFileWithRobotsTxtCheck(baseURL + "llms.txt");
+
+    if (llmsResult.blockedByRobots) {
+      blockedByRobots = true;
+      console.log(`Access to ${baseURL}llms.txt disallowed by robots.txt`);
+    } else if (llmsResult.content) {
+      content = llmsResult.content;
       fileUsed = "llms.txt";
     } else {
-      // If llms.txt is not found, fall back to the landing page
-      console.warn(`llms.txt not found at ${baseURL}, trying base URL`);
-      const htmlContent = await fetchFile(baseURL);
-      try {
-        if (htmlContent) {
+      // If llms.txt is not found or disallowed, fall back to the landing page
+      console.warn(
+        `llms.txt not found or not allowed at ${baseURL}, trying base URL`,
+      );
+      const indexResult = await fetchFileWithRobotsTxtCheck(baseURL);
+
+      if (indexResult.blockedByRobots) {
+        blockedByRobots = true;
+        console.log(`Access to ${baseURL} disallowed by robots.txt`);
+      } else if (indexResult.content) {
+        try {
           // Convert HTML to Markdown for proper processing
-          content = htmlToMd(htmlContent);
+          content = htmlToMd(indexResult.content);
           fileUsed = "landing page (index.html, converted to Markdown)";
+        } catch (error) {
+          console.warn(
+            `Error converting HTML to Markdown for ${baseURL}: ${error}`,
+          );
         }
-      } catch (error) {
-        console.warn(
-          `Error converting HTML to Markdown for ${baseURL}: ${error}`,
-        );
       }
+
+      // If index page was blocked or not available, try readme.md
+      if (!content && !blockedByRobots) {
+        const readmeResult = await fetchFileWithRobotsTxtCheck(
+          baseURL + "readme.md",
+        );
+
+        if (readmeResult.blockedByRobots) {
+          blockedByRobots = true;
+          console.log(`Access to ${baseURL}readme.md disallowed by robots.txt`);
+        } else if (readmeResult.content) {
+          content = readmeResult.content;
+          fileUsed = "readme.md";
+        }
+      }
+    }
+
+    // If any path was blocked by robots.txt, return appropriate message
+    if (blockedByRobots) {
+      content =
+        "Access to this GitHub Pages site is restricted by robots.txt. GitMCP respects robots.txt directives.";
+      fileUsed = "robots.txt restriction";
     }
   }
 
@@ -163,12 +386,36 @@ export async function fetchDocumentation({
     if (!baseURL.endsWith("/")) {
       baseURL += "/";
     }
-    content = await fetchFile(baseURL + "llms.txt");
-    fileUsed = "llms.txt";
 
-    if (!content) {
-      content = await fetchFile(baseURL + "readme.md");
-      fileUsed = "readme.md";
+    // Try fetching llms.txt with robots.txt check
+    const llmsResult = await fetchFileWithRobotsTxtCheck(baseURL + "llms.txt");
+
+    if (llmsResult.blockedByRobots) {
+      blockedByRobots = true;
+    } else if (llmsResult.content) {
+      content = llmsResult.content;
+      fileUsed = "llms.txt";
+    }
+
+    // If llms.txt not available or blocked, try readme.md
+    if (!content && !blockedByRobots) {
+      const readmeResult = await fetchFileWithRobotsTxtCheck(
+        baseURL + "readme.md",
+      );
+
+      if (readmeResult.blockedByRobots) {
+        blockedByRobots = true;
+      } else if (readmeResult.content) {
+        content = readmeResult.content;
+        fileUsed = "readme.md";
+      }
+    }
+
+    // If any path was blocked by robots.txt, return appropriate message
+    if (blockedByRobots) {
+      content =
+        "Access to this GitHub Pages site is restricted by robots.txt. GitMCP respects robots.txt directives.";
+      fileUsed = "robots.txt restriction";
     }
   }
 
@@ -219,7 +466,12 @@ export async function searchRepositoryDocumentation({
     repo = path || "docs";
   }
   // Check for github repo pattern: gitmcp.io/{owner}/{repo} or git-mcp.vercel.app/{owner}/{repo}
-  else if (hostHeader === "gitmcp.io" || hostHeader === "git-mcp.vercel.app") {
+  // or git-mcp-git-{preview}-git-mcp.vercel.app/{owner}/{repo}
+  else if (
+    hostHeader === "gitmcp.io" ||
+    hostHeader === "git-mcp.vercel.app" ||
+    /^git-mcp-git-.*-git-mcp\.vercel\.app$/.test(hostHeader)
+  ) {
     // Extract owner/repo from path
     [owner, repo] = path.split("/");
     if (!owner || !repo) {

@@ -62,7 +62,7 @@ export default function Content({
         return "https://claude.ai/favicon.ico";
       case "Windsurf":
         return "https://codeium.com/favicon.ico";
-      case "Insiders":
+      case "VSCode":
         return "https://code.visualstudio.com/assets/favicon.ico";
       default:
         return "https://codeium.com/favicon.ico";
@@ -146,7 +146,7 @@ export default function Content({
           {/* Tabs for different integrations */}
           <div className="mb-6">
             <div className="flex flex-wrap border-b border-slate-200 mb-4">
-              {["Cursor", "Claude Desktop", "Windsurf", "Insiders"].map(
+              {["Cursor", "Claude Desktop", "Windsurf", "VSCode"].map(
                 (tab, index) => (
                   <button
                     key={tab}
@@ -266,10 +266,10 @@ export default function Content({
                 />
               </div>
             </div>
-            <div id="tab-insiders" className="tab-content hidden">
+            <div id="tab-vscode" className="tab-content hidden">
               <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
                 <p className="text-sm text-slate-700 mb-2">
-                  To add this MCP to VSCode Insiders, update your{" "}
+                  To add this MCP to VSCode, update your{" "}
                   <code className="bg-slate-200 px-1.5 py-0.5 rounded text-blue-700 break-words">
                     .vscode/mcp.json
                   </code>
@@ -334,7 +334,7 @@ export default function Content({
             Windsurf
           </a>
           <a
-            href="https://code.visualstudio.com/insiders/"
+            href="https://code.visualstudio.com/"
             className="text-blue-600 hover:text-blue-800 flex items-center transition-colors"
             target="_blank"
             rel="noopener noreferrer"
@@ -344,7 +344,7 @@ export default function Content({
               alt="VSCode"
               className="h-6 w-6 mr-2"
             />
-            VSCode Insiders
+            VSCode
           </a>
         </div>
       </div>

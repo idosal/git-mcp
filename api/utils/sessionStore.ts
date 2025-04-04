@@ -31,7 +31,7 @@ let lastRegularUsage = 0;
 // Redis client health check interval (in ms)
 const CLIENT_HEALTH_CHECK_INTERVAL = 10000; // 10 seconds
 
-// Session TTL in seconds (30 minutes)
+// Session TTL in seconds (24 hrs)
 const SESSION_TTL = 60 * 60 * 24;
 
 // Key prefix for session storage
@@ -685,8 +685,7 @@ export async function subscribeToResponse(
       `[${INSTANCE_ID}] Successfully subscribed to response channel ${responseChannel}`,
     );
 
-    // Return unsubscribe function
-    return async () => {
+    const unsubscribe = async () => {
       // Use the mutex to protect unsubscribe operation
       return subscriberMutex.runExclusive(async () => {
         try {
@@ -705,20 +704,26 @@ export async function subscribeToResponse(
               `[${INSTANCE_ID}] Successfully unsubscribed from response channel ${responseChannel}`,
             );
           }
-
-          // Remove from active subscriptions tracking
-          activeSubscriptions.delete(responseChannel);
         } catch (error) {
           console.error(
             `[${INSTANCE_ID}] Error unsubscribing from response channel ${responseChannel}:`,
             error,
           );
-          // Still clean up our tracking
+        } finally {
+          // Remove from active subscriptions tracking
           activeSubscriptions.delete(responseChannel);
-          throw error;
         }
       });
     };
+
+    await subscriber.subscribe(responseChannel, messageHandler);
+
+    console.info(
+      `[${INSTANCE_ID}] Successfully subscribed to response channel ${responseChannel}`,
+    );
+
+    // Return unsubscribe function
+    return unsubscribe;
   } catch (error) {
     console.error(
       `[${INSTANCE_ID}] Error subscribing to response channel for ${sessionId}:${requestId}:`,

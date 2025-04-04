@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 
 // Initialize the Inter font
 const inter = Inter({
@@ -46,6 +47,7 @@ export default function RootLayout({
           content="Instantly create an MCP server for any GitHub project"
         />
         <meta name="twitter:image" content="https://gitmcp.io/OG." />
+        <Analytics />
       </head>
       <body className="font-sans antialiased">{children}</body>
     </html>
