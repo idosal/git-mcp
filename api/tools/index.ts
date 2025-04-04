@@ -1,6 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { getRepoData, RepoData } from "../../shared/repoData.js";
+import {
+  fetchDocumentation,
+  searchRepositoryDocumentation,
+} from "./fetchAndSearch.js";
 
 export function registerTools(
   mcp: McpServer,
@@ -24,7 +28,6 @@ export function registerTools(
         repo: z.string().describe("The GitHub repository name"),
       },
       async ({ owner, repo }) => {
-        const { fetchDocumentation } = await import("./fetchAndSearch.js");
         // Use the existing logic but override the URL to point to the specified repository
         return fetchDocumentation({
           requestHost: "gitmcp.io",
@@ -47,9 +50,6 @@ export function registerTools(
           .describe("The search query to find relevant documentation"),
       },
       async ({ owner, repo, query }) => {
-        const { searchRepositoryDocumentation } = await import(
-          "./fetchAndSearch.js"
-        );
         // Use the existing search logic but override the URL to point to the specified repository
         return searchRepositoryDocumentation({
           requestHost: "gitmcp.io",
@@ -68,7 +68,6 @@ export function registerTools(
 
   // Register fetch documentation tool
   mcp.tool(toolName, description, {}, async () => {
-    const { fetchDocumentation } = await import("./fetchAndSearch.js");
     return fetchDocumentation({ requestHost, requestUrl });
   });
 
@@ -82,9 +81,6 @@ export function registerTools(
         .describe("The search query to find relevant documentation"),
     },
     async ({ query }) => {
-      const { searchRepositoryDocumentation } = await import(
-        "./fetchAndSearch.js"
-      );
       return searchRepositoryDocumentation({ requestHost, requestUrl, query });
     },
   );
