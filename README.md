@@ -28,7 +28,7 @@ GitMCP is a free, open-source service that seamlessly transforms any GitHub proj
 - **Zero Setup Required**: No configurations or modifications needed — GitMCP works out of the box.
 - **Completely Free and Private**: GitMCP is free. We don't collect any personally identifiable information or queries. Plus, you can host it yourself!
 
-## Usage
+## Getting Started (Usage)
 
 To make your GitHub repository accessible to AI assistants via GitMCP, use the following URL formats:
 
@@ -65,7 +65,7 @@ GitMCP provides a set of tools that can be used to access and interact with the 
 Fetches the documentation for the `{owner}/{repo}` GitHub repository (as extracted from the URL: `gitmcp.io/{owner}/{repo}` or `{owner}.gitmcp.io/{repo}`). Useful for general questions. Retrieves the `llms.txt` file and falls back to `README.md` or other pages if the former is unavailable.
 
 ### `search_<repo-name>_documentation`: 
-Searches the repository's documentation by providing a `query`. Useful for specific questions. Uses semantic search to find the most relevant documentation. This mitigates the cost of a large documentation set, that cannot be provided as direct context to LLMs.
+It searches the repository's documentation by providing a `query`. This is useful for specific questions. It uses semantic search to find the most relevant documentation. This mitigates the cost of a large documentation set that cannot be provided as direct context to LLMs.
 
 > Note: In the case of a generic `gitmcp.com/docs` usage, the tools are called `fetch_generic_documentation` and `search_generic_documentation`, and receive additional `owner` and `repo` arguments.
 
@@ -89,9 +89,9 @@ No, GitMCP is a free service to the community with no associated costs.
 
 ## Privacy
 
-GitMCP is deeply committed to its users' privacy. The service doesn't have access to or store any personally identifiable information as it doesn't require authentication. In addition, we don't store any queries sent by the agents. Moreover, as the GitMCP is an open-source project, it can be deployed independently in your environment.
+GitMCP is deeply committed to its users' privacy. The service doesn't have access to or store any personally identifiable information as it doesn't require authentication. In addition, it doesn't store any queries sent by the agents. Moreover, as GitMCP is an open-source project, it can be deployed independently in your environment.
 
-GitMCP only grants access to content that is already publicly available. Before accessing any Github Pages site, it checks for robots.txt rules and follows the directives set by site owners, allowing them to opt out. We don't permanently store any data.
+GitMCP only accesses content that is already publicly available. Before accessing any GitHub Pages site, the code checks for `robots.txt` rules and follows the directives set by site owners, allowing them to opt out. Please note that GitMCP doesn't permanently store data regarding the GitHub projects or their content.
 
 ## Contributing
 
@@ -103,4 +103,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Disclaimer
 
-GitMCP is provided "as is" without warranty of any kind. While we strive to ensure the reliability and security of our service, we are not responsible for any damages or issues that may arise from its use. GitHub repositories accessed through GitMCP are subject to their respective owners' terms and conditions. GitMCP is not affiliated with GitHub, Inc.
+GitMCP is provided "as is" without warranty of any kind. While we strive to ensure the reliability and security of our service, we are not responsible for any damages or issues that may arise from its use. GitHub projects accessed through GitMCP are subject to their respective owners' terms and conditions. GitMCP is not affiliated with GitHub or any of the mentioned AI tools.
