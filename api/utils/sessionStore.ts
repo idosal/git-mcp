@@ -709,10 +709,10 @@ export async function subscribeToResponse(
             `[${INSTANCE_ID}] Error unsubscribing from response channel ${responseChannel}:`,
             error,
           );
+        } finally {
+          // Remove from active subscriptions tracking
+          activeSubscriptions.delete(responseChannel);
         }
-
-        // Remove from active subscriptions tracking
-        activeSubscriptions.delete(responseChannel);
       });
     };
 
