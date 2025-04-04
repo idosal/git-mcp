@@ -701,18 +701,18 @@ export async function subscribeToResponse(
           } else {
             await subscriber.unsubscribe(responseChannel);
             console.info(
-              `[${INSTANCE_ID}] Successfully unsubscribed from ${responseChannel}`,
+              `[${INSTANCE_ID}] Successfully unsubscribed from response channel ${responseChannel}`,
             );
           }
-
-          // Remove from local tracking
-          activeSubscriptions.delete(responseChannel);
         } catch (error) {
           console.error(
-            `[${INSTANCE_ID}] Error unsubscribing from ${responseChannel}:`,
+            `[${INSTANCE_ID}] Error unsubscribing from response channel ${responseChannel}:`,
             error,
           );
         }
+
+        // Remove from active subscriptions tracking
+        activeSubscriptions.delete(responseChannel);
       });
     };
 
