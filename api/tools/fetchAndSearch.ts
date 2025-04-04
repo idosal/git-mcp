@@ -219,7 +219,12 @@ export async function searchRepositoryDocumentation({
     repo = path || "docs";
   }
   // Check for github repo pattern: gitmcp.io/{owner}/{repo} or git-mcp.vercel.app/{owner}/{repo}
-  else if (hostHeader === "gitmcp.io" || hostHeader === "git-mcp.vercel.app") {
+  // or git-mcp-git-{preview}-git-mcp.vercel.app/{owner}/{repo}
+  else if (
+    hostHeader === "gitmcp.io" ||
+    hostHeader === "git-mcp.vercel.app" ||
+    /^git-mcp-git-.*-git-mcp\.vercel\.app$/.test(hostHeader)
+  ) {
     // Extract owner/repo from path
     [owner, repo] = path.split("/");
     if (!owner || !repo) {
