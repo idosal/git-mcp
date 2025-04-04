@@ -517,13 +517,14 @@ export default async function handler(
               console.debug(
                 `[${INSTANCE_ID}:${logRequestId}] Response sent to client for ${sessionId}:${requestId} (trace: ${traceId})`,
               );
-              onResponse();
             } catch (error) {
               console.error(
                 `[${INSTANCE_ID}:${logRequestId}] Error sending response to client for ${requestId} (trace: ${traceId}):`,
                 error,
               );
             }
+
+            onResponse();
           },
         );
 
