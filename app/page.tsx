@@ -1,15 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-  ArrowRight,
-  Github,
-  GitBranch,
-  Code,
-  Globe,
-  Zap,
-  Lock,
-} from "lucide-react";
+import { Github, Code, Globe, Zap } from "lucide-react";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function Home() {
   return (
@@ -340,6 +333,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-gray-950 text-gray-400 py-8 sm:py-12">
+        <Analytics />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
@@ -348,7 +342,7 @@ export default function Home() {
                 <span className="text-emerald-400">MCP</span>
               </div>
               <p className="text-sm sm:text-base text-gray-500">
-                © 2024 GitMCP. All rights reserved.
+                © 2025 GitMCP. All rights reserved.
               </p>
             </div>
           </div>
