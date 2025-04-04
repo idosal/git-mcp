@@ -69,7 +69,7 @@ Yes, GitMCP is compatible with any AI assistant supporting the Model Context Pro
 
 ### Is GitMCP compatible with all GitHub projects?
 
-Absolutely! GitMCP works with any public GitHub repository without requiring any modifications. It prioritizes the `llms.txt` file and falls back to `README.md` or other if the former is unavailable. Future updates aim to support additional documentation methods and even generate content dynamically.
+Absolutely! GitMCP works with any public GitHub repository without requiring any modifications. It prioritizes the `llms.txt` file and falls back to `README.md` or other pages if the former is unavailable. Future updates aim to support additional documentation methods and even generate content dynamically.
 
 ### Does GitMCP cost money?
 
@@ -77,9 +77,9 @@ No, GitMCP is a free service to the community with no associated costs.
 
 ## Privacy
 
-GitMCP is deeply conscious of its users' privacy. It doesn't require identification and doesn't store any personally identifiable information or queries.
+GitMCP is deeply committed to its users' privacy. The service doesn't have access to or store any personally identifiable information as it doesn't require authentication. In addition, we don't store any queries sent by the agents. Moreover, as the GitMCP is an open-source project, it can be deployed independently in your environment.
 
-GitMCP only grants access to content that is already publicly available. Before accessing any Github Pages site, it checks for robots.txt rules and follows the directives set by site owners, allowing them to opt out.
+GitMCP only grants access to content that is already publicly available. Before accessing any Github Pages site, it checks for robots.txt rules and follows the directives set by site owners, allowing them to opt out. We don't permanently store any data.
 
 ## Contributing
 
