@@ -85,7 +85,7 @@ export default function Content({
       </div>
       <div className="max-w-3xl w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2 relative inline-block">
+          <h1 className="text-xl sm:text-4xl font-bold mb-2 relative inline-block">
             <span className="text-blue-800">GitHub Documentation MCP</span>
           </h1>
           <div className="mt-4 text-lg sm:text-xl text-slate-700">
