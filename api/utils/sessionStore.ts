@@ -679,14 +679,7 @@ export async function subscribeToResponse(
       }
     };
 
-    await subscriber.subscribe(responseChannel, messageHandler);
-
-    console.info(
-      `[${INSTANCE_ID}] Successfully subscribed to response channel ${responseChannel}`,
-    );
-
-    // Return unsubscribe function
-    return async () => {
+    const unsubscribe = async () => {
       // Use the mutex to protect unsubscribe operation
       return subscriberMutex.runExclusive(async () => {
         try {
@@ -702,23 +695,29 @@ export async function subscribeToResponse(
           } else {
             await subscriber.unsubscribe(responseChannel);
             console.info(
-              `[${INSTANCE_ID}] Successfully unsubscribed from response channel ${responseChannel}`,
+              `[${INSTANCE_ID}] Successfully unsubscribed from ${responseChannel}`,
             );
           }
 
-          // Remove from active subscriptions tracking
+          // Remove from local tracking
           activeSubscriptions.delete(responseChannel);
         } catch (error) {
           console.error(
-            `[${INSTANCE_ID}] Error unsubscribing from response channel ${responseChannel}:`,
+            `[${INSTANCE_ID}] Error unsubscribing from ${responseChannel}:`,
             error,
           );
-          // Still clean up our tracking
-          activeSubscriptions.delete(responseChannel);
-          throw error;
         }
       });
     };
+
+    await subscriber.subscribe(responseChannel, messageHandler);
+
+    console.info(
+      `[${INSTANCE_ID}] Successfully subscribed to response channel ${responseChannel}`,
+    );
+
+    // Return unsubscribe function
+    return unsubscribe;
   } catch (error) {
     console.error(
       `[${INSTANCE_ID}] Error subscribing to response channel for ${sessionId}:${requestId}:`,

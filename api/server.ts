@@ -499,12 +499,10 @@ export default async function handler(
         traceId: string,
         logRequestId: string,
         res: NextApiResponse,
-        onResponse: (cleanup: () => Promise<void>) => void,
+        onResponse: () => void,
       ) {
-        let unsubscribe: () => Promise<void>;
-
         // First create and await the unsubscribe function BEFORE using it in callbacks
-        unsubscribe = await subscribeToResponse(
+        const unsubscribe = await subscribeToResponse(
           sessionId,
           requestId,
           async (response) => {
@@ -519,7 +517,7 @@ export default async function handler(
               console.debug(
                 `[${INSTANCE_ID}:${logRequestId}] Response sent to client for ${sessionId}:${requestId} (trace: ${traceId})`,
               );
-              onResponse(unsubscribe);
+              onResponse();
             } catch (error) {
               console.error(
                 `[${INSTANCE_ID}:${logRequestId}] Error sending response to client for ${requestId} (trace: ${traceId}):`,
@@ -529,55 +527,25 @@ export default async function handler(
           },
         );
 
-        return {
-          unsubscribe,
-          handleResponse: async (response: {
-            status: number;
-            body: string;
-          }) => {
-            console.info(
-              `[${INSTANCE_ID}:${logRequestId}] Handling response for ${sessionId}:${requestId} (trace: ${traceId})`,
-            );
-
-            try {
-              res.status(response.status).send(response.body);
-              console.debug(
-                `[${INSTANCE_ID}:${logRequestId}] Response sent to client for ${sessionId}:${requestId} (trace: ${traceId})`,
-              );
-            } catch (error) {
-              console.error(
-                `[${INSTANCE_ID}:${logRequestId}] Error sending response to client for ${requestId} (trace: ${traceId}):`,
-                error,
-              );
-            }
-
-            // Cleanup after handling
-            onResponse(unsubscribe);
-          },
-        };
+        return unsubscribe;
       }
 
       try {
         // Create the unsubscribe function before using it in callbacks
-        const { unsubscribe, handleResponse } = await setupResponseSubscription(
+        const unsubscribe = await setupResponseSubscription(
           sessionId,
           messageRequestId,
           messageTraceId,
           requestId,
           res,
-          (cleanup) => {
+          () => {
             if (responseTimeout) {
               clearTimeout(responseTimeout);
             }
             hasResponded = true;
-            return cleanup();
           },
         );
 
-        // Save for later use in timeout and close handlers
-        unsubscribeFunction = unsubscribe;
-
-        // ONLY set up the timeout AFTER we have the unsubscribe function initialized
         responseTimeout = setTimeout(async () => {
           if (hasResponded) {
             console.debug(
@@ -600,7 +568,7 @@ export default async function handler(
           });
 
           // Clean up the subscription after responding, but don't wait for it
-          unsubscribeFunction().catch((err) => {
+          unsubscribe().catch((err) => {
             console.error(
               `[${INSTANCE_ID}:${requestId}] Error unsubscribing after timeout for ${messageRequestId} (trace: ${messageTraceId}):`,
               err,
@@ -617,7 +585,7 @@ export default async function handler(
             clearTimeout(responseTimeout);
           }
           if (!hasResponded) {
-            await unsubscribeFunction().catch((err) => {
+            await unsubscribe().catch((err) => {
               console.error(
                 `[${INSTANCE_ID}:${requestId}] Error unsubscribing on close for ${messageRequestId} (trace: ${messageTraceId}):`,
                 err,
