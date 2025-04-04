@@ -202,83 +202,18 @@ export default function Content({
                   </code>
                   :
                 </p>
-                <pre className="bg-slate-800 text-slate-100 p-3 rounded-md text-sm overflow-x-auto relative">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`{
-  "mcpServers": {
-    "${serverName}": {
-      "url": "${url}"
-    }
-  }
-}`);
-                      const copyBtn =
-                        document.querySelector("#cursor-copy-btn");
-                      if (copyBtn) {
-                        copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-                        setTimeout(() => {
-                          copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-                        }, 2000);
-                      }
-                    }}
-                    id="cursor-copy-btn"
-                    className="absolute top-2 right-2 p-1 rounded-md hover:bg-slate-700 transition-colors focus:outline-none"
-                    aria-label="Copy code"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect
-                        x="9"
-                        y="9"
-                        width="13"
-                        height="13"
-                        rx="2"
-                        ry="2"
-                      ></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => {
-                      window.open(`cursor://mcp-remote?url=${url}`);
-                    }}
-                    id="cursor-open-btn"
-                    className="absolute top-2 right-8 p-1 rounded-md hover:bg-slate-700 transition-colors focus:outline-none"
-                    aria-label="Open Cursor"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                      <polyline points="15 3 21 3 21 9"></polyline>
-                      <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                  </button>
-                  {`{
+                <CodeExample
+                  code={`{
   "mcpServers": {
     "${serverName}": {
       "url": "${url}"
     }
   }
 }`}
-                </pre>
+                  id="cursor"
+                  name="Cursor"
+                  popoutUrl="cursor://mcp-remote?url=${url}"
+                />
               </div>
             </div>
 
@@ -291,56 +226,8 @@ export default function Content({
                   </code>
                   :
                 </p>
-                <pre className="bg-slate-800 text-slate-100 p-3 rounded-md text-sm overflow-x-auto relative">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`{
-  "mcpServers": {
-    "${serverName}": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "${url}"
-      ]
-    }
-  }
-}`);
-                      const copyBtn =
-                        document.querySelector("#claude-copy-btn");
-                      if (copyBtn) {
-                        copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-                        setTimeout(() => {
-                          copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-                        }, 2000);
-                      }
-                    }}
-                    id="claude-copy-btn"
-                    className="absolute top-2 right-2 p-1 rounded-md hover:bg-slate-700 transition-colors focus:outline-none"
-                    aria-label="Copy code"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect
-                        x="9"
-                        y="9"
-                        width="13"
-                        height="13"
-                        rx="2"
-                        ry="2"
-                      ></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                  </button>
-                  {`{
+                <CodeExample
+                  code={`{
   "mcpServers": {
     "${serverName}": {
       "command": "npx",
@@ -351,7 +238,9 @@ export default function Content({
     }
   }
 }`}
-                </pre>
+                  id="claude"
+                  name="Claude Desktop"
+                />
               </div>
             </div>
 
@@ -364,59 +253,17 @@ export default function Content({
                   </code>
                   :
                 </p>
-                <pre className="bg-slate-800 text-slate-100 p-3 rounded-md text-sm overflow-x-auto relative">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`{
-  "mcpServers": {
-    "${serverName}": {
-      "serverUrl": "${url}"
-    }
-  }
-}`);
-                      const copyBtn =
-                        document.querySelector("#windsurf-copy-btn");
-                      if (copyBtn) {
-                        copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-                        setTimeout(() => {
-                          copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-                        }, 2000);
-                      }
-                    }}
-                    id="windsurf-copy-btn"
-                    className="absolute top-2 right-2 p-1 rounded-md hover:bg-slate-700 transition-colors focus:outline-none"
-                    aria-label="Copy code"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect
-                        x="9"
-                        y="9"
-                        width="13"
-                        height="13"
-                        rx="2"
-                        ry="2"
-                      ></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                  </button>
-                  {`{
+                <CodeExample
+                  code={`{
   "mcpServers": {
     "${serverName}": {
       "serverUrl": "${url}"
     }
   }
 }`}
-                </pre>
+                  id="windsurf"
+                  name="Windsurf"
+                />
               </div>
             </div>
             <div id="tab-insiders" className="tab-content hidden">
@@ -428,85 +275,19 @@ export default function Content({
                   </code>
                   :
                 </p>
-                <pre className="bg-slate-800 text-slate-100 p-3 rounded-md text-sm overflow-x-auto relative">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`{
+                <CodeExample
+                  code={`{
   "mcpServers": {
     "${serverName}": {
       "type": "sse",
       "url": "${url}"
     }
   }
-}`);
-                      const copyBtn =
-                        document.querySelector("#vscode-copy-btn");
-                      if (copyBtn) {
-                        copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-                        setTimeout(() => {
-                          copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-                        }, 2000);
-                      }
-                    }}
-                    id="vscode-copy-btn"
-                    className="absolute top-2 right-2 p-1 rounded-md hover:bg-slate-700 transition-colors focus:outline-none"
-                    aria-label="Copy code"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect
-                        x="9"
-                        y="9"
-                        width="13"
-                        height="13"
-                        rx="2"
-                        ry="2"
-                      ></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => {
-                      window.open(`vscode://mcp-remote?url=${url}`);
-                    }}
-                    id="vscode-open-btn"
-                    className="absolute top-2 right-8 p-1 rounded-md hover:bg-slate-700 transition-colors focus:outline-none"
-                    aria-label="Open VSCode Insiders"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                      <polyline points="15 3 21 3 21 9"></polyline>
-                      <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                  </button>
-                  {`{
-  "servers": {
-    "${serverName}": {
-    "type": "sse",
-      "url": "${url}"
-    }
-  }
 }`}
-                </pre>
+                  id="vscode"
+                  name="VSCode Insiders"
+                  popoutUrl={`vscode://mcp-remote?url=${url}`}
+                />
               </div>
             </div>
           </div>
@@ -567,6 +348,82 @@ export default function Content({
           </a>
         </div>
       </div>
+    </div>
+  );
+}
+
+function CodeExample({
+  code,
+  id,
+  name,
+  popoutUrl,
+}: {
+  code: string;
+  id: string;
+  name: string;
+  popoutUrl?: string;
+}) {
+  return (
+    <div className="bg-slate-800 text-slate-100 p-3 rounded-md text-sm overflow-x-auto relative">
+      <button
+        onClick={() => {
+          navigator.clipboard.writeText(code);
+          const copyBtn = document.querySelector(`#${id}-copy-btn`);
+          if (copyBtn) {
+            copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            setTimeout(() => {
+              copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+            }, 2000);
+          }
+        }}
+        id={`${id}-copy-btn`}
+        className="absolute top-2 right-2 p-1 rounded-md hover:bg-slate-700 transition-colors focus:outline-none z-10"
+        aria-label="Copy code"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+      {popoutUrl && (
+        <button
+          onClick={() => {
+            window.open(popoutUrl);
+          }}
+          id={`${id}-open-btn`}
+          className="absolute top-2 right-8 p-1 rounded-md hover:bg-slate-700 transition-colors focus:outline-none z-10"
+          aria-label={`Open ${name}`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </button>
+      )}
+      <pre className="bg-slate-800 text-slate-100 rounded-md text-sm overflow-x-auto relative">
+        {code}
+      </pre>
     </div>
   );
 }
