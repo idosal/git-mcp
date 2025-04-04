@@ -310,7 +310,7 @@ export default function Home() {
 
             <div className="flex flex-col items-center">
               <a
-                href="https://code.visualstudio.com/insiders/"
+                href="https://code.visualstudio.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group hover:opacity-90 transition-opacity flex flex-col items-center"
@@ -318,12 +318,12 @@ export default function Home() {
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl shadow-lg flex items-center justify-center mb-3 group-hover:from-gray-650 group-hover:to-gray-750 transition-all">
                   <img
                     src="https://code.visualstudio.com/assets/favicon.ico"
-                    alt="VSCode Insiders"
+                    alt="VSCode"
                     className="h-8 w-8 sm:h-10 sm:w-10"
                   />
                 </div>
                 <span className="text-gray-200 text-base sm:text-lg font-medium">
-                  VSCode Insiders
+                  VSCode
                 </span>
               </a>
             </div>
