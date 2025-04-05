@@ -20,7 +20,29 @@
 
 ## What is GitMCP?
 
-GitMCP is a free, open-source service that seamlessly transforms any GitHub project into a remote [Model Context Protocol (MCP)](https://modelcontextprotocol.github.io/) endpoint, enabling AI assistants to access and understand the project's documentation effortlessly.
+GitMCP is an intelligent documentation search tool that helps AI assistants better understand and search through GitHub project documentation. Key features:
+
+- 🔍 **Smart Search**: Supports natural language queries to quickly find relevant content in project docs
+- 📚 **Document Support**: Automatically retrieves `llms.txt` and `README.md` from your repository
+- 🤖 **AI-Optimized**: Specifically designed for AI assistants to provide more accurate document understanding
+- 🆓 **Completely Free**: Open-source project with no associated costs
+- 🔒 **Privacy-Focused**: No personal information collected, no query history stored
+
+### Use Cases
+
+- Let AI assistants help you find specific content in project documentation
+- Quickly locate installation and configuration instructions
+- Search through API documentation and usage examples
+- Access project best practices and guidelines
+
+### Supported Documentation
+
+GitMCP currently supports the following documents (in order of priority):
+1. `llms.txt` - Documentation optimized for AI assistants
+   - Follows the [llms.txt specification](https://llmstxt.org)
+   - Provides structured, AI-friendly content
+   - Recommended format for best search results
+2. `README.md` - Project documentation
 
 ## Features
 
@@ -45,7 +67,29 @@ The dynamic endpoint doesn't require a pre-defined repository. When used, your A
 
 ## How It Works
 
-GitMCP serves as a bridge between your GitHub repository's documentation and AI assistants by implementing the Model Context Protocol (MCP). When an AI assistant requires information from your repository, it sends a request to GitMCP. GitMCP retrieves the relevant content and provides semantic search capabilities, ensuring efficient and accurate information delivery.
+GitMCP implements the [Model Context Protocol (MCP)](https://modelcontextprotocol.github.io/) to provide a standardized interface for AI assistants to access GitHub documentation. Here's how it works:
+
+### Core Components
+- **MCP Implementation**: 
+  - Implements MCP server specification
+  - Handles AI assistant requests
+  - Manages documentation retrieval
+
+- **Documentation Handler**:
+  - Prioritizes `llms.txt` for AI-optimized content
+  - Falls back to `README.md`
+  - Supports semantic search capabilities
+
+- **Search Engine**:
+  - Vector-based semantic search
+  - Keyword matching
+  - Context-aware results
+
+### Request Flow
+1. AI assistant sends MCP request to GitMCP
+2. GitMCP authenticates and retrieves documentation
+3. Content is processed and indexed
+4. Search results are returned in MCP format
 
 ## Examples
 
