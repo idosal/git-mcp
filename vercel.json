@@ -14,7 +14,8 @@
   ],
   "functions": {
     "api/server.ts": {
-      "maxDuration": 360
+      "memory": 1024,
+      "maxDuration": 60
     }
   }
 }
