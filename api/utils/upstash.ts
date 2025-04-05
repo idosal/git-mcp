@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { RobotsRule } from "./robotsTxt.js";
 
 // Initialize Upstash Redis client
 const redis = Redis.fromEnv();
@@ -76,15 +77,6 @@ export async function cacheFilePath(
  */
 export function getRobotsTxtCacheKey(domain: string): string {
   return `robotstxt:${domain}`;
-}
-
-/**
- * Interface for robots.txt rule
- */
-export interface RobotsRule {
-  userAgent: string;
-  disallow: string[];
-  allow: string[];
 }
 
 /**

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { getRepoData } from "../../../shared/repoData";
+import { getRepoData, RepoData } from "../../../shared/repoData";
 import Content from "./content";
 import { removeLeadingUnderscore } from "../../../shared/urlUtils";
 
@@ -15,30 +15,25 @@ export default function ContentClient() {
     setLocationHref(locationHref);
   }, []);
 
-  const { subdomain, path, owner, repo, url } = useMemo<{
-    subdomain?: string;
-    path?: string;
-    owner?: string;
-    repo?: string;
-    url?: string;
-  }>(() => {
+  const { urlType, owner, repo, url } = useMemo<
+    RepoData & { url?: string }
+  >(() => {
     if (!locationHref) {
-      return {};
+      return {
+        urlType: "unknown",
+        owner: null,
+        repo: null,
+        host: "gitmcp.io",
+      };
     }
     const locationWithoutUnderscore = removeLeadingUnderscore(locationHref);
     const locationObj = new URL(locationWithoutUnderscore);
     const host = locationObj.host;
     let pathname = locationObj.pathname;
-    const repoData = getRepoData(host, pathname);
+    const repoData = getRepoData({ requestHost: host, requestUrl: pathname });
     return { ...repoData, url: locationObj.toString() };
   }, [locationHref]);
   return locationHref ? (
-    <Content
-      subdomain={subdomain}
-      path={path}
-      owner={owner}
-      repo={repo}
-      url={url}
-    />
+    <Content urlType={urlType} owner={owner} repo={repo} url={url} />
   ) : null;
 }

@@ -23,12 +23,14 @@ export default async function Page({
   const host = cleanUrl.host;
   const pathname = cleanUrl.pathname;
 
-  const { subdomain, path, owner, repo } = getRepoData(host, pathname);
+  const { urlType, owner, repo } = getRepoData({
+    requestHost: host,
+    requestUrl: pathname,
+  });
 
   return (
     <Content
-      subdomain={subdomain}
-      path={path}
+      urlType={urlType}
       owner={owner}
       repo={repo}
       url={cleanUrl.toString()}

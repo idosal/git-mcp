@@ -1,21 +1,27 @@
+export type UrlType = "subdomain" | "github" | "unknown";
 export type RepoData = {
-  subdomain?: string;
-  path?: string;
-  owner?: string;
-  repo?: string;
+  owner: string | null;
+  repo: string | null;
+  host: string;
+  urlType: UrlType;
 };
-type GetRepoDataLog = RepoData & {
+export type RequestData = {
   requestHost: string;
-  requestUrl: string | undefined;
+  requestUrl?: string;
 };
-export function getRepoData(
-  requestHost: string,
-  requestUrl?: string,
-): RepoData {
+export type LogData = RepoData & RequestData;
+
+export function getRepoData(requestData: RequestData): RepoData {
+  const { requestHost, requestUrl } = requestData;
+
   // Parse the URL if provided
-  const getRepoDataLog: GetRepoDataLog = {
-    requestHost,
+  const logData: LogData = {
+    owner: null,
+    repo: null,
+    host: requestHost,
+    urlType: "unknown",
     requestUrl,
+    requestHost,
   };
   const protocol = requestHost.includes("localhost") ? "http" : "https";
   let fullUrl = new URL(`${protocol}://${requestHost}`);
@@ -33,42 +39,68 @@ export function getRepoData(
   // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
   if (requestHost.includes(".gitmcp.io")) {
     const subdomain = requestHost.split(".")[0];
-    getRepoDataLog.subdomain = subdomain;
-    getRepoDataLog.path = path;
-    console.log("getRepoDataLog", JSON.stringify(getRepoDataLog, null, 2));
+    logData.owner = subdomain;
+    logData.repo = path;
+    logData.urlType = "subdomain";
+    log("getRepoDataLog", JSON.stringify(logData, null, 2));
 
     if (!subdomain && !path) {
-      console.error('Invalid repository data:', getRepoDataLog);
+      console.error("Invalid repository data:", logData);
       throw new Error(
-        `Invalid repository data: ${JSON.stringify(getRepoDataLog, null, 2)}`,
+        `Invalid repository data: ${JSON.stringify(logData, null, 2)}`,
       );
     }
 
-    return { subdomain, path };
+    return {
+      owner: subdomain,
+      repo: path,
+      host: requestHost,
+      urlType: "subdomain",
+    };
   }
   // Check for github repo pattern: gitmcp.io/{owner}/{repo}, git-mcp.vercel.app/{owner}/{repo},
   // or git-mcp-git-{preview}-git-mcp.vercel.app/{owner}/{repo}
   else if (
     requestHost === "gitmcp.io" ||
     requestHost === "git-mcp.vercel.app" ||
-    /^git-mcp-git-.*-git-mcp\.vercel\.app$/.test(requestHost)
+    /^git-mcp-git-.*-git-mcp\.vercel\.app$/.test(requestHost) ||
+    requestHost.includes("localhost")
   ) {
     // Extract owner/repo from path
-    const [owner, repo] = path.split("/");
-    getRepoDataLog.owner = owner;
-    getRepoDataLog.repo = repo;
-    console.log("getRepoDataLog", JSON.stringify(getRepoDataLog, null, 2));
+    const splitPath = path.split("/");
+    const owner = splitPath.at(0) ?? null;
+    const repo = splitPath.at(1) ?? null;
+    logData.owner = owner;
+    logData.repo = repo;
+    logData.urlType = "github";
+    log("getRepoDataLog", JSON.stringify(logData, null, 2));
 
     if (!owner && !repo) {
-      console.error('Invalid repository data:', getRepoDataLog);
+      console.error("Invalid repository data:", logData);
       throw new Error(
-        `Invalid repository data: ${JSON.stringify(getRepoDataLog, null, 2)}`,
+        `Invalid repository data: ${JSON.stringify(logData, null, 2)}`,
       );
     }
 
-    return { owner, repo };
+    return {
+      owner,
+      repo,
+      host: requestHost,
+      urlType: "github",
+    };
   }
-  console.log("getRepoDataLog", JSON.stringify(getRepoDataLog, null, 2));
 
-  return {};
+  logData.urlType = "unknown";
+  log("getRepoDataLog", JSON.stringify(logData, null, 2));
+
+  return {
+    owner: null,
+    repo: null,
+    host: requestHost,
+    urlType: "unknown",
+  };
+}
+
+function log(...args: any[]) {
+  console.log(...args);
 }

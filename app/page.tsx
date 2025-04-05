@@ -137,7 +137,7 @@ export default function Home() {
       <section id="github-pages-demo" className="py-8 bg-gray-900">
         <div className="text-center mb-4 sm:mb-4">
           <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 text-gradient">
-            With Github Pages
+            With GitHub Pages
           </h2>
           <p className="mt-4 text-base sm:text-xl text-gray-300 max-w-3xl mx-auto font-light px-2">
             GitMCP works seamlesslywith <b>GitHub Pages</b>. Here's an example:
@@ -157,7 +157,7 @@ export default function Home() {
       <section id="github-repo-demo" className="py-8 bg-gray-900">
         <div className="text-center mb-4 sm:mb-4">
           <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 text-gradient">
-            A Github Repo
+            A GitHub Repo
           </h2>
           <p className="mt-4 text-base sm:text-xl text-gray-300 max-w-3xl mx-auto font-light px-2">
             GitMCP works with <b>any public GitHub repository</b>. Here's an

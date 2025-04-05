@@ -4,10 +4,13 @@ import { Index } from "@upstash/vector";
 type Dict = { [key: string]: any };
 
 // Initialize Upstash Vector client - single index
-const vector = new Index({
-  url: process.env.UPSTASH_VECTOR_REST_URL || "",
-  token: process.env.UPSTASH_VECTOR_REST_TOKEN || "",
-});
+let vector: Index;
+if (process.env.UPSTASH_VECTOR_REST_TOKEN) {
+  vector = new Index({
+    url: process.env.UPSTASH_VECTOR_REST_URL,
+    token: process.env.UPSTASH_VECTOR_REST_TOKEN,
+  });
+}
 
 // TTL for vector entries in seconds (1 day)
 const VECTOR_TTL = 60 * 60 * 24 * 1;

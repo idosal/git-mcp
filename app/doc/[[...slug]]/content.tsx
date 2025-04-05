@@ -1,30 +1,28 @@
 "use client";
 import React, { useState } from "react";
 import { ClipboardCopy, Check, Github } from "lucide-react";
-import { bt } from "@upstash/redis/zmscore-BdNsMd17";
+import { UrlType } from "../../../shared/repoData";
 
 export default function Content({
-  subdomain,
-  path,
+  urlType,
   owner,
   repo,
   url,
 }: {
-  subdomain?: string;
-  path?: string;
-  owner?: string;
-  repo?: string;
+  urlType: UrlType;
+  owner?: string | null;
+  repo?: string | null;
   url?: string;
 }) {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const description: React.ReactNode = (() => {
-    if (subdomain && path) {
+    if (urlType === "subdomain") {
       return (
         <div>
           <span> for the</span>{" "}
           <strong className="text-emerald-500">
-            {subdomain}/{path}
+            {owner}/{repo}
           </strong>{" "}
           <span>GitHub Pages</span>
         </div>
@@ -43,7 +41,7 @@ export default function Content({
     return <div>Documentation MCP</div>;
   })();
 
-  const serverName = (repo ?? path) ? `${repo ?? path} Docs` : "MCP Docs";
+  const serverName = repo ? `${repo} Docs` : "MCP Docs";
 
   const [copied, setCopied] = useState(false);
 
