@@ -15,6 +15,13 @@ class DefaultRepoHandler implements RepoHandler {
     const fetchToolDescription = generateFetchToolDescription(repoData);
     const searchToolName = generateSearchToolName(repoData);
     const searchToolDescription = generateSearchToolDescription(repoData);
+    console.debug(
+      `registering tools for ${repoData.owner}/${repoData.repo}`,
+      fetchToolName,
+      fetchToolDescription,
+      searchToolName,
+      searchToolDescription,
+    );
 
     // Register fetch documentation tool
     mcp.tool(fetchToolName, fetchToolDescription, {}, async () => {

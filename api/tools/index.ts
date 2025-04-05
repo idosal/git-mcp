@@ -9,5 +9,9 @@ export function registerTools(
 ) {
   const repoData = getRepoData({ requestHost, requestUrl });
   const handler = getHandlerByRepoData(repoData);
+  console.log(
+    `handler for ${repoData.owner}/${repoData.repo} found`,
+    handler.name,
+  );
   handler.registerTools(mcp, repoData);
 }
