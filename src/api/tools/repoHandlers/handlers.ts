@@ -12,7 +12,7 @@ const handlers: RepoHandlerMap = {
 };
 
 export function getHandlerByRepoData(repoData: RepoData): RepoHandler {
-  if (!repoData.owner || !repoData.repo) {
+  if (!repoData.repo && repoData.owner !== "docs") {
     console.log("Invalid repo data:", repoData);
 
     throw new Error(
