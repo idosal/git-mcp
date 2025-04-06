@@ -136,7 +136,7 @@ export default function Home() {
             With GitHub Pages
           </h2>
           <p className="mt-4 text-base sm:text-xl text-gray-300 max-w-3xl mx-auto font-light px-2">
-            GitMCP works seamlesslywith <b>GitHub Pages</b>. Here's an example:
+            GitMCP works seamlessly with <b>GitHub Pages</b>. Here's an example:
           </p>
         </div>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
