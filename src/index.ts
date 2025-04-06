@@ -74,12 +74,12 @@ const mcpHandler = MyMCP.mount("*");
 // Export a request handler that checks the transport header
 export default {
   async fetch(request: Request, env: any, ctx: any) {
-    // Check if the request has a transport header indicating SSE
-    console.log("Request Headers:", request.headers);
-    console.log("Request URL:", request.url);
-    const isSse = request.headers.get("accept")?.includes("text/event-stream");
-    const isMessage = request.url.includes("message");
-    console.log("ctx", ctx);
+    const url = new URL(request.url);
+    const isSse =
+      request.headers.get("accept")?.includes("text/event-stream") &&
+      !!url.pathname;
+    const isMessage =
+      request.method === "POST" && url.pathname.includes("message");
     ctx.props.request = request;
 
     if (isMessage) {
