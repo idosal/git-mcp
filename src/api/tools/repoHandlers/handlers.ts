@@ -12,6 +12,14 @@ const handlers: RepoHandlerMap = {
 };
 
 export function getHandlerByRepoData(repoData: RepoData): RepoHandler {
+  if (!repoData.owner || !repoData.repo) {
+    console.log("Invalid repo data:", repoData);
+
+    throw new Error(
+      `Invalid repository data: ${JSON.stringify(repoData, null, 2)}`,
+    );
+  }
+
   const repoKey = `${repoData.owner ?? ""}/${repoData.repo ?? ""}` as RepoKey;
 
   return (

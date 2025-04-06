@@ -205,46 +205,6 @@ export async function fetchDocumentation({
       }
     }
   }
-  // Default/fallback case
-  else {
-    // Map "gitmcp.io" to "github.io"
-    const mappedHost = host.replace("gitmcp.io", "github.io");
-    let baseURL = `https://${mappedHost}/${repo}`;
-    if (!baseURL.endsWith("/")) {
-      baseURL += "/";
-    }
-
-    // Try fetching llms.txt with robots.txt check
-    const llmsResult = await fetchFileWithRobotsTxtCheck(baseURL + "llms.txt");
-
-    if (llmsResult.blockedByRobots) {
-      blockedByRobots = true;
-    } else if (llmsResult.content) {
-      content = llmsResult.content;
-      fileUsed = "llms.txt";
-    }
-
-    // If llms.txt not available or blocked, try readme.md
-    if (!content && !blockedByRobots) {
-      const readmeResult = await fetchFileWithRobotsTxtCheck(
-        baseURL + "readme.md",
-      );
-
-      if (readmeResult.blockedByRobots) {
-        blockedByRobots = true;
-      } else if (readmeResult.content) {
-        content = readmeResult.content;
-        fileUsed = "readme.md";
-      }
-    }
-
-    // If any path was blocked by robots.txt, return appropriate message
-    if (blockedByRobots) {
-      content =
-        "Access to this GitHub Pages site is restricted by robots.txt. GitMCP respects robots.txt directives.";
-      fileUsed = "robots.txt restriction";
-    }
-  }
 
   if (!content) {
     content = "No documentation found.";

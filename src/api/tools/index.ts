@@ -9,7 +9,5 @@ export function getMcpTools(
 ): Array<Tool> {
   const repoData = getRepoData({ requestHost, requestUrl });
   const handler = getHandlerByRepoData(repoData);
-  console.log("getMcpTools env", env);
-  // Pass the env to the handler to make it available for tools that need it
   return handler.getTools(repoData, env);
 }
