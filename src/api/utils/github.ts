@@ -25,11 +25,11 @@ export async function searchGitHubRepo(
   owner: string,
   repo: string,
   filename: string,
-  env?: any,
+  env: any,
 ): Promise<string | null> {
   try {
     // First check if we have a cached path for this file
-    const cachedPath = await getCachedFilePath(owner, repo, filename, env);
+    const cachedPath = await getCachedFilePath(owner, repo, filename);
     if (cachedPath) {
       console.log(`Using cached path for ${filename} in ${owner}/${repo}`);
       const content = await fetchFileFromGitHub(
@@ -50,7 +50,7 @@ export async function searchGitHubRepo(
       headers: {
         Accept: "application/vnd.github.v3+json",
         // Add GitHub token as environment variable if rate limits become an issue
-        ...(process?.env?.GITHUB_TOKEN
+        ...(env?.GITHUB_TOKEN
           ? { Authorization: `token ${process?.env?.GITHUB_TOKEN}` }
           : {}),
       },

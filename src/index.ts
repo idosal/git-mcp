@@ -73,7 +73,9 @@ export default {
       !!url.pathname &&
       url.pathname !== "/";
     const isMessage =
-      request.method === "POST" && url.pathname.includes("message");
+      request.method === "POST" &&
+      url.pathname.includes("/message") &&
+      url.pathname !== "/message";
     ctx.props.request = request;
 
     if (isMessage) {
