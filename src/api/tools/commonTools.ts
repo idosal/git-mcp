@@ -95,7 +95,7 @@ export async function fetchDocumentation({
     }
   } else if (urlType === "github" && owner && repo) {
     // First check if we have a cached path for llms.txt
-    const cachedPath = await getCachedFilePath(owner, repo, "llms.txt", env);
+    const cachedPath = await getCachedFilePath(owner, repo, env);
     if (cachedPath) {
       content = await fetchFileFromGitHub(
         owner,
@@ -279,6 +279,11 @@ export async function searchRepositoryDocumentation({
       env.VECTORIZE,
     );
 
+    console.log(
+      `Initial search found ${results.length} results for "${query}"`,
+      results,
+    );
+
     // If no results or forceReindex is true, we need to index the documentation
     if (results.length === 0 || forceReindex) {
       console.log(
@@ -286,7 +291,10 @@ export async function searchRepositoryDocumentation({
           forceReindex ? "Force reindexing" : "No search results found"
         } for in ${owner}/${repo}, fetching documentation first`,
       );
+
       isFirstSearch = true;
+
+      await cacheIsIndexed(owner, repo, false, env);
 
       // Fetch the documentation - pass env
       const docResult = await fetchDocumentation({ repoData, env });
@@ -300,9 +308,6 @@ export async function searchRepositoryDocumentation({
       // Only search if we found content
       if (content && owner && repo && content !== "No documentation found.") {
         try {
-          // Wait a short time to ensure indexing is complete
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-
           // Search again after indexing - pass the Vectorize binding
           results = await searchDocumentation(
             owner,

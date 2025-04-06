@@ -1,8 +1,8 @@
 // Define a generic Dict type since we can't import it directly
 type Dict = { [key: string]: any };
 
-// TTL for vector entries in seconds (1 day)
-const VECTOR_TTL = 60 * 60 * 24 * 1;
+// TTL for vector entries in milliseconds (1 day)
+const VECTOR_TTL = 60 * 60 * 24 * 1 * 1000;
 
 // Vectorize interface to match the Cloudflare API
 interface VectorizeVector {
@@ -729,6 +729,7 @@ export async function storeDocumentationVectors(
           owner,
           repo,
           chunkIndex: i,
+          timestamp: new Date().toISOString(), // e.g., "2025-04-06T20:52:37.123Z"
         },
       });
     }
@@ -860,7 +861,7 @@ export async function searchDocumentation(
   repo: string,
   query: string,
   limit: number = 5,
-  vectorize?: Vectorize,
+  vectorize: Vectorize,
 ): Promise<Array<{ chunk: string; score: number }>> {
   try {
     // Check if Vectorize is available
@@ -880,6 +881,9 @@ export async function searchDocumentation(
       topK: limit,
       namespace: namespace, // Use namespace instead of filter
       returnValues: false, // We don't need the vector values back
+      filter: {
+        timestamp: { $gt: Date.now() - VECTOR_TTL }, // Only keep recent vectors
+      },
       returnMetadata: true, // We need the metadata for chunks
     });
 

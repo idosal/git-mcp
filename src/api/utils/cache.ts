@@ -15,15 +15,10 @@ function getCacheTTL(): number {
  * Cache key structure for repository file paths
  * @param owner - Repository owner
  * @param repo - Repository name
- * @param filename - File name to cache path for
  * @returns Cache key
  */
-export function getRepoFilePathCacheKey(
-  owner: string,
-  repo: string,
-  filename: string,
-): string {
-  return `repo:${owner}:${repo}:filepath:${filename}`;
+export function getRepoFilePathCacheKey(owner: string, repo: string): string {
+  return `repo:${owner}:${repo}`;
 }
 
 /**
@@ -73,6 +68,7 @@ async function setInCache(
   // Use provided TTL or generate one with jitter
   const cacheTTL = ttl || getCacheTTL();
 
+  console.log("Env CACHE_KV:", env?.CACHE_KV);
   // Store in KV cache
   if (env?.CACHE_KV) {
     try {
@@ -96,11 +92,10 @@ async function setInCache(
 export async function getCachedFilePath(
   owner: string,
   repo: string,
-  filename: string,
   env?: any,
 ): Promise<{ path: string; branch: string } | null> {
   try {
-    const key = getRepoFilePathCacheKey(owner, repo, filename);
+    const key = getRepoFilePathCacheKey(owner, repo);
     const result = await getFromCache(key, env);
     return result as { path: string; branch: string } | null;
   } catch (error) {
@@ -127,7 +122,10 @@ export async function cacheFilePath(
   env?: any,
 ): Promise<void> {
   try {
-    const key = getRepoFilePathCacheKey(owner, repo, filename);
+    const key = getRepoFilePathCacheKey(owner, repo);
+    console.log(
+      `Caching file path for ${filename} in ${owner}/${repo}: ${path}`,
+    );
     await setInCache(key, { path, branch }, getCacheTTL(), env);
     console.log(
       `Cached file path for ${filename} in ${owner}/${repo}: ${path}`,
