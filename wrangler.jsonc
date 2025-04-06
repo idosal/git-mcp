@@ -35,13 +35,9 @@
   	],
 	"kv_namespaces": [
 		{
-			"binding": "OAUTH_KV",
-			"id": "5ab11c6a710b47a7a7931a46046e8534"
-		},
-		{
 			"binding": "CACHE_KV",
-			"id": "${CACHE_KV_ID}",
-			"preview_id": "${CACHE_KV_PREVIEW_ID}"
+			"id": "git-mcp-cache",
+			"preview_id": "git-mcp-cache"
 		}
 	],
 	"observability": {
