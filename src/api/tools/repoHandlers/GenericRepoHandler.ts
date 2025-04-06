@@ -13,7 +13,7 @@ class GenericRepoHandler implements RepoHandler {
 
     return [
       {
-        name: "fetch_generic_documentation",
+        name: "fetch_generic_docs",
         description:
           "Fetch documentation for any GitHub repository by providing owner and project name",
         paramsSchema: {
@@ -33,9 +33,9 @@ class GenericRepoHandler implements RepoHandler {
         },
       },
       {
-        name: "search_generic_documentation",
+        name: "search_generic_docs",
         description:
-          "Search within documentation for any GitHub repository by providing owner, project name, and search query",
+          "Semantically search in documentation for any GitHub repository by providing owner, project name, and search query. Useful for specific queries. Don't call if you already used fetch_generic_docs on this owner and project name.",
         paramsSchema: {
           owner: z
             .string()

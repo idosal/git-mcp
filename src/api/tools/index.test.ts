@@ -41,13 +41,13 @@ describe("Tools Module", () => {
         });
 
       expect(mockMcp.getTools()).toEqual({
-        fetch_myrepo_documentation: {
+        fetch_myrepo_docs: {
           description:
             "Fetch entire documentation file from GitHub repository: myorg/myrepo. Useful for general questions.",
         },
-        search_myrepo_documentation: {
+        search_myrepo_docs: {
           description:
-            "Semantically search within the fetched documentation from GitHub repository: myorg/myrepo. Useful for specific queries. Don't call if you already used fetch_documentation.",
+            "Semantically search within the fetched documentation from GitHub repository: myorg/myrepo. Useful for specific queries. Don't call if you already used fetch_docs.",
         },
       });
     });
@@ -62,13 +62,13 @@ describe("Tools Module", () => {
         });
 
       expect(mockMcp.getTools()).toEqual({
-        fetch_myrepo_documentation: {
+        fetch_myrepo_docs: {
           description:
             "Fetch entire documentation file from the myorg/myrepo GitHub Pages. Useful for general questions.",
         },
-        search_myrepo_documentation: {
+        search_myrepo_docs: {
           description:
-            "Semantically search within the fetched documentation from the myorg/myrepo GitHub Pages. Useful for specific queries. Don't call if you already used fetch_documentation.",
+            "Semantically search within the fetched documentation from the myorg/myrepo GitHub Pages. Useful for specific queries. Don't call if you already used fetch_docs.",
         },
       });
     });

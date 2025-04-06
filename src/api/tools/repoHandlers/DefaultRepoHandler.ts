@@ -85,7 +85,7 @@ export function getDefaultRepoHandler(): DefaultRepoHandler {
 }
 
 /**
- * Generate a dynamic search tool name for the search_documentation tool based on the URL
+ * Generate a dynamic search tool name for the search_docs tool based on the URL
  * @param requestHost - The host from the request
  * @param requestUrl - The full request URL (optional)
  * @returns A descriptive string for the tool name
@@ -93,21 +93,21 @@ export function getDefaultRepoHandler(): DefaultRepoHandler {
 function generateSearchToolName({ urlType, owner, repo }: RepoData): string {
   try {
     // Default tool name as fallback
-    let toolName = "search_documentation";
+    let toolName = "search_docs";
     if (urlType == "subdomain" || urlType == "github") {
-      toolName = `search_${repo}_documentation`;
+      toolName = `search_${repo}_docs`;
     }
     // replace non-alphanumeric characters with underscores
     return toolName.replace(/[^a-zA-Z0-9]/g, "_");
   } catch (error) {
     console.error("Error generating search tool name:", error);
     // Return default tool name if there's any error parsing the URL
-    return "search_documentation";
+    return "search_docs";
   }
 }
 
 /**
- * Generate a dynamic description for the search_documentation tool based on the URL
+ * Generate a dynamic description for the search_docs tool based on the URL
  * @param requestHost - The host from the request
  * @param requestUrl - The full request URL (optional)
  * @returns A descriptive string for the tool
@@ -123,9 +123,9 @@ function generateSearchToolDescription({
       "Semantically search within the fetched documentation for the current repository.";
 
     if (urlType == "subdomain") {
-      description = `Semantically search within the fetched documentation from the ${owner}/${repo} GitHub Pages. Useful for specific queries. Don't call if you already used fetch_documentation.`;
+      description = `Semantically search within the fetched documentation from the ${owner}/${repo} GitHub Pages. Useful for specific queries. Don't call if you already used fetch_docs.`;
     } else if (urlType == "github") {
-      description = `Semantically search within the fetched documentation from GitHub repository: ${owner}/${repo}. Useful for specific queries. Don't call if you already used fetch_documentation.`;
+      description = `Semantically search within the fetched documentation from GitHub repository: ${owner}/${repo}. Useful for specific queries. Don't call if you already used fetch_docs.`;
     }
 
     return description;
@@ -136,7 +136,7 @@ function generateSearchToolDescription({
 }
 
 /**
- * Generate a dynamic description for the fetch_documentation tool based on the URL
+ * Generate a dynamic description for the fetch_docs tool based on the URL
  * @param requestHost - The host from the request
  * @param requestUrl - The full request URL (optional)
  * @returns A descriptive string for the tool
@@ -164,7 +164,7 @@ function generateFetchToolDescription({
 }
 
 /**
- * Generate a dynamic tool name for the fetch_documentation tool based on the URL
+ * Generate a dynamic tool name for the fetch_docs tool based on the URL
  * @param requestHost - The host from the request
  * @param requestUrl - The full request URL (optional)
  * @returns A descriptive string for the tool
@@ -172,10 +172,10 @@ function generateFetchToolDescription({
 function generateFetchToolName({ urlType, owner, repo }: RepoData): string {
   try {
     // Default tool name as fallback
-    let toolName = "fetch_documentation";
+    let toolName = "fetch_docs";
 
     if (urlType == "subdomain" || urlType == "github") {
-      toolName = `fetch_${repo}_documentation`;
+      toolName = `fetch_${repo}_docs`;
     }
 
     // replace non-alphanumeric characters with underscores
@@ -183,6 +183,6 @@ function generateFetchToolName({ urlType, owner, repo }: RepoData): string {
   } catch (error) {
     console.error("Error generating tool name:", error);
     // Return default tool name if there's any error parsing the URL
-    return "fetch_documentation";
+    return "fetch_docs";
   }
 }
