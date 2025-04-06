@@ -29,7 +29,7 @@ export async function searchGitHubRepo(
 ): Promise<string | null> {
   try {
     // First check if we have a cached path for this file
-    const cachedPath = await getCachedFilePath(owner, repo, filename);
+    const cachedPath = await getCachedFilePath(owner, repo, env);
     if (cachedPath) {
       console.log(`Using cached path for ${filename} in ${owner}/${repo}`);
       const content = await fetchFileFromGitHub(
