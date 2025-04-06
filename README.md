@@ -61,13 +61,13 @@ These URLs enable AI assistants to access and interact with the project's docume
 
 GitMCP provides a set of tools that can be used to access and interact with the project's documentation.
 
-### `fetch_<repo-name>_docs`: 
+### `fetch_<repo-name>_documentation`: 
 Fetches the documentation for the `{owner}/{repo}` GitHub repository (as extracted from the URL: `gitmcp.io/{owner}/{repo}` or `{owner}.gitmcp.io/{repo}`). Useful for general questions. Retrieves the `llms.txt` file and falls back to `README.md` or other pages if the former is unavailable.
 
-### `search_<repo-name>_docs`: 
+### `search_<repo-name>_documentation`: 
 It searches the repository's documentation by providing a `query`. This is useful for specific questions. It uses semantic search to find the most relevant documentation. This mitigates the cost of a large documentation set that cannot be provided as direct context to LLMs.
 
-> Note: In the case of a generic `gitmcp.com/docs` usage, the tools are called `fetch_generic_docs` and `search_generic_docs`, and receive additional `owner` and `repo` arguments.
+> Note: In the case of a generic `gitmcp.com/docs` usage, the tools are called `fetch_generic_documentation` and `search_generic_documentation`, and receive additional `owner` and `repo` arguments.
 
 ## FAQ
 
