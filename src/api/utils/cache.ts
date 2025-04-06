@@ -27,6 +27,16 @@ export function getRepoFilePathCacheKey(
 }
 
 /**
+ * Cache key structure for vector existence
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @returns Cache key
+ */
+export function getIsIndexedCacheKey(owner: string, repo: string): string {
+  return `vector_exists:${owner}:${repo}`;
+}
+
+/**
  * Get a value from KV cache
  * @param key - The cache key
  * @param env - Environment with Cloudflare bindings
@@ -36,7 +46,9 @@ async function getFromCache(key: string, env?: any): Promise<any> {
   // Check KV store for cached value
   if (env?.CACHE_KV) {
     try {
-      return await env.CACHE_KV.get(key, { type: "json" });
+      const result = await env.CACHE_KV.get(key, { type: "json" });
+      console.log(`Cache retrieval for key ${key}:`, result);
+      return result;
     } catch (error) {
       console.warn("Failed to retrieve from Cloudflare KV:", error);
     }
@@ -117,6 +129,9 @@ export async function cacheFilePath(
   try {
     const key = getRepoFilePathCacheKey(owner, repo, filename);
     await setInCache(key, { path, branch }, getCacheTTL(), env);
+    console.log(
+      `Cached file path for ${filename} in ${owner}/${repo}: ${path}`,
+    );
   } catch (error) {
     console.warn("Failed to save to cache:", error);
   }
@@ -167,5 +182,49 @@ export async function cacheRobotsTxt(
     await setInCache(key, rules, getCacheTTL(), env);
   } catch (error) {
     console.warn("Failed to save robots.txt to cache:", error);
+  }
+}
+
+/**
+ * Check if vectors exist in cache for a repository
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param env - Environment with Cloudflare bindings
+ * @returns Boolean indicating if vectors exist, or null if not in cache
+ */
+export async function getIsIndexedFromCache(
+  owner: string,
+  repo: string,
+  env?: any,
+): Promise<boolean | null> {
+  try {
+    const key = getIsIndexedCacheKey(owner, repo);
+    const result = await getFromCache(key, env);
+    return result as boolean | null;
+  } catch (error) {
+    console.warn("Failed to retrieve vector existence from cache:", error);
+    return null;
+  }
+}
+
+/**
+ * Cache whether vectors exist for a repository
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param exists - Boolean indicating if vectors exist
+ * @param env - Environment with Cloudflare bindings
+ */
+export async function cacheIsIndexed(
+  owner: string,
+  repo: string,
+  exists: boolean,
+  env?: any,
+): Promise<void> {
+  try {
+    const key = getIsIndexedCacheKey(owner, repo);
+    await setInCache(key, exists, getCacheTTL(), env);
+    console.log(`Cached vector existence for ${owner}/${repo}: ${exists}`);
+  } catch (error) {
+    console.warn("Failed to save vector existence to cache:", error);
   }
 }

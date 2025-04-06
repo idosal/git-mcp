@@ -6,7 +6,9 @@ import { getCachedFilePath, cacheFilePath } from "../utils/cache.js";
 import {
   searchDocumentation,
   storeDocumentationVectors,
+  getRepoNamespace,
 } from "../utils/vectorStore.js";
+import { cacheIsIndexed, getIsIndexedFromCache } from "../utils/cache.js";
 import htmlToMd from "html-to-md";
 
 // Add env parameter to access Cloudflare's bindings
@@ -194,15 +196,28 @@ export async function fetchDocumentation({
     // Store documentation in vector database for later search
     if (content && owner && repo) {
       try {
-        // Pass the Vectorize binding from env
-        await storeDocumentationVectors(
-          owner,
-          repo,
-          content,
-          fileUsed,
-          env.VECTORIZE,
-        );
-        console.log(`Stored documentation vectors for ${owner}/${repo}`);
+        // First check if vectors exist in KV cache
+        let vectorsExist = await getIsIndexedFromCache(owner, repo, env);
+
+        // Only store vectors if they don't exist yet
+        if (!vectorsExist) {
+          // Pass the Vectorize binding from env
+          await storeDocumentationVectors(
+            owner,
+            repo,
+            content,
+            fileUsed,
+            env.VECTORIZE,
+          );
+
+          // Update the cache to indicate vectors now exist
+          await cacheIsIndexed(owner, repo, true, env);
+          console.log(`Stored documentation vectors for ${owner}/${repo}`);
+        } else {
+          console.log(
+            `Documentation vectors already exist for ${owner}/${repo}, skipping indexing`,
+          );
+        }
       } catch (error) {
         console.error(`Failed to store documentation vectors: ${error}`);
         // Continue despite vector storage failure
