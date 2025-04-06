@@ -729,7 +729,7 @@ export async function storeDocumentationVectors(
           owner,
           repo,
           chunkIndex: i,
-          timestamp: new Date().toISOString(), // e.g., "2025-04-06T20:52:37.123Z"
+          timestamp: Date.now(), // e.g., "2025-04-06T20:52:37.123Z"
         },
       });
     }
@@ -753,16 +753,6 @@ function calculateKeywordMatchScore(text: string, query: string): number {
   // Lower-case for case-insensitive matching
   const lowerText = text.toLowerCase();
   const lowerQuery = query.toLowerCase();
-
-  // Detect query intent
-  const isInstallationQuery =
-    /\bhow\b.*\binstall\b|\bsetup\b|\binstallation\b/i.test(lowerQuery);
-  const isUsageQuery = /\bhow\b.*\buse\b|\busage\b|\bexample\b/i.test(
-    lowerQuery,
-  );
-  const isErrorQuery = /\berror\b|\bissue\b|\bproblem\b|\bfail\b/i.test(
-    lowerQuery,
-  );
 
   let score = 0;
 
@@ -941,25 +931,6 @@ export async function searchDocumentation(
  * @returns Array of text chunks with preserved structure
  */
 export function chunkStructuredDocs(text: string): string[] {
-  // Check if this is a special llms.txt file that needs list-item level chunking
-  //   const isLlmsFile = fileName?.toLowerCase().includes('llms.txt');
-
-  // Quick check to see if this looks like structured documentation
-  // Check for both link patterns: [title](url) and nested list items with links
-  //   const hasLinkPatterns = /\[.+?\]\(.+?\)/.test(text);
-  //   const hasListItems = /^[-*]\s+/.test(text);
-
-  // For llms.txt files, we want to process them even if they don't have link patterns
-  // as long as they have list items or link patterns
-  //   if (!isLlmsFile && !hasLinkPatterns) {
-  //     return chunkText(text);
-  //   }
-
-  // For non-llms files that don't have link patterns or list items, use regular chunking
-  //   if (!isLlmsFile && !hasLinkPatterns && !hasListItems) {
-  //     return chunkText(text);
-  //   }
-
   const chunks: string[] = [];
   const lines = text.split("\n");
 
