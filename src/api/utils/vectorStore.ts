@@ -878,7 +878,7 @@ export async function searchDocumentation(
 
     // Query vectors using Cloudflare Vectorize with namespace
     const results = await vectorize.query(queryEmbedding, {
-      topK: Math.min(10, limit * 2), // Query more results than needed for post-processing
+      topK: limit,
       namespace: namespace, // Use namespace instead of filter
       returnValues: false, // We don't need the vector values back
       returnMetadata: true, // We need the metadata for chunks
@@ -886,6 +886,7 @@ export async function searchDocumentation(
 
     console.log(
       `Found ${results?.matches?.length || 0} results in namespace ${namespace}`,
+      results,
     );
 
     if (!results || !results.matches || results.matches.length === 0) {

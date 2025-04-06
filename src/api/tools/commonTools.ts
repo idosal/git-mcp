@@ -190,7 +190,6 @@ export async function fetchDocumentation({
     if (content && owner && repo) {
       try {
         // Pass the Vectorize binding from env
-        console.log("ENV VECTORIZE", env);
         await storeDocumentationVectors(
           owner,
           repo,
@@ -278,21 +277,9 @@ export async function searchRepositoryDocumentation({
         `Fetched documentation from ${fileUsed} (${content.length} characters)`,
       );
 
-      // Only index and search if we got actual content
+      // Only search if we found content
       if (content && owner && repo && content !== "No documentation found.") {
         try {
-          // Wait for vectors to be stored - pass the Vectorize binding
-          const vectorCount = await storeDocumentationVectors(
-            owner,
-            repo,
-            content,
-            fileUsed,
-            env.VECTORIZE,
-          );
-          console.log(
-            `Successfully indexed ${vectorCount} document chunks for ${owner}/${repo}`,
-          );
-
           // Wait a short time to ensure indexing is complete
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -317,10 +304,8 @@ export async function searchRepositoryDocumentation({
                   type: "text" as const,
                   text:
                     `### Search Results for: "${query}"\n\n` +
-                    // `We've just indexed the documentation for this repository (${vectorCount} chunks). ` +
-                    // `Documentation:\n\n` +
+                    // fallback to content
                     docResult.content[0].text,
-                  // `Please try your search again in a moment for more fine-grained`,
                 },
               ],
             };
