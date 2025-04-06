@@ -6,7 +6,6 @@ import { getCachedFilePath, cacheFilePath } from "../utils/cache.js";
 import {
   searchDocumentation,
   storeDocumentationVectors,
-  getRepoNamespace,
 } from "../utils/vectorStore.js";
 import { cacheIsIndexed, getIsIndexedFromCache } from "../utils/cache.js";
 import htmlToMd from "html-to-md";
