@@ -68,7 +68,6 @@ async function setInCache(
   // Use provided TTL or generate one with jitter
   const cacheTTL = ttl || getCacheTTL();
 
-  console.log("Env CACHE_KV:", env?.CACHE_KV);
   // Store in KV cache
   if (env?.CACHE_KV) {
     try {
@@ -123,9 +122,6 @@ export async function cacheFilePath(
 ): Promise<void> {
   try {
     const key = getRepoFilePathCacheKey(owner, repo);
-    console.log(
-      `Caching file path for ${filename} in ${owner}/${repo}: ${path}`,
-    );
     await setInCache(key, { path, branch }, getCacheTTL(), env);
     console.log(
       `Cached file path for ${filename} in ${owner}/${repo}: ${path}`,

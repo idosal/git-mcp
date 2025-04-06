@@ -879,7 +879,6 @@ export async function searchDocumentation(
 
     console.log(
       `Found ${results?.matches?.length || 0} results in namespace ${namespace}`,
-      results,
     );
 
     if (!results || !results.matches || results.matches.length === 0) {
