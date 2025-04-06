@@ -36,9 +36,7 @@
 	"kv_namespaces": [
 		{
 			"binding": "CACHE_KV",
-			"id": "git-mcp-cache",
-			"preview_id": "git-mcp-cache"
-		}
+			"id": "c5dd8e05242a471b9d7bf12f0ddcee3a"		}
 	],
 	"observability": {
 		"enabled": true
