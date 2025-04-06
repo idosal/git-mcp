@@ -2,7 +2,7 @@ import type { RepoData } from "../../shared/repoData.js";
 import { fetchFileFromGitHub, searchGitHubRepo } from "../utils/github.js";
 import { formatSearchResults } from "../utils/helpers.js";
 import { fetchFileWithRobotsTxtCheck } from "../utils/robotsTxt.js";
-import { getCachedFilePath, cacheFilePath } from "../utils/upstash.js";
+import { getCachedFilePath, cacheFilePath } from "../utils/cache.js";
 import {
   searchDocumentation,
   storeDocumentationVectors,
@@ -35,7 +35,10 @@ export async function fetchDocumentation({
     const baseURL = `https://${githubIoDomain}${pathWithSlash}/`;
 
     // Try to fetch llms.txt with robots.txt check
-    const llmsResult = await fetchFileWithRobotsTxtCheck(baseURL + "llms.txt");
+    const llmsResult = await fetchFileWithRobotsTxtCheck(
+      baseURL + "llms.txt",
+      env,
+    );
 
     if (llmsResult.blockedByRobots) {
       blockedByRobots = true;
@@ -48,7 +51,7 @@ export async function fetchDocumentation({
       console.warn(
         `llms.txt not found or not allowed at ${baseURL}, trying base URL`,
       );
-      const indexResult = await fetchFileWithRobotsTxtCheck(baseURL);
+      const indexResult = await fetchFileWithRobotsTxtCheck(baseURL, env);
 
       if (indexResult.blockedByRobots) {
         blockedByRobots = true;
@@ -69,6 +72,7 @@ export async function fetchDocumentation({
       if (!content && !blockedByRobots) {
         const readmeResult = await fetchFileWithRobotsTxtCheck(
           baseURL + "readme.md",
+          env,
         );
 
         if (readmeResult.blockedByRobots) {
@@ -89,13 +93,13 @@ export async function fetchDocumentation({
     }
   } else if (urlType === "github" && owner && repo) {
     // First check if we have a cached path for llms.txt
-    const cachedPath = await getCachedFilePath(owner, repo, "llms.txt");
+    const cachedPath = await getCachedFilePath(owner, repo, "llms.txt", env);
     if (cachedPath) {
       content = await fetchFileFromGitHub(
         owner,
         repo,
-        "cachedPath.branch",
-        "cachedPath.path",
+        cachedPath.branch,
+        cachedPath.path,
       );
       if (content) {
         fileUsed =
@@ -149,6 +153,7 @@ export async function fetchDocumentation({
             "llms.txt",
             mainResult.location,
             mainResult.branch,
+            env,
           );
           break;
         }

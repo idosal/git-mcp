@@ -1,5 +1,5 @@
 import { fetchFile } from "./helpers.js";
-import { cacheFilePath } from "./upstash.js";
+import { cacheFilePath, getCachedFilePath } from "./cache.js";
 
 /**
  * Fetch file content from a specific path in a GitHub repository
@@ -28,6 +28,22 @@ export async function searchGitHubRepo(
   env?: any,
 ): Promise<string | null> {
   try {
+    // First check if we have a cached path for this file
+    const cachedPath = await getCachedFilePath(owner, repo, filename, env);
+    if (cachedPath) {
+      console.log(`Using cached path for ${filename} in ${owner}/${repo}`);
+      const content = await fetchFileFromGitHub(
+        owner,
+        repo,
+        cachedPath.branch,
+        cachedPath.path,
+      );
+      if (content) {
+        return content;
+      }
+      console.log("Cached path failed, falling back to search");
+    }
+
     const searchUrl = `https://api.github.com/search/code?q=filename:${filename}+repo:${owner}/${repo}`;
 
     const response = await fetch(searchUrl, {
@@ -68,10 +84,10 @@ export async function searchGitHubRepo(
 
     // Cache the successful path
     if (mainContent) {
-      await cacheFilePath(owner, repo, filename, filePath, "main");
+      await cacheFilePath(owner, repo, filename, filePath, "main", env);
       return mainContent;
     } else if (masterContent) {
-      await cacheFilePath(owner, repo, filename, filePath, "master");
+      await cacheFilePath(owner, repo, filename, filePath, "master", env);
       return masterContent;
     }
 

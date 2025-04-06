@@ -79,7 +79,6 @@ export async function getEmbeddings(text: string): Promise<number[]> {
   // This is an improved embedding function that creates a better vector representation
   // Still simple but designed to create more topical differentiation
 
-  // Create a vector with 1024 dimensions to match Upstash Vector requirements
   const view = new Float32Array(1024);
 
   // Extract key terms and topics from the text

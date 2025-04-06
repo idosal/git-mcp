@@ -1,4 +1,4 @@
-import { cacheRobotsTxt, getCachedRobotsTxt } from "./upstash.js";
+import { cacheRobotsTxt, getCachedRobotsTxt } from "./cache.js";
 
 /**
  * Interface for robots.txt rule
@@ -115,15 +115,16 @@ function isPathAllowed(rules: RobotsRule[], path: string): boolean {
  * Check if a specific URL is allowed according to robots.txt rules
  * @param domain - The domain to check
  * @param path - The complete path to check including the file (should start with /)
+ * @param env - Environment with Cloudflare bindings
  * @returns boolean indicating if access is allowed
  */
 export async function checkRobotsTxt(
   domain: string,
   path: string,
+  env?: any,
 ): Promise<boolean> {
   try {
-    // Check Upstash cache first
-    const cachedRules = await getCachedRobotsTxt(domain);
+    const cachedRules = await getCachedRobotsTxt(domain, env);
 
     if (cachedRules) {
       console.log(
@@ -141,7 +142,7 @@ export async function checkRobotsTxt(
     if (!response.ok) {
       console.log(`No robots.txt found for ${domain} or couldn't be accessed`);
       // Cache empty rules for domains without robots.txt
-      await cacheRobotsTxt(domain, []);
+      await cacheRobotsTxt(domain, [], env);
       return true;
     }
 
@@ -149,7 +150,7 @@ export async function checkRobotsTxt(
     const rules = parseRobotsTxt(content);
 
     // Cache the parsed rules in Upstash
-    await cacheRobotsTxt(domain, rules);
+    await cacheRobotsTxt(domain, rules, env);
     console.log(`Cached robots.txt rules for ${domain}`);
 
     return isPathAllowed(rules, path);
@@ -163,10 +164,12 @@ export async function checkRobotsTxt(
 /**
  * Safely fetch a file after checking robots.txt permissions
  * @param url - Complete URL to fetch
+ * @param env - Environment with Cloudflare bindings
  * @returns File content or null if not allowed or not found
  */
 export async function fetchFileWithRobotsTxtCheck(
   url: string,
+  env?: any,
 ): Promise<{ content: string | null; blockedByRobots: boolean }> {
   try {
     const urlObj = new URL(url);
@@ -174,7 +177,7 @@ export async function fetchFileWithRobotsTxtCheck(
     const path = urlObj.pathname;
 
     // Check robots.txt before attempting to fetch
-    const isAllowed = await checkRobotsTxt(urlObj.hostname, path);
+    const isAllowed = await checkRobotsTxt(urlObj.hostname, path, env);
 
     if (!isAllowed) {
       console.log(`Access to ${url} disallowed by robots.txt`);
