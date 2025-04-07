@@ -52,7 +52,7 @@ GitMCP serves as a bridge between your GitHub repository's documentation and AI 
 Here are some examples of how to use GitMCP with different repositories:
 
 - **Example 1**: For the repository `https://github.com/octocat/Hello-World`, use: `https://gitmcp.io/octocat/Hello-World`
-- **Example 2**: For the GitHub Pages site `langchain-ai.gitmcp.io/langgraph`, use: `https://langchain-ai.gitmcp.io/langgraph`
+- **Example 2**: For the GitHub Pages site `langchain-ai.github.io/langgraph`, use: `https://langchain-ai.gitmcp.io/langgraph`
 - **Example 3**: Use the generic `gitmcp.com/docs` endpoint for your AI to dynamically select a repository
 - 
 These URLs enable AI assistants to access and interact with the project's documentation through GitMCP.
