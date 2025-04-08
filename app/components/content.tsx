@@ -274,7 +274,7 @@ export default function Content({
                 </p>
                 <CodeExample
                   code={`{
-  "mcpServers": {
+  "servers": {
     "${serverName}": {
       "type": "sse",
       "url": "${url}"
