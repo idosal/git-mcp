@@ -5,6 +5,8 @@ import {
 import { z } from "zod";
 import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
+import { fetchFileWithRobotsTxtCheck } from "../../utils/robotsTxt.js";
+import htmlToMd from "html-to-md";
 
 class DefaultRepoHandler implements RepoHandler {
   name = "default";
@@ -38,6 +40,87 @@ class DefaultRepoHandler implements RepoHandler {
             query,
             env,
           });
+        },
+      },
+      {
+        name: "fetch_url_content",
+        description:
+          "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+        paramsSchema: {
+          url: z.string().describe("The URL of the document or page to fetch"),
+        },
+        cb: async ({ url }) => {
+          try {
+            // Use the robotsTxt checking function to respect robots.txt rules
+            const result = await fetchFileWithRobotsTxtCheck(url, env);
+
+            if (result.blockedByRobots) {
+              return {
+                url,
+                status: "blocked",
+                content: [
+                  {
+                    type: "text" as const,
+                    text: `Access to ${url} is disallowed by robots.txt. GitMCP respects robots.txt directives.`,
+                  },
+                ],
+              };
+            }
+
+            if (!result.content) {
+              return {
+                url,
+                status: "not_found",
+                content: [
+                  {
+                    type: "text" as const,
+                    text: `Content at ${url} could not be retrieved. The resource may not exist or may require authentication.`,
+                  },
+                ],
+              };
+            }
+
+            let finalContent = result.content;
+
+            // Convert HTML to markdown if content appears to be HTML
+            if (
+              finalContent.trim().startsWith("<!DOCTYPE") ||
+              finalContent.trim().startsWith("<html") ||
+              finalContent.includes("<body")
+            ) {
+              try {
+                finalContent = htmlToMd(finalContent);
+              } catch (error) {
+                console.warn(
+                  `Error converting HTML to Markdown for ${url}: ${error}`,
+                );
+                // Continue with the original content if conversion fails
+              }
+            }
+
+            return {
+              url,
+              status: "success",
+              content: [
+                {
+                  type: "text" as const,
+                  text: finalContent,
+                },
+              ],
+            };
+          } catch (error) {
+            console.error(`Error fetching ${url}: ${error}`);
+            return {
+              url,
+              status: "error",
+              content: [
+                {
+                  type: "text" as const,
+                  text: `Error fetching content from ${url}: ${error}`,
+                },
+              ],
+            };
+          }
         },
       },
     ];
