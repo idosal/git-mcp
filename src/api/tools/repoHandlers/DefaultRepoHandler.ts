@@ -7,6 +7,7 @@ import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
 import { fetchFileWithRobotsTxtCheck } from "../../utils/robotsTxt.js";
 import htmlToMd from "html-to-md";
+import { generateServerName } from "../../../shared/nameUtils.js";
 
 class DefaultRepoHandler implements RepoHandler {
   name = "default";
@@ -168,17 +169,83 @@ export function getDefaultRepoHandler(): DefaultRepoHandler {
 }
 
 /**
+ * Enforces the 60-character limit on the combined server and tool names
+ * @param prefix - The prefix for the tool name (fetch_ or search_)
+ * @param repo - The repository name
+ * @param suffix - The suffix for the tool name (_documentation)
+ * @returns A tool name that ensures combined length with server name stays under 60 characters
+ */
+function enforceToolNameLengthLimit(
+  prefix: string,
+  repo: string | null | undefined,
+  suffix: string,
+): string {
+  if (!repo) {
+    console.error(
+      "Repository name is null/undefined in enforceToolNameLengthLimit",
+    );
+    return `${prefix}${suffix}`;
+  }
+
+  // Generate the server name to check combined length
+  const serverNameLen = generateServerName(repo)?.length;
+
+  console.log(`Server name length: ${serverNameLen}`);
+  // Replace non-alphanumeric characters with underscores
+  let repoName = repo.replace(/[^a-zA-Z0-9]/g, "_");
+  let toolName = `${prefix}${repoName}${suffix}`;
+
+  // Calculate combined length
+  const combinedLength = toolName.length + serverNameLen;
+
+  // If combined length is already under limit, return it
+  if (combinedLength <= 60) {
+    return toolName;
+  }
+
+  // Step 1: Try shortening "_documentation" to "_docs"
+  if (suffix === "_documentation") {
+    toolName = `${prefix}${repoName}_docs`;
+    if (toolName.length + serverNameLen <= 60) {
+      return toolName;
+    }
+  }
+
+  // Step 2: Shorten the repo name by removing words
+  const words = repoName.split("_");
+  if (words.length > 1) {
+    // Keep removing words from the end until we're under the limit or have only one word left
+    let shortenedRepo = repoName;
+    for (let i = words.length - 1; i > 0; i--) {
+      shortenedRepo = words.slice(0, i).join("_");
+      toolName = `${prefix}${shortenedRepo}${suffix === "_documentation" ? "_docs" : suffix}`;
+      if (toolName.length + serverNameLen <= 60) {
+        return toolName;
+      }
+    }
+  }
+
+  // Step 3: As a last resort, truncate to fit
+  const shortenedSuffix = suffix === "_documentation" ? "_docs" : suffix;
+  const maxRepoLength =
+    60 - prefix.length - shortenedSuffix.length - serverNameLen;
+  const truncatedRepo = repoName.substring(0, Math.max(1, maxRepoLength));
+  return `${prefix}${truncatedRepo}${shortenedSuffix}`;
+}
+
+/**
  * Generate a dynamic search tool name for the search_documentation tool based on the URL
  * @param requestHost - The host from the request
  * @param requestUrl - The full request URL (optional)
  * @returns A descriptive string for the tool name
  */
-function generateSearchToolName({ urlType, owner, repo }: RepoData): string {
+function generateSearchToolName({ urlType, repo }: RepoData): string {
   try {
     // Default tool name as fallback
     let toolName = "search_documentation";
     if (urlType == "subdomain" || urlType == "github") {
-      toolName = `search_${repo}_documentation`;
+      // Use enforceLengthLimit to ensure the tool name doesn't exceed 60 characters
+      return enforceToolNameLengthLimit("search_", repo, "_documentation");
     }
     // replace non-alphanumeric characters with underscores
     return toolName.replace(/[^a-zA-Z0-9]/g, "_");
@@ -258,7 +325,8 @@ function generateFetchToolName({ urlType, owner, repo }: RepoData): string {
     let toolName = "fetch_documentation";
 
     if (urlType == "subdomain" || urlType == "github") {
-      toolName = `fetch_${repo}_documentation`;
+      // Use enforceLengthLimit to ensure the tool name doesn't exceed 60 characters
+      return enforceToolNameLengthLimit("fetch_", repo, "_documentation");
     }
 
     // replace non-alphanumeric characters with underscores

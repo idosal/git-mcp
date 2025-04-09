@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ClipboardCopy, Check, Github } from "lucide-react";
 import type { UrlType } from "../../src/shared/repoData";
+import { generateServerName } from "../../src/shared/nameUtils";
 
 export default function Content({
   urlType,
@@ -40,7 +41,7 @@ export default function Content({
     return <div>Documentation MCP</div>;
   })();
 
-  const serverName = repo ? `${repo} Docs` : "MCP Docs";
+  const serverName = generateServerName(repo);
 
   const [copied, setCopied] = useState(false);
 
