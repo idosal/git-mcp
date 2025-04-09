@@ -188,7 +188,7 @@ function enforceToolNameLengthLimit(
   }
 
   // Generate the server name to check combined length
-  const serverNameLen = generateServerName(repo)?.length;
+  const serverNameLen = generateServerName(repo).length;
 
   console.log(`Server name length: ${serverNameLen}`);
   // Replace non-alphanumeric characters with underscores
