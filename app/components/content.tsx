@@ -237,6 +237,7 @@ export default function Content({
 }`}
                   id="claude"
                   name="Claude Desktop"
+                  popoutUrl="claude://"
                 />
               </div>
             </div>
@@ -259,6 +260,7 @@ export default function Content({
   }
 }`}
                   id="windsurf"
+                  popoutUrl="windsurf://"
                   name="Windsurf"
                 />
               </div>
