@@ -6,6 +6,9 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "git-mcp",
 	"main": "src/index.ts",
+	"compatibility_flags": [
+		"nodejs_compat",
+	],
 	"compatibility_date": "2025-03-10",
 	"routes": [
 		{

@@ -62,7 +62,7 @@ export class MyMCP extends McpAgent {
   }
 }
 
-const mcpHandler = MyMCP.mount("*");
+const mcpHandler = MyMCP.mount("/*");
 
 // Export a request handler that checks the transport header
 export default {
