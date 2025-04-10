@@ -278,10 +278,7 @@ export async function searchRepositoryDocumentation({
       env.VECTORIZE,
     );
 
-    console.log(
-      `Initial search found ${results.length} results for "${query}"`,
-      results,
-    );
+    console.log(`Initial search found ${results.length} results"`, results);
 
     // If no results or forceReindex is true, we need to index the documentation
     if (results.length === 0 || forceReindex) {
@@ -432,7 +429,7 @@ export async function searchRepositoryCode({
       };
     }
 
-    console.log(`Searching code in ${owner}/${repo} for: "${query}"`);
+    console.log(`Searching code in ${owner}/${repo}"`);
 
     // Construct search URL for GitHub code search API
     // This searches for the query string in the specified repository
