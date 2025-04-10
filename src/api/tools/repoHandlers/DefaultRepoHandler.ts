@@ -2,12 +2,11 @@ import {
   fetchDocumentation,
   searchRepositoryDocumentation,
   searchRepositoryCode,
+  fetchUrlContent,
 } from "../commonTools.js";
 import { z } from "zod";
 import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
-import { fetchFileWithRobotsTxtCheck } from "../../utils/robotsTxt.js";
-import htmlToMd from "html-to-md";
 import { generateServerName } from "../../../shared/nameUtils.js";
 
 class DefaultRepoHandler implements RepoHandler {
@@ -73,77 +72,7 @@ class DefaultRepoHandler implements RepoHandler {
           url: z.string().describe("The URL of the document or page to fetch"),
         },
         cb: async ({ url }) => {
-          try {
-            // Use the robotsTxt checking function to respect robots.txt rules
-            const result = await fetchFileWithRobotsTxtCheck(url, env);
-
-            if (result.blockedByRobots) {
-              return {
-                url,
-                status: "blocked",
-                content: [
-                  {
-                    type: "text" as const,
-                    text: `Access to ${url} is disallowed by robots.txt. GitMCP respects robots.txt directives.`,
-                  },
-                ],
-              };
-            }
-
-            if (!result.content) {
-              return {
-                url,
-                status: "not_found",
-                content: [
-                  {
-                    type: "text" as const,
-                    text: `Content at ${url} could not be retrieved. The resource may not exist or may require authentication.`,
-                  },
-                ],
-              };
-            }
-
-            let finalContent = result.content;
-
-            // Convert HTML to markdown if content appears to be HTML
-            if (
-              finalContent.trim().startsWith("<!DOCTYPE") ||
-              finalContent.trim().startsWith("<html") ||
-              finalContent.includes("<body")
-            ) {
-              try {
-                finalContent = htmlToMd(finalContent);
-              } catch (error) {
-                console.warn(
-                  `Error converting HTML to Markdown for ${url}: ${error}`,
-                );
-                // Continue with the original content if conversion fails
-              }
-            }
-
-            return {
-              url,
-              status: "success",
-              content: [
-                {
-                  type: "text" as const,
-                  text: finalContent,
-                },
-              ],
-            };
-          } catch (error) {
-            console.error(`Error fetching ${url}: ${error}`);
-            return {
-              url,
-              status: "error",
-              content: [
-                {
-                  type: "text" as const,
-                  text: `Error fetching content from ${url}: ${error}`,
-                },
-              ],
-            };
-          }
+          return fetchUrlContent({ url, env });
         },
       },
     ];
@@ -289,14 +218,20 @@ function generateSearchToolDescription({
   repo,
 }: RepoData): string {
   try {
+    const fetchToolName = generateFetchToolName({
+      urlType,
+      owner,
+      repo,
+    });
+
     // Default description as fallback
     let description =
       "Semantically search within the fetched documentation for the current repository.";
 
     if (urlType == "subdomain") {
-      description = `Semantically search within the fetched documentation from the ${owner}/${repo} GitHub Pages. Useful for specific queries. Don't call if you already used search_documentation.`;
+      description = `Semantically search within the fetched documentation from the ${owner}/${repo} GitHub Pages. Useful for specific queries. Don't call if you already used ${fetchToolName}.`;
     } else if (urlType == "github") {
-      description = `Semantically search within the fetched documentation from GitHub repository: ${owner}/${repo}. Useful for specific queries. Don't call if you already used fetch_documentation.`;
+      description = `Semantically search within the fetched documentation from GitHub repository: ${owner}/${repo}. Useful for specific queries. Don't call if you already used ${fetchToolName}.`;
     }
 
     return description;
@@ -316,7 +251,7 @@ function generateFetchToolDescription({
   urlType,
   owner,
   repo,
-}: RepoData): string {
+}: Omit<RepoData, "host">): string {
   try {
     // Default description as fallback
     let description = "Fetch entire documentation for the current repository.";
@@ -340,7 +275,11 @@ function generateFetchToolDescription({
  * @param requestUrl - The full request URL (optional)
  * @returns A descriptive string for the tool
  */
-function generateFetchToolName({ urlType, owner, repo }: RepoData): string {
+function generateFetchToolName({
+  urlType,
+  owner,
+  repo,
+}: Omit<RepoData, "host">): string {
   try {
     // Default tool name as fallback
     let toolName = "fetch_documentation";

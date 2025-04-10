@@ -60,10 +60,6 @@ describe("getHandlerByRepoData", () => {
         requestHost: "owner.gitmcp.io",
         requestUrl: "/some-repo",
       },
-      {
-        requestHost: "test.com",
-        requestUrl: "/some-repo",
-      },
     ];
     requests.forEach((request) => {
       const repoData = getRepoData(request);

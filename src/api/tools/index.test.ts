@@ -47,7 +47,15 @@ describe("Tools Module", () => {
         },
         search_myrepo_documentation: {
           description:
-            "Semantically search within the fetched documentation from GitHub repository: myorg/myrepo. Useful for specific queries. Don't call if you already used fetch_documentation.",
+            "Semantically search within the fetched documentation from GitHub repository: myorg/myrepo. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
+        },
+        fetch_url_content: {
+          description:
+            "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+        },
+        search_myrepo_code: {
+          description:
+            "Search for code within GitHub repository: myorg/myrepo. Returns matching files and code snippets.",
         },
       });
     });
@@ -68,7 +76,44 @@ describe("Tools Module", () => {
         },
         search_myrepo_documentation: {
           description:
-            "Semantically search within the fetched documentation from the myorg/myrepo GitHub Pages. Useful for specific queries. Don't call if you already used fetch_documentation.",
+            "Semantically search within the fetched documentation from the myorg/myrepo GitHub Pages. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
+        },
+        fetch_url_content: {
+          description:
+            "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+        },
+        search_myrepo_code: {
+          description:
+            "Search for code within the myorg/myrepo GitHub repository. Returns matching files and code snippets.",
+        },
+      });
+    });
+
+    it("should register tool names correctly for https://gitmcp.io/docs", () => {
+      const mockMcp = new MockMcp();
+
+      toolsModule
+        .getMcpTools("gitmcp.io", "https://gitmcp.io/docs")
+        .forEach((tool) => {
+          mockMcp.tool(tool.name, tool.description, tool.paramsSchema, tool.cb);
+        });
+
+      expect(mockMcp.getTools()).toEqual({
+        fetch_generic_documentation: {
+          description:
+            "Fetch documentation for any GitHub repository by providing owner and project name",
+        },
+        search_generic_code: {
+          description:
+            "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets.",
+        },
+        fetch_url_content: {
+          description:
+            "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+        },
+        search_generic_documentation: {
+          description:
+            "Semantically search in documentation for any GitHub repository by providing owner, project name, and search query. Useful for specific queries. Don't call if you already used fetch_generic_documentation on this owner and project name.",
         },
       });
     });
