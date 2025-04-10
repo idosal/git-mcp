@@ -79,7 +79,7 @@ Searches code in the repository using the GitHub code search API. Provides resul
 
 ### What is the Model Context Protocol?
 
-The [Model Context Protocol](https://modelcontextprotocol.github.io/) is a standard that allows AI assistants to request and receive additional context from external sources in a structured manner, enhancing their understanding and performance.
+The [Model Context Protocol](https://modelcontextprotocol.io/introduction) is a standard that allows AI assistants to request and receive additional context from external sources in a structured manner, enhancing their understanding and performance.
 
 ### Does GitMCP work with any AI assistant?
 
