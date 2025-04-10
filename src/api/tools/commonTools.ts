@@ -398,3 +398,156 @@ export async function searchRepositoryDocumentation({
     };
   }
 }
+
+/**
+ * Search for code in a GitHub repository
+ * Uses the GitHub Search API to find code matching a query
+ */
+export async function searchRepositoryCode({
+  repoData,
+  query,
+  env,
+}: {
+  repoData: RepoData;
+  query: string;
+  env: any;
+}): Promise<{
+  searchQuery: string;
+  content: { type: "text"; text: string }[];
+}> {
+  try {
+    // Initialize owner and repo from the provided repoData
+    const owner = repoData.owner;
+    const repo = repoData.repo;
+
+    if (!owner || !repo) {
+      return {
+        searchQuery: query,
+        content: [
+          {
+            type: "text" as const,
+            text: `### Code Search Results for: "${query}"\n\nCannot perform code search without repository information.`,
+          },
+        ],
+      };
+    }
+
+    console.log(`Searching code in ${owner}/${repo} for: "${query}"`);
+
+    // Construct search URL for GitHub code search API
+    // This searches for the query string in the specified repository
+    const searchUrl = `https://api.github.com/search/code?q=${encodeURIComponent(query)}+repo:${owner}/${repo}`;
+
+    // Make the API request with authentication if available
+    const response = await fetch(searchUrl, {
+      headers: {
+        Accept: "application/vnd.github.v3+json",
+        ...(env?.GITHUB_TOKEN
+          ? { Authorization: `token ${env.GITHUB_TOKEN}` }
+          : {}),
+      },
+      // Explicitly omit credentials to avoid CORS issues with GitHub API
+      credentials: "omit",
+    });
+
+    if (!response.ok) {
+      console.warn(
+        `GitHub API code search failed: ${response.status} ${response.statusText}`,
+      );
+      return {
+        searchQuery: query,
+        content: [
+          {
+            type: "text" as const,
+            text: `### Code Search Results for: "${query}"\n\nFailed to search code in ${owner}/${repo}. GitHub API returned: ${response.status} ${response.statusText}`,
+          },
+        ],
+      };
+    }
+
+    const data = (await response.json()) as {
+      total_count: number;
+      items: Array<{
+        name: string;
+        path: string;
+        html_url: string;
+        repository: { full_name: string };
+      }>;
+    };
+
+    // Check if we found any matches
+    if (data.total_count === 0 || !data.items || data.items.length === 0) {
+      return {
+        searchQuery: query,
+        content: [
+          {
+            type: "text" as const,
+            text: `### Code Search Results for: "${query}"\n\nNo code matches found in ${owner}/${repo}.`,
+          },
+        ],
+      };
+    }
+
+    // Format the search results
+    let formattedResults = `### Code Search Results for: "${query}"\n\nFound ${data.total_count} matches in ${owner}/${repo}.\n\n`;
+
+    // Limit to top 10 results to avoid overwhelming responses
+    const limitedResults = data.items.slice(0, 10);
+
+    for (const item of limitedResults) {
+      // Get file content for each result
+      let fileContent: string | null = null;
+
+      try {
+        // Try to fetch from main branch first, then master if that fails
+        fileContent =
+          (await fetchFileFromGitHub(owner, repo, "main", item.path)) ||
+          (await fetchFileFromGitHub(owner, repo, "master", item.path));
+      } catch (error) {
+        console.warn(`Failed to fetch file content for ${item.path}: ${error}`);
+      }
+
+      formattedResults += `#### [${item.path}](${item.html_url})\n\n`;
+
+      if (fileContent) {
+        // If file content is too large, truncate it
+        const maxLength = 2000;
+        if (fileContent.length > maxLength) {
+          fileContent =
+            fileContent.substring(0, maxLength) + "\n... (truncated)";
+        }
+
+        // Add file content in code block
+        formattedResults += "```\n" + fileContent + "\n```\n\n";
+      } else {
+        formattedResults += "_File content could not be retrieved._\n\n";
+      }
+    }
+
+    // If there are more results than we're showing
+    if (data.total_count > limitedResults.length) {
+      formattedResults += `_Showing ${limitedResults.length} of ${data.total_count} results._\n\n`;
+    }
+
+    return {
+      searchQuery: query,
+      content: [
+        {
+          type: "text" as const,
+          text: formattedResults,
+        },
+      ],
+    };
+  } catch (error) {
+    console.error(`Error in searchRepositoryCode: ${error}`);
+    return {
+      searchQuery: query,
+      content: [
+        {
+          type: "text" as const,
+          text: `### Code Search Results for: "${query}"\n\nAn error occurred while searching code: ${error}`,
+        },
+      ],
+    };
+  }
+}

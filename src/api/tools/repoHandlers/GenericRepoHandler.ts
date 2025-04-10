@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   fetchDocumentation,
   searchRepositoryDocumentation,
+  searchRepositoryCode,
 } from "../commonTools.js";
 import { fetchFileWithRobotsTxtCheck } from "../../utils/robotsTxt.js";
 import htmlToMd from "html-to-md";
@@ -55,6 +56,31 @@ class GenericRepoHandler implements RepoHandler {
             host: "gitmcp.io",
           };
           return searchRepositoryDocumentation({ repoData, query, env });
+        },
+      },
+      {
+        name: "search_generic_code",
+        description:
+          "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets.",
+        paramsSchema: {
+          owner: z
+            .string()
+            .describe("The GitHub repository owner (username or organization)"),
+          repo: z.string().describe("The GitHub repository name"),
+          query: z
+            .string()
+            .describe(
+              "The search query to find relevant code files and snippets",
+            ),
+        },
+        cb: async ({ owner, repo, query }) => {
+          const repoData: RepoData = {
+            owner,
+            repo,
+            urlType: "github",
+            host: "gitmcp.io",
+          };
+          return searchRepositoryCode({ repoData, query, env });
         },
       },
       {

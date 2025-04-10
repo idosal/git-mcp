@@ -1,6 +1,7 @@
 import {
   fetchDocumentation,
   searchRepositoryDocumentation,
+  searchRepositoryCode,
 } from "../commonTools.js";
 import { z } from "zod";
 import type { RepoData } from "../../../shared/repoData.js";
@@ -17,6 +18,9 @@ class DefaultRepoHandler implements RepoHandler {
     const fetchToolDescription = generateFetchToolDescription(repoData);
     const searchToolName = generateSearchToolName(repoData);
     const searchToolDescription = generateSearchToolDescription(repoData);
+    const codeSearchToolName = generateCodeSearchToolName(repoData);
+    const codeSearchToolDescription =
+      generateCodeSearchToolDescription(repoData);
 
     return [
       {
@@ -37,6 +41,24 @@ class DefaultRepoHandler implements RepoHandler {
         },
         cb: async ({ query }) => {
           return searchRepositoryDocumentation({
+            repoData,
+            query,
+            env,
+          });
+        },
+      },
+      {
+        name: codeSearchToolName,
+        description: codeSearchToolDescription,
+        paramsSchema: {
+          query: z
+            .string()
+            .describe(
+              "The search query to find relevant code files and snippets",
+            ),
+        },
+        cb: async ({ query }) => {
+          return searchRepositoryCode({
             repoData,
             query,
             env,
@@ -190,7 +212,6 @@ function enforceToolNameLengthLimit(
   // Generate the server name to check combined length
   const serverNameLen = generateServerName(repo).length;
 
-  console.log(`Server name length: ${serverNameLen}`);
   // Replace non-alphanumeric characters with underscores
   let repoName = repo.replace(/[^a-zA-Z0-9]/g, "_");
   let toolName = `${prefix}${repoName}${suffix}`;
@@ -335,5 +356,54 @@ function generateFetchToolName({ urlType, owner, repo }: RepoData): string {
     console.error("Error generating tool name:", error);
     // Return default tool name if there's any error parsing the URL
     return "fetch_documentation";
+  }
+}
+
+/**
+ * Generate a dynamic tool name for the code search tool based on the URL
+ * @param repoData - The repository data object
+ * @returns A descriptive string for the tool
+ */
+function generateCodeSearchToolName({ urlType, repo }: RepoData): string {
+  try {
+    // Default tool name as fallback
+    let toolName = "search_code";
+    if (urlType == "subdomain" || urlType == "github") {
+      // Use enforceLengthLimit to ensure the tool name doesn't exceed 60 characters
+      return enforceToolNameLengthLimit("search_", repo, "_code");
+    }
+    // replace non-alphanumeric characters with underscores
+    return toolName.replace(/[^a-zA-Z0-9]/g, "_");
+  } catch (error) {
+    console.error("Error generating code search tool name:", error);
+    // Return default tool name if there's any error parsing the URL
+    return "search_code";
+  }
+}
+
+/**
+ * Generate a dynamic description for the code search tool based on the URL
+ * @param repoData - The repository data object
+ * @returns A descriptive string for the tool
+ */
+function generateCodeSearchToolDescription({
+  urlType,
+  owner,
+  repo,
+}: RepoData): string {
+  try {
+    // Default description as fallback
+    let description = "Search code files in the current repository.";
+
+    if (urlType == "subdomain") {
+      description = `Search for code within the ${owner}/${repo} GitHub repository. Returns matching files and code snippets.`;
+    } else if (urlType == "github") {
+      description = `Search for code within GitHub repository: ${owner}/${repo}. Returns matching files and code snippets.`;
+    }
+
+    return description;
+  } catch (error) {
+    // Return default description if there's any error parsing the URL
+    return "Search code in the current repository.";
   }
 }
