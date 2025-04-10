@@ -68,9 +68,12 @@ Fetches the documentation for the `{owner}/{repo}` GitHub repository (as extract
 It searches the repository's documentation by providing a `query`. This is useful for specific questions. It uses semantic search to find the most relevant documentation. This mitigates the cost of a large documentation set that cannot be provided as direct context to LLMs.
 
 ### `fetch_url_content`:
-Fetches content from a URL that was referenced in previously retrieved documentation and converts it to markdown. This enables the AI assistant to access and process additional resources linked within the project documentation (especially useful for `llms.txt`).
+Fetches content from a URL that was referenced in previously retrieved documentation and converts it to markdown. This enables the AI assistant to access and process additional resources linked within the project documentation (extremely handy for `llms.txt`).
 
-> Note: In the case of a generic `gitmcp.com/docs` usage, the tools are called `fetch_generic_documentation` and `search_generic_documentation`, and receive additional `owner` and `repo` arguments.
+### `search_<repo-name>_code`:
+Searches code in the repository using the GitHub code search API. Provides results of code matching the search query, helping AI assistants find relevant implementation details and examples within the codebase.
+
+> Note: In the case of a generic `gitmcp.com/docs` usage, the tools are called `fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`. They receive additional `owner` and `repo` arguments.
 
 ## FAQ
 
