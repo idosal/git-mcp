@@ -47,26 +47,51 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-16">
             <div className="mt-0 max-w-3xl mx-auto sm:mt-6">
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-6 sm:mb-8 flex flex-col sm:flex-row items-center">
-                <div className="flex-1 flex items-center justify-center sm:justify-end text-gray-300 text-sm sm:text-lg font-mono px-2 sm:px-4 mb-2 sm:mb-0">
-                  github.com/username/repo
+              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-3">
+                <div className="flex flex-col sm:flex-row items-center pb-3">
+                  <div className="flex-1 flex items-center justify-center sm:justify-end text-gray-300 text-sm sm:text-lg font-mono px-2 sm:px-4 mb-2 sm:mb-0">
+                    github.com/username/repo
+                  </div>
+                  <div className="mx-2 sm:mx-4 text-gray-500 transform rotate-90 sm:rotate-0">
+                    →
+                  </div>
+                  <div className="flex-1 flex items-center justify-center sm:justify-start text-emerald-400 text-sm sm:text-lg font-mono px-2 sm:px-4">
+                    <b>gitmcp.io</b>/username/repo
+                  </div>
                 </div>
-                <div className="mx-2 sm:mx-4 text-gray-500 transform rotate-90 sm:rotate-0">
-                  →
+                <div className="flex justify-center py-1">
+                  <div className="w-48 h-px bg-gray-700/70"></div>
                 </div>
-                <div className="flex-1 flex items-center justify-center sm:justify-start text-emerald-400 text-sm sm:text-lg font-mono px-2 sm:px-4">
-                  <b>gitmcp.io</b>/username/repo
+                <div className="flex flex-col sm:flex-row items-center pt-3">
+                  <div className="flex-1 flex items-center justify-center sm:justify-end text-gray-300 text-sm sm:text-lg font-mono px-2 sm:px-4 mb-2 sm:mb-0">
+                    username.github.io/repo
+                  </div>
+                  <div className="mx-2 sm:mx-4 text-gray-500 transform rotate-90 sm:rotate-0">
+                    →
+                  </div>
+                  <div className="flex-1 flex items-center justify-center sm:justify-start text-emerald-400 text-sm sm:text-lg font-mono px-2 sm:px-4">
+                    username.<b>gitmcp.io</b>/repo
+                  </div>
                 </div>
               </div>
+
+              <div className="flex items-center w-full my-4">
+                <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent to-gray-700"></div>
+                <div className="px-4 py-1 bg-gray-800 text-gray-400 text-sm rounded-full border border-gray-700">
+                  And the best part
+                </div>
+                <div className="h-0.5 flex-1 bg-gradient-to-l from-transparent to-gray-700"></div>
+              </div>
+
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-6 sm:mb-8 flex flex-col sm:flex-row items-center">
                 <div className="flex-1 flex items-center justify-center sm:justify-end text-gray-300 text-sm sm:text-lg font-mono px-2 sm:px-4 mb-2 sm:mb-0">
-                  username.github.io/repo
+                  <b>any</b>&nbsp;GitHub repository
                 </div>
                 <div className="mx-2 sm:mx-4 text-gray-500 transform rotate-90 sm:rotate-0">
                   →
                 </div>
                 <div className="flex-1 flex items-center justify-center sm:justify-start text-emerald-400 text-sm sm:text-lg font-mono px-2 sm:px-4">
-                  username.<b>gitmcp.io</b>/repo
+                  <b>gitmcp.io/docs</b>
                 </div>
               </div>
               <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto font-light px-2">
