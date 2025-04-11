@@ -25,7 +25,7 @@ class DefaultRepoHandler implements RepoHandler {
       {
         name: fetchToolName,
         description: fetchToolDescription,
-        paramsSchema: {},
+        paramsSchema: undefined,
         cb: async () => {
           return fetchDocumentation({ repoData, env });
         },
@@ -52,14 +52,19 @@ class DefaultRepoHandler implements RepoHandler {
         paramsSchema: {
           query: z
             .string()
+            .describe("The search query to find relevant code files"),
+          page: z
+            .number()
+            .optional()
             .describe(
-              "The search query to find relevant code files and snippets",
+              "Page number to retrieve (starting from 1). Each page contains 30 results.",
             ),
         },
-        cb: async ({ query }) => {
+        cb: async ({ query, page }) => {
           return searchRepositoryCode({
             repoData,
             query,
+            page,
             env,
           });
         },

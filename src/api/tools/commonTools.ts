@@ -9,6 +9,7 @@ import {
 } from "../utils/vectorStore.js";
 import { cacheIsIndexed, getIsIndexedFromCache } from "../utils/cache.js";
 import htmlToMd from "html-to-md";
+import { searchCode } from "../utils/githubClient.js";
 
 // Add env parameter to access Cloudflare's bindings
 export async function fetchDocumentation({
@@ -101,6 +102,7 @@ export async function fetchDocumentation({
         repo,
         cachedPath.branch,
         cachedPath.path,
+        env,
       );
       if (content) {
         fileUsed =
@@ -121,12 +123,12 @@ export async function fetchDocumentation({
       // Create array of all location+branch combinations to try
       const fetchPromises = possibleLocations.flatMap((location) => [
         {
-          promise: fetchFileFromGitHub(owner, repo, "main", location),
+          promise: fetchFileFromGitHub(owner, repo, "main", location, env),
           location,
           branch: "main",
         },
         {
-          promise: fetchFileFromGitHub(owner, repo, "master", location),
+          promise: fetchFileFromGitHub(owner, repo, "master", location, env),
           location,
           branch: "master",
         },
@@ -178,12 +180,24 @@ export async function fetchDocumentation({
       console.log(`llms.txt not found, trying README.md`);
       // Only use static approach for README, no search API
       // Try main branch first
-      content = await fetchFileFromGitHub(owner, repo, "main", "README.md");
+      content = await fetchFileFromGitHub(
+        owner,
+        repo,
+        "main",
+        "README.md",
+        env,
+      );
       fileUsed = "readme.md (main branch)";
 
       // If not found, try master branch
       if (!content) {
-        content = await fetchFileFromGitHub(owner, repo, "master", "README.md");
+        content = await fetchFileFromGitHub(
+          owner,
+          repo,
+          "master",
+          "README.md",
+          env,
+        );
         fileUsed = "readme.md (master branch)";
       }
     }
@@ -399,18 +413,27 @@ export async function searchRepositoryDocumentation({
 /**
  * Search for code in a GitHub repository
  * Uses the GitHub Search API to find code matching a query
+ * Supports pagination for retrieving more results
  */
 export async function searchRepositoryCode({
   repoData,
   query,
+  page = 1,
   env,
 }: {
   repoData: RepoData;
   query: string;
+  page?: number;
   env: any;
 }): Promise<{
   searchQuery: string;
   content: { type: "text"; text: string }[];
+  pagination?: {
+    totalCount: number;
+    currentPage: number;
+    perPage: number;
+    hasMorePages: boolean;
+  };
 }> {
   try {
     // Initialize owner and repo from the provided repoData
@@ -429,48 +452,34 @@ export async function searchRepositoryCode({
       };
     }
 
-    console.log(`Searching code in ${owner}/${repo}"`);
+    // Use fixed resultsPerPage of 30 and normalize page value
+    const currentPage = Math.max(1, page);
+    const resultsPerPage = 30; // Fixed at 30 results per page
 
-    // Construct search URL for GitHub code search API
-    // This searches for the query string in the specified repository
-    const searchUrl = `https://api.github.com/search/code?q=${encodeURIComponent(query)}+repo:${owner}/${repo}`;
+    console.log(
+      `Searching code in ${owner}/${repo}" (page ${currentPage}, ${resultsPerPage} per page)`,
+    );
 
-    // Make the API request with authentication if available
-    const response = await fetch(searchUrl, {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        ...(env.GITHUB_TOKEN
-          ? { Authorization: `token ${env.GITHUB_TOKEN}` }
-          : {}),
-      },
-      // Explicitly omit credentials to avoid CORS issues with GitHub API
-      credentials: "omit",
-    });
+    const data = await searchCode(
+      query,
+      owner,
+      repo,
+      env,
+      currentPage,
+      resultsPerPage,
+    );
 
-    if (!response.ok) {
-      console.warn(
-        `GitHub API code search failed: ${response.status} ${response.statusText}`,
-      );
+    if (!data) {
       return {
         searchQuery: query,
         content: [
           {
             type: "text" as const,
-            text: `### Code Search Results for: "${query}"\n\nFailed to search code in ${owner}/${repo}. GitHub API returned: ${response.status} ${response.statusText}`,
+            text: `### Code Search Results for: "${query}"\n\nFailed to search code in ${owner}/${repo}. GitHub API request failed.`,
           },
         ],
       };
     }
-
-    const data = (await response.json()) as {
-      total_count: number;
-      items: Array<{
-        name: string;
-        path: string;
-        html_url: string;
-        repository: { full_name: string };
-      }>;
-    };
 
     // Check if we found any matches
     if (data.total_count === 0 || !data.items || data.items.length === 0) {
@@ -485,45 +494,27 @@ export async function searchRepositoryCode({
       };
     }
 
+    // Calculate pagination information
+    const totalCount = data.total_count;
+    const hasMorePages = currentPage * resultsPerPage < totalCount;
+    const totalPages = Math.ceil(totalCount / resultsPerPage);
+
     // Format the search results
-    let formattedResults = `### Code Search Results for: "${query}"\n\nFound ${data.total_count} matches in ${owner}/${repo}.\n\n`;
+    let formattedResults = `### Code Search Results for: "${query}"\n\n`;
+    formattedResults += `Found ${totalCount} matches in ${owner}/${repo}.\n`;
+    formattedResults += `Page ${currentPage} of ${totalPages}.\n\n`;
 
-    // Limit to top 10 results to avoid overwhelming responses
-    const limitedResults = data.items.slice(0, 10);
-
-    for (const item of limitedResults) {
-      // Get file content for each result
-      let fileContent: string | null = null;
-
-      try {
-        // Try to fetch from main branch first, then master if that fails
-        fileContent =
-          (await fetchFileFromGitHub(owner, repo, "main", item.path)) ||
-          (await fetchFileFromGitHub(owner, repo, "master", item.path));
-      } catch (error) {
-        console.warn(`Failed to fetch file content for ${item.path}: ${error}`);
-      }
-
-      formattedResults += `#### [${item.path}](${item.html_url})\n\n`;
-
-      if (fileContent) {
-        // If file content is too large, truncate it
-        const maxLength = 2000;
-        if (fileContent.length > maxLength) {
-          fileContent =
-            fileContent.substring(0, maxLength) + "\n... (truncated)";
-        }
-
-        // Add file content in code block
-        formattedResults += "```\n" + fileContent + "\n```\n\n";
-      } else {
-        formattedResults += "_File content could not be retrieved._\n\n";
-      }
+    for (const item of data.items) {
+      formattedResults += `#### ${item.name}\n`;
+      formattedResults += `- **Path**: ${item.path}\n`;
+      formattedResults += `- **URL**: ${item.html_url}\n`;
+      formattedResults += `- **Git URL**: ${item.git_url}\n`;
+      formattedResults += `- **Score**: ${item.score}\n\n`;
     }
 
-    // If there are more results than we're showing
-    if (data.total_count > limitedResults.length) {
-      formattedResults += `_Showing ${limitedResults.length} of ${data.total_count} results._\n\n`;
+    // Add pagination information to the response
+    if (hasMorePages) {
+      formattedResults += `_Showing ${data.items.length} of ${totalCount} results. Use pagination to see more results._\n\n`;
     }
 
     return {
@@ -534,6 +525,12 @@ export async function searchRepositoryCode({
           text: formattedResults,
         },
       ],
+      pagination: {
+        totalCount,
+        currentPage,
+        perPage: resultsPerPage,
+        hasMorePages,
+      },
     };
   } catch (error) {
     console.error(`Error in searchRepositoryCode: ${error}`);

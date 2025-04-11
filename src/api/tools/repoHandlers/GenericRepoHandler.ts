@@ -60,7 +60,7 @@ class GenericRepoHandler implements RepoHandler {
       {
         name: "search_generic_code",
         description:
-          "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets.",
+          "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets. Supports pagination with 30 results per page.",
         paramsSchema: {
           owner: z
             .string()
@@ -68,18 +68,22 @@ class GenericRepoHandler implements RepoHandler {
           repo: z.string().describe("The GitHub repository name"),
           query: z
             .string()
+            .describe("The search query to find relevant code files"),
+          page: z
+            .number()
+            .optional()
             .describe(
-              "The search query to find relevant code files and snippets",
+              "Page number to retrieve (starting from 1). Each page contains 30 results.",
             ),
         },
-        cb: async ({ owner, repo, query }) => {
+        cb: async ({ owner, repo, query, page }) => {
           const repoData: RepoData = {
             owner,
             repo,
             urlType: "github",
             host: "gitmcp.io",
           };
-          return searchRepositoryCode({ repoData, query, env });
+          return searchRepositoryCode({ repoData, query, page, env });
         },
       },
       {

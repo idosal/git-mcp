@@ -16,6 +16,12 @@
 		"custom_domain": true
 		}
  	],
+	 "analytics_engine_datasets": [
+		{
+			"binding": "MY_METRICS",
+     		"dataset": "my_metrics_dataset"
+		}
+	],
 	"migrations": [
 		{
 			"new_sqlite_classes": ["MyMCP"],

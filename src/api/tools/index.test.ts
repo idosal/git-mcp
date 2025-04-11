@@ -105,7 +105,7 @@ describe("Tools Module", () => {
         },
         search_generic_code: {
           description:
-            "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets.",
+            "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets. Supports pagination with 30 results per page.",
         },
         fetch_url_content: {
           description:
