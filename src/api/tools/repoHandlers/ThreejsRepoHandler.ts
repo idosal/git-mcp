@@ -49,7 +49,7 @@ class ThreejsRepoHandler implements RepoHandler {
           urls: z.array(z.string()).describe("The URLs of the pages to fetch"),
         },
         cb: async ({ urls }) => {
-          return await fetchThreeJsUrlsAsMarkdown(urls, env);
+          return await fetchThreeJsUrlsAsMarkdown(urls);
         },
       },
     ];

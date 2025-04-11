@@ -250,7 +250,7 @@ export async function fetchUrlContent<T extends keyof FormatOptions>({
   format,
 }: {
   url: string;
-  format: string;
+  format: T;
 }): Promise<FormatOptions[T] | null> {
   try {
     console.log(`Fetching ${url} with Cloudflare tiered cache`);

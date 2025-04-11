@@ -195,7 +195,7 @@ export async function fetchFileWithRobotsTxtCheck(
     });
 
     return {
-      content: content as string,
+      content: content,
       blockedByRobots: false,
     };
   } catch (error) {

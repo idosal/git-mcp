@@ -81,15 +81,18 @@ async function getReferenceDocsList({ env }: { env: any }): Promise<{
       format: "json",
     })) as {
       en: Record<string, Record<string, Record<string, string>>>;
-    },
+    } | null,
     (await fetchUrlContent({
       url: THREEJS_MANUAL_REF_URL,
       format: "json",
     })) as {
       en: Record<string, Record<string, string>>;
-    },
+    } | null,
   ]);
-  return { docs: docs.en, manual: manual.en };
+  if (!docs || !manual) {
+    console.error("Error fetching docs or manual");
+  }
+  return { docs: docs?.en ?? {}, manual: manual?.en ?? {} };
 }
 
 /**
@@ -239,12 +242,15 @@ export async function fetchThreeJsUrlsAsMarkdown(
 
       if (!text) {
         console.error(`Error fetching url ${urlToFetch}`);
-        throw new Error(`Error fetching url ${urlToFetch}`);
+        return {
+          documentName: documentName ?? urlToFetch.pathname,
+          text: "",
+        };
       }
 
       return {
         documentName: documentName ?? urlToFetch.pathname,
-        text: (text as string).replace(
+        text: text.replace(
           new RegExp(`\\[name\\]`, "g"),
           documentNameToUse ?? "[name]",
         ),
