@@ -1,5 +1,6 @@
 import { fetchFile } from "./helpers.js";
 import { cacheFilePath, getCachedFilePath } from "./cache.js";
+import { fetchRawFile } from "./githubClient.js";
 
 /**
  * Fetch file content from a specific path in a GitHub repository
@@ -14,10 +15,9 @@ export async function fetchFileFromGitHub(
   repo: string,
   branch: string,
   path: string,
+  env: any,
 ): Promise<string | null> {
-  return await fetchFile(
-    `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`,
-  );
+  return await fetchRawFile(owner, repo, branch, path, env);
 }
 
 // Helper: search for a file in a GitHub repository using the GitHub Search API
@@ -37,6 +37,7 @@ export async function searchGitHubRepo(
         repo,
         cachedPath.branch,
         cachedPath.path,
+        env,
       );
       if (content) {
         return content;
@@ -44,29 +45,14 @@ export async function searchGitHubRepo(
       console.log("Cached path failed, falling back to search");
     }
 
-    const searchUrl = `https://api.github.com/search/code?q=filename:${filename}+repo:${owner}/${repo}`;
+    // Use the centralized GitHub client to search for the file
+    const { searchFileByName } = await import("./githubClient.js");
+    const data = await searchFileByName(filename, owner, repo, env);
 
-    const response = await fetch(searchUrl, {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        // Add GitHub token as environment variable if rate limits become an issue
-        ...(env?.GITHUB_TOKEN
-          ? { Authorization: `token ${env.GITHUB_TOKEN}` }
-          : {}),
-      },
-    });
-
-    if (!response.ok) {
-      console.warn(
-        `GitHub API search failed: ${response.status} ${response.statusText}`,
-      );
+    // Handle search failure
+    if (!data) {
       return null;
     }
-
-    const data = (await response.json()) as {
-      total_count: number;
-      items: { path: string }[];
-    };
 
     // Check if we found any matches
     if (data.total_count === 0 || !data.items || data.items.length === 0) {
@@ -78,8 +64,8 @@ export async function searchGitHubRepo(
 
     // Try fetching from both main and master branches in parallel
     const [mainContent, masterContent] = await Promise.all([
-      fetchFileFromGitHub(owner, repo, "main", filePath),
-      fetchFileFromGitHub(owner, repo, "master", filePath),
+      fetchFileFromGitHub(owner, repo, "main", filePath, env),
+      fetchFileFromGitHub(owner, repo, "master", filePath, env),
     ]);
 
     // Cache the successful path
