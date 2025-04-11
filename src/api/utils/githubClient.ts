@@ -155,11 +155,22 @@ export async function githubApiRequest(
       headers.set("Authorization", `token ${env.GITHUB_TOKEN}`);
     }
 
-    // Make the request
+    // Configure Cloudflare's tiered cache
+    const cfCacheOptions = {
+      cacheEverything: true,
+      cacheTtlByStatus: {
+        "200-299": 3600, // Cache successful responses for 1 hour
+        "404": 60, // Cache "Not Found" responses for 60 seconds
+        "500-599": 0, // Do not cache server error responses
+      },
+    };
+
+    // Make the request with tiered cache
     const response = await fetch(url, {
       ...options,
       headers,
       credentials: "omit", // Avoid CORS issues
+      cf: cfCacheOptions, // Use Cloudflare's tiered cache
     });
 
     // Update rate limit info from response headers
