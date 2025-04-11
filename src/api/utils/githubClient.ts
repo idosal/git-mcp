@@ -9,6 +9,45 @@ const DEFAULT_DELAY = 1000;
 const MAX_RETRIES = 3;
 
 /**
+ * Extract repository context from a GitHub URL
+ * This helps provide context for analytics metrics
+ */
+function extractRepoContextFromUrl(url: string): string {
+  try {
+    // Handle raw.githubusercontent.com URLs
+    if (url.includes("raw.githubusercontent.com")) {
+      const match = url.match(
+        /raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)/,
+      );
+      if (match) {
+        return `${match[1]}/${match[2]}`;
+      }
+    }
+
+    // Handle api.github.com/repos URLs
+    if (url.includes("api.github.com/repos")) {
+      const match = url.match(/api\.github\.com\/repos\/([^\/]+)\/([^\/]+)/);
+      if (match) {
+        return `${match[1]}/${match[2]}`;
+      }
+    }
+
+    // Handle api.github.com/search URLs with repo: parameter
+    if (url.includes("api.github.com/search")) {
+      const repoMatch = url.match(/repo:([^\/+\s]+)\/([^\/+\s]+)/);
+      if (repoMatch) {
+        return `${repoMatch[1]}/${repoMatch[2]}`;
+      }
+    }
+
+    return "unknown/unknown";
+  } catch (error) {
+    console.error(`Error extracting repo context from URL: ${error}`);
+    return "error/extracting";
+  }
+}
+
+/**
  * Rate limiting state tracking
  */
 interface RateLimitInfo {
@@ -87,6 +126,18 @@ export async function githubApiRequest(
   retryCount = 0,
 ): Promise<Response | null> {
   try {
+    // Extract repository context for metrics
+    const repoContext = extractRepoContextFromUrl(url);
+
+    // Track GitHub query count using Cloudflare analytics
+    if (env?.CLOUDFLARE_ANALYTICS && retryCount === 0) {
+      env.CLOUDFLARE_ANALYTICS.writeDataPoint({
+        blobs: [url, repoContext],
+        doubles: [1],
+        indexes: ["github_api_request"],
+      });
+    }
+
     // Wait for rate limit if necessary
     await respectRateLimits();
 
@@ -118,6 +169,16 @@ export async function githubApiRequest(
 
       if (responseBody.includes("API rate limit exceeded")) {
         console.warn(`GitHub API rate limit exceeded`);
+
+        // Track rate-limited requests with repository context using Cloudflare analytics
+        if (env?.CLOUDFLARE_ANALYTICS) {
+          const repoContext = extractRepoContextFromUrl(url);
+          env.CLOUDFLARE_ANALYTICS.writeDataPoint({
+            blobs: [url, repoContext, responseBody.substring(0, 100)], // First 100 chars of error message
+            doubles: [1, retryCount],
+            indexes: ["github_rate_limited_request"],
+          });
+        }
 
         // If we haven't retried too many times, wait and retry
         if (retryCount < MAX_RETRIES) {
