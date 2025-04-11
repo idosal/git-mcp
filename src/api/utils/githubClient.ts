@@ -224,14 +224,21 @@ export async function githubApiRequest(
  * @param owner - Repository owner
  * @param repo - Repository name
  * @param env - Environment for GitHub token
+ * @param page - Page number (1-indexed)
+ * @param perPage - Results per page (max 100)
  */
 export async function searchCode(
   query: string,
   owner: string,
   repo: string,
   env: any,
+  page: number = 1,
+  perPage: number = 20,
 ): Promise<any> {
-  const searchUrl = `https://api.github.com/search/code?q=${encodeURIComponent(query)}+repo:${owner}/${repo}`;
+  // GitHub API has a max per_page of 100
+  const validPerPage = Math.min(Math.max(1, perPage), 100);
+
+  const searchUrl = `https://api.github.com/search/code?q=${encodeURIComponent(query)}+repo:${owner}/${repo}&page=${page}&per_page=${validPerPage}`;
 
   const response = await githubApiRequest(searchUrl, {}, env);
 

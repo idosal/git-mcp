@@ -413,18 +413,27 @@ export async function searchRepositoryDocumentation({
 /**
  * Search for code in a GitHub repository
  * Uses the GitHub Search API to find code matching a query
+ * Supports pagination for retrieving more results
  */
 export async function searchRepositoryCode({
   repoData,
   query,
+  page = 1,
   env,
 }: {
   repoData: RepoData;
   query: string;
+  page?: number;
   env: any;
 }): Promise<{
   searchQuery: string;
   content: { type: "text"; text: string }[];
+  pagination?: {
+    totalCount: number;
+    currentPage: number;
+    perPage: number;
+    hasMorePages: boolean;
+  };
 }> {
   try {
     // Initialize owner and repo from the provided repoData
@@ -443,9 +452,22 @@ export async function searchRepositoryCode({
       };
     }
 
-    console.log(`Searching code in ${owner}/${repo}"`);
+    // Use fixed resultsPerPage of 30 and normalize page value
+    const currentPage = Math.max(1, page);
+    const resultsPerPage = 30; // Fixed at 30 results per page
 
-    const data = await searchCode(query, owner, repo, env);
+    console.log(
+      `Searching code in ${owner}/${repo}" (page ${currentPage}, ${resultsPerPage} per page)`,
+    );
+
+    const data = await searchCode(
+      query,
+      owner,
+      repo,
+      env,
+      currentPage,
+      resultsPerPage,
+    );
 
     if (!data) {
       return {
@@ -472,24 +494,27 @@ export async function searchRepositoryCode({
       };
     }
 
+    // Calculate pagination information
+    const totalCount = data.total_count;
+    const hasMorePages = currentPage * resultsPerPage < totalCount;
+    const totalPages = Math.ceil(totalCount / resultsPerPage);
+
     // Format the search results
-    let formattedResults = `### Code Search Results for: "${query}"\n\nFound ${data.total_count} matches in ${owner}/${repo}.\n\n`;
+    let formattedResults = `### Code Search Results for: "${query}"\n\n`;
+    formattedResults += `Found ${totalCount} matches in ${owner}/${repo}.\n`;
+    formattedResults += `Page ${currentPage} of ${totalPages}.\n\n`;
 
-    // Limit to top 20 results to avoid overwhelming responses
-    const limitedResults = data.items.slice(0, 20);
-
-    for (const item of limitedResults) {
-      // Just output the git_url, name, and path without fetching file content
+    for (const item of data.items) {
       formattedResults += `#### ${item.name}\n`;
       formattedResults += `- **Path**: ${item.path}\n`;
       formattedResults += `- **URL**: ${item.html_url}\n`;
-      formattedResults += `- **Git URL**: ${item.git_url}\n\n`;
+      formattedResults += `- **Git URL**: ${item.git_url}\n`;
       formattedResults += `- **Score**: ${item.score}\n\n`;
     }
 
-    // If there are more results than we're showing
-    if (data.total_count > limitedResults.length) {
-      formattedResults += `_Showing ${limitedResults.length} of ${data.total_count} results._\n\n`;
+    // Add pagination information to the response
+    if (hasMorePages) {
+      formattedResults += `_Showing ${data.items.length} of ${totalCount} results. Use pagination to see more results._\n\n`;
     }
 
     return {
@@ -500,6 +525,12 @@ export async function searchRepositoryCode({
           text: formattedResults,
         },
       ],
+      pagination: {
+        totalCount,
+        currentPage,
+        perPage: resultsPerPage,
+        hasMorePages,
+      },
     };
   } catch (error) {
     console.error(`Error in searchRepositoryCode: ${error}`);
