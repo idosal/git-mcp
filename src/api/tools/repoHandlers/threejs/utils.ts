@@ -7,6 +7,9 @@ const THREEJS_MANUAL_BASE_URL = `${THREEJS_BASE_URL}/manual`;
 const THREEJS_DOCS_REF_URL = `${THREEJS_DOCS_BASE_URL}/list.json`;
 const THREEJS_MANUAL_REF_URL = `${THREEJS_MANUAL_BASE_URL}/list.json`;
 
+/**
+ * Get the url of a document by key, flattens the docs and manual lists
+ */
 async function getByKey(
   key: string,
   env: any,
@@ -36,6 +39,9 @@ async function getByKey(
 
 let docsCacheByInnerKey: Record<string, string> | null = null;
 let manualCacheByInnerKey: Record<string, string> | null = null;
+/**
+ * Flatten the docs and manual lists
+ */
 async function getListFlatCache(env: any) {
   // build the cache if it's not built
   if (!docsCacheByInnerKey || !manualCacheByInnerKey) {
@@ -62,6 +68,9 @@ async function getListFlatCache(env: any) {
   return { docsCacheByInnerKey, manualCacheByInnerKey };
 }
 
+/**
+ * Fetches https://threejs.org/docs/list.json and https://threejs.org/manual/list.json
+ */
 async function getReferenceDocsList({ env }: { env: any }): Promise<{
   docs: Record<string, Record<string, Record<string, string>>>;
   manual: Record<string, Record<string, string>>;
@@ -85,6 +94,9 @@ async function getReferenceDocsList({ env }: { env: any }): Promise<{
   return { docs: docs.en, manual: manual.en };
 }
 
+/**
+ * Get the docs and manual lists as markdown
+ */
 export async function getReferenceDocsListAsMarkdown({
   env,
 }: {
@@ -149,6 +161,9 @@ export async function getReferenceDocsListAsMarkdown({
   };
 }
 
+/**
+ * Get the content of specific documents
+ */
 export async function getReferenceDocsContent({
   env,
   documents,
@@ -189,6 +204,9 @@ export async function getReferenceDocsContent({
   };
 }
 
+/**
+ * A specific tool for fetching links inside threejs documentation, since the urls are not standard
+ */
 export async function fetchThreeJsUrlsAsMarkdown(
   urlsToFetch: { documentName?: string; url: string }[],
   env: any,
