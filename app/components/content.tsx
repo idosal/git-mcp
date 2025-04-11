@@ -307,7 +307,7 @@ export default function Content({
                   code={`{
   "mcpServers": {
     "${serverName}": {
-      "url": "${url}"
+      "url": "${url}",
       "disabled": false,
       "autoApprove": []
     }
