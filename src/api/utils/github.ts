@@ -51,7 +51,7 @@ export async function searchGitHubRepo(
         Accept: "application/vnd.github.v3+json",
         // Add GitHub token as environment variable if rate limits become an issue
         ...(env?.GITHUB_TOKEN
-          ? { Authorization: `token ${process?.env?.GITHUB_TOKEN}` }
+          ? { Authorization: `token ${env.GITHUB_TOKEN}` }
           : {}),
       },
     });
