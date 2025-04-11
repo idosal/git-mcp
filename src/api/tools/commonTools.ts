@@ -439,7 +439,7 @@ export async function searchRepositoryCode({
     const response = await fetch(searchUrl, {
       headers: {
         Accept: "application/vnd.github.v3+json",
-        ...(env?.GITHUB_TOKEN
+        ...(env.GITHUB_TOKEN
           ? { Authorization: `token ${env.GITHUB_TOKEN}` }
           : {}),
       },
