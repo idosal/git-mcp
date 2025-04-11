@@ -105,7 +105,7 @@ We welcome contributions! Please take a look at our [contribution](https://githu
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [Apache License 2.0](LICENSE).
 
 ## Disclaimer
 
