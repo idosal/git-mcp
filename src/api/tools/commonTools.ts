@@ -123,12 +123,26 @@ export async function fetchDocumentation({
       // Create array of all location+branch combinations to try
       const fetchPromises = possibleLocations.flatMap((location) => [
         {
-          promise: fetchFileFromGitHub(owner, repo, "main", location, env),
+          promise: fetchFileFromGitHub(
+            owner,
+            repo,
+            "main",
+            location,
+            env,
+            false,
+          ),
           location,
           branch: "main",
         },
         {
-          promise: fetchFileFromGitHub(owner, repo, "master", location, env),
+          promise: fetchFileFromGitHub(
+            owner,
+            repo,
+            "master",
+            location,
+            env,
+            false,
+          ),
           location,
           branch: "master",
         },
@@ -186,6 +200,7 @@ export async function fetchDocumentation({
         "main",
         "README.md",
         env,
+        false,
       );
       fileUsed = "readme.md (main branch)";
 

@@ -8,6 +8,8 @@ import { fetchRawFile } from "./githubClient.js";
  * @param repo - Repository name
  * @param branch - Branch name (main, master)
  * @param path - File path within the repository
+ * @param env - Environment for GitHub token
+ * @param useAuth - Whether to use authentication
  * @returns File content or null if not found
  */
 export async function fetchFileFromGitHub(
@@ -16,8 +18,9 @@ export async function fetchFileFromGitHub(
   branch: string,
   path: string,
   env: any,
+  useAuth = false,
 ): Promise<string | null> {
-  return await fetchRawFile(owner, repo, branch, path, env);
+  return await fetchRawFile(owner, repo, branch, path, env, useAuth);
 }
 
 // Helper: search for a file in a GitHub repository using the GitHub Search API
@@ -38,6 +41,7 @@ export async function searchGitHubRepo(
         cachedPath.branch,
         cachedPath.path,
         env,
+        true,
       );
       if (content) {
         return content;

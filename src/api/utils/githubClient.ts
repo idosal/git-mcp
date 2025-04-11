@@ -117,6 +117,7 @@ async function respectRateLimits(): Promise<void> {
  * @param options - Fetch options
  * @param env - Environment containing GitHub token if available
  * @param retryCount - Current retry attempt (used internally)
+ * @param useAuth - Whether to include authorization header if token is available (default: true)
  * @returns The API response or null if failed
  */
 export async function githubApiRequest(
@@ -124,13 +125,14 @@ export async function githubApiRequest(
   options: RequestInit = {},
   env: any,
   retryCount = 0,
+  useAuth = true,
 ): Promise<Response | null> {
   try {
     // Extract repository context for metrics
     const repoContext = extractRepoContextFromUrl(url);
 
     // Track GitHub query count using Cloudflare analytics
-    if (env?.CLOUDFLARE_ANALYTICS && retryCount === 0) {
+    if (env.CLOUDFLARE_ANALYTICS && retryCount === 0) {
       env.CLOUDFLARE_ANALYTICS.writeDataPoint({
         blobs: [url, repoContext],
         doubles: [1],
@@ -141,7 +143,7 @@ export async function githubApiRequest(
     // Wait for rate limit if necessary
     await respectRateLimits();
 
-    // Add GitHub authentication if token is available
+    // Add GitHub authentication if token is available and useAuth is true
     const headers = new Headers(options.headers || {});
     headers.set("Accept", "application/vnd.github.v3+json");
     headers.set(
@@ -149,7 +151,7 @@ export async function githubApiRequest(
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
     );
 
-    if (env?.GITHUB_TOKEN) {
+    if (useAuth && env.GITHUB_TOKEN) {
       headers.set("Authorization", `token ${env.GITHUB_TOKEN}`);
     }
 
@@ -286,6 +288,7 @@ export async function searchFileByName(
  * @param branch - Branch name
  * @param path - File path
  * @param env - Environment for GitHub token
+ * @param useAuth - Whether to use authentication
  */
 export async function fetchRawFile(
   owner: string,
@@ -293,12 +296,13 @@ export async function fetchRawFile(
   branch: string,
   path: string,
   env: any,
+  useAuth = false,
 ): Promise<string | null> {
   const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
 
   // Raw GitHub content doesn't need the GitHub API token
   // But we still use the client for rate limiting
-  const response = await githubApiRequest(url, {}, env);
+  const response = await githubApiRequest(url, {}, env, 0, useAuth);
 
   if (!response || !response.ok) {
     return null;
