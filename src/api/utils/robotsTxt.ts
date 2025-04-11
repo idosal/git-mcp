@@ -1,4 +1,8 @@
-import { cacheRobotsTxt, getCachedRobotsTxt } from "./cache.js";
+import {
+  cacheRobotsTxt,
+  fetchUrlContent,
+  getCachedRobotsTxt,
+} from "./cache.js";
 
 /**
  * Interface for robots.txt rule
@@ -184,10 +188,14 @@ export async function fetchFileWithRobotsTxtCheck(
       return { content: null, blockedByRobots: true };
     }
 
-    // If allowed, proceed with fetching
-    const response = await fetch(url);
+    // If allowed, use cached content or fetch
+    const content = await fetchUrlContent({
+      url,
+      format: "text",
+    });
+
     return {
-      content: response.ok ? await response.text() : null,
+      content: content as string,
       blockedByRobots: false,
     };
   } catch (error) {

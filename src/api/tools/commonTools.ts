@@ -620,33 +620,3 @@ export async function fetchUrlContent({ url, env }: { url: string; env: any }) {
     };
   }
 }
-
-// Define the format options and their corresponding return types
-type FormatOptions = {
-  text: string;
-  json: Record<string, unknown>;
-};
-
-const urlContentCache: Record<string, FormatOptions[keyof FormatOptions]> = {};
-
-// Use generic type parameter to constrain the format parameter
-export async function getUrlContentWithCache<T extends keyof FormatOptions>({
-  url,
-  env,
-  format,
-}: {
-  url: string;
-  env: any;
-  format: T;
-}): Promise<FormatOptions[T]> {
-  if (urlContentCache[url]) {
-    return urlContentCache[url] as FormatOptions[T];
-  }
-
-  const response = await fetch(url);
-  const result =
-    format === "json" ? await response.json() : await response.text();
-
-  urlContentCache[url] = result as FormatOptions[T];
-  return result as FormatOptions[T];
-}

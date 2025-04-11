@@ -1,5 +1,11 @@
 import type { RobotsRule } from "./robotsTxt.js";
 
+// Define the format options and their corresponding return types
+export type FormatOptions = {
+  text: string;
+  json: Record<string, unknown>;
+};
+
 // 12 hour TTL in seconds with jitter (base time ±20%)
 const BASE_TTL = 60 * 60 * 12; // 12 hours in seconds
 const JITTER_FACTOR = 0.2; // 20% jitter
@@ -29,6 +35,16 @@ export function getRepoFilePathCacheKey(owner: string, repo: string): string {
  */
 export function getIsIndexedCacheKey(owner: string, repo: string): string {
   return `vector_exists:${owner}:${repo}`;
+}
+
+/**
+ * Cache key structure for URL content
+ * @param url - The URL being cached
+ * @param format - The format of the content (json, text)
+ * @returns Cache key
+ */
+export function getUrlContentCacheKey(url: string, format: string): string {
+  return `url_content:${format}:${url}`;
 }
 
 /**
@@ -220,5 +236,53 @@ export async function cacheIsIndexed(
     console.log(`Cached vector existence for ${owner}/${repo}: ${exists}`);
   } catch (error) {
     console.warn("Failed to save vector existence to cache:", error);
+  }
+}
+
+/**
+ * Fetch URL content with Cloudflare's tiered cache
+ * @param url - URL to fetch
+ * @param format - Format of the content (json, text)
+ * @returns Content from the URL or null on error
+ */
+export async function fetchUrlContent<T extends keyof FormatOptions>({
+  url,
+  format,
+}: {
+  url: string;
+  format: string;
+}): Promise<FormatOptions[T] | null> {
+  try {
+    console.log(`Fetching ${url} with Cloudflare tiered cache`);
+
+    const cfCacheOptions = {
+      cacheEverything: true,
+      cacheTtlByStatus: {
+        "200-299": 3600, // Cache successful responses for 1 hour
+        "404": 60, // Cache "Not Found" responses for 60 seconds
+        "500-599": 0, // Do not cache server error responses
+      },
+    };
+
+    // Use Cloudflare's tiered cache for content requests
+    const response = await fetch(url, {
+      cf: cfCacheOptions,
+    });
+
+    // Don't proceed with unsuccessful responses
+    if (!response.ok) {
+      console.log(
+        `Error fetching ${url}: ${response.status} ${response.statusText}`,
+      );
+      return null;
+    }
+
+    // Process the response based on requested format
+    const result =
+      format === "json" ? await response.json() : await response.text();
+    return result as FormatOptions[T];
+  } catch (error) {
+    console.warn(`Failed to fetch URL content (${url}):`, error);
+    return null;
   }
 }

@@ -1,5 +1,5 @@
 import htmlToMd from "html-to-md";
-import { getUrlContentWithCache } from "../../commonTools.js";
+import { fetchUrlContent } from "src/api/utils/cache.js";
 
 const THREEJS_BASE_URL = "https://threejs.org";
 const THREEJS_DOCS_BASE_URL = `${THREEJS_BASE_URL}/docs`;
@@ -76,16 +76,14 @@ async function getReferenceDocsList({ env }: { env: any }): Promise<{
   manual: Record<string, Record<string, string>>;
 }> {
   const [docs, manual] = await Promise.all([
-    (await getUrlContentWithCache({
+    (await fetchUrlContent({
       url: THREEJS_DOCS_REF_URL,
-      env,
       format: "json",
     })) as {
       en: Record<string, Record<string, Record<string, string>>>;
     },
-    (await getUrlContentWithCache({
+    (await fetchUrlContent({
       url: THREEJS_MANUAL_REF_URL,
-      env,
       format: "json",
     })) as {
       en: Record<string, Record<string, string>>;
@@ -191,7 +189,7 @@ export async function getReferenceDocsContent({
     }),
   );
 
-  const content = await fetchThreeJsUrlsAsMarkdown(urlsToFetch, env);
+  const content = await fetchThreeJsUrlsAsMarkdown(urlsToFetch);
 
   return {
     filesUsed: urlsToFetch.map(({ url }) => url),
@@ -209,7 +207,6 @@ export async function getReferenceDocsContent({
  */
 export async function fetchThreeJsUrlsAsMarkdown(
   urlsToFetch: { documentName?: string; url: string }[],
-  env: any,
 ) {
   // get the html content of each page
   const htmlContent = await Promise.all(
@@ -235,14 +232,19 @@ export async function fetchThreeJsUrlsAsMarkdown(
           console.error(`Error getting document name from url ${url}`, e);
         }
       }
-      const text = await getUrlContentWithCache({
+      const text = await fetchUrlContent({
         url: urlToFetch.toString(),
-        env,
         format: "text",
       });
+
+      if (!text) {
+        console.error(`Error fetching url ${urlToFetch}`);
+        throw new Error(`Error fetching url ${urlToFetch}`);
+      }
+
       return {
         documentName: documentName ?? urlToFetch.pathname,
-        text: text.replace(
+        text: (text as string).replace(
           new RegExp(`\\[name\\]`, "g"),
           documentNameToUse ?? "[name]",
         ),
