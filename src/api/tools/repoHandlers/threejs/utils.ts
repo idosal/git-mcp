@@ -1,5 +1,5 @@
 import htmlToMd from "html-to-md";
-import { fetchUrlContent } from "src/api/utils/cache.js";
+import { fetchUrlContent } from "../../../utils/cache.js";
 
 const THREEJS_BASE_URL = "https://threejs.org";
 const THREEJS_DOCS_BASE_URL = `${THREEJS_BASE_URL}/docs`;
