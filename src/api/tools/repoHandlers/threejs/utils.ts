@@ -192,17 +192,7 @@ export async function getReferenceDocsContent({
     }),
   );
 
-  const content = await fetchThreeJsUrlsAsMarkdown(urlsToFetch);
-
-  return {
-    filesUsed: urlsToFetch.map(({ url }) => url),
-    content: [
-      {
-        type: "text" as const,
-        text: content,
-      },
-    ],
-  };
+  return await fetchThreeJsUrlsAsMarkdown(urlsToFetch);
 }
 
 /**
@@ -210,7 +200,10 @@ export async function getReferenceDocsContent({
  */
 export async function fetchThreeJsUrlsAsMarkdown(
   urlsToFetch: { documentName?: string; url: string }[],
-) {
+): Promise<{
+  filesUsed: string[];
+  content: { type: "text"; text: string }[];
+}> {
   // get the html content of each page
   const htmlContent = await Promise.all(
     urlsToFetch.map(async ({ documentName, url }) => {
@@ -267,5 +260,13 @@ export async function fetchThreeJsUrlsAsMarkdown(
       `;
   }, "");
 
-  return content;
+  return {
+    filesUsed: urlsToFetch.map(({ url }) => url),
+    content: [
+      {
+        type: "text" as const,
+        text: content,
+      },
+    ],
+  };
 }
