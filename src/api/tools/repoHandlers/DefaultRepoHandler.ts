@@ -25,7 +25,7 @@ class DefaultRepoHandler implements RepoHandler {
       {
         name: fetchToolName,
         description: fetchToolDescription,
-        paramsSchema: {},
+        paramsSchema: undefined,
         cb: async () => {
           return fetchDocumentation({ repoData, env });
         },
