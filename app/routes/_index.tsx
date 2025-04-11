@@ -78,7 +78,7 @@ export default function Home() {
               <div className="flex items-center w-full my-4">
                 <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent to-gray-700"></div>
                 <div className="px-4 py-1 bg-gray-800 text-gray-400 text-sm rounded-full border border-gray-700">
-                  Oh, and one more thing!
+                  Oh, one more thing!
                 </div>
                 <div className="h-0.5 flex-1 bg-gradient-to-l from-transparent to-gray-700"></div>
               </div>
