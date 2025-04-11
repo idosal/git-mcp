@@ -1,6 +1,6 @@
 # GitMCP
 
-<img width="1148" alt="image" src="https://github.com/user-attachments/assets/e0c719d2-62f4-450e-90f3-c7dd0194f0b9" />
+<img width="1092" alt="image" src="https://github.com/user-attachments/assets/7f82dc7a-1516-42c4-b779-84e783935782" />
 
 <p align="center">
   <a href="#features">Features</a> •
