@@ -102,7 +102,7 @@ export function getRepoData(requestData: RequestData): RepoData {
 }
 
 function log(...args: any[]) {
-  console.log(...args);
+  // console.log(...args);
 }
 
 export const HOST_TEMP_URL = "remote-mcp-server-cf.idosalomon.workers.dev";

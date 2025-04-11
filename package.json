@@ -17,10 +17,16 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "src/**/*.ts*": [
+    "src/**/*.ts": [
       "prettier --write"
     ],
-    "app/**/*.ts*": [
+    "src/**/*.tsx": [
+      "prettier --write"
+    ],
+    "app/**/*.ts": [
+      "prettier --write"
+    ],
+    "app/**/*.tsx": [
       "prettier --write"
     ]
   },
