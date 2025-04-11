@@ -113,9 +113,7 @@ export default {
     ctx.props.request = request;
 
     if (isMessage) {
-      // Add CORS headers to MCP message response
-      const response = await mcpHandler.fetch(request, env, ctx);
-      return addCorsHeaders(response);
+      return await mcpHandler.fetch(request, env, ctx);
     }
 
     if (isSse) {
@@ -128,15 +126,13 @@ export default {
         headers: newHeaders,
       });
 
-      // Handle SSE request with MCP handler and add CORS headers
-      const response = await mcpHandler.fetch(modifiedRequest, env, ctx);
-      return addCorsHeaders(response);
+      // Handle SSE request with MCP handler
+      return await mcpHandler.fetch(modifiedRequest, env, ctx);
     } else {
-      // Default to serving the regular page with CORS headers
-      const response = await requestHandler(request, {
+      // Default to serving the regular page
+      return requestHandler(request, {
         cloudflare: { env, ctx },
       });
-      return addCorsHeaders(response);
     }
   },
 };
