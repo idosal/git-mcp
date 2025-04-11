@@ -62,6 +62,8 @@ export default function Content({
         return "https://codeium.com/favicon.ico";
       case "VSCode":
         return "https://code.visualstudio.com/assets/favicon.ico";
+      case "Cline":
+        return "https://cline.bot/assets/icons/favicon-32x32.png";
       default:
         return "https://codeium.com/favicon.ico";
     }
@@ -144,7 +146,7 @@ export default function Content({
           {/* Tabs for different integrations */}
           <div className="mb-6">
             <div className="flex flex-wrap border-b border-slate-200 mb-4">
-              {["Cursor", "Claude Desktop", "Windsurf", "VSCode"].map(
+              {["Cursor", "Claude Desktop", "Windsurf", "VSCode", "Cline"].map(
                 (tab, index) => (
                   <button
                     key={tab}
@@ -290,6 +292,32 @@ export default function Content({
                 />
               </div>
             </div>
+
+            <div id="tab-cline" className="tab-content hidden">
+              <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
+                <p className="text-sm text-slate-700 mb-2">
+                  To add this MCP to Cline, update your{" "}
+                  <code className="bg-slate-200 px-1.5 py-0.5 rounded text-blue-700 break-words">
+                    ~/Library/Application
+                    Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json
+                  </code>
+                  :
+                </p>
+                <CodeExample
+                  code={`{
+  "mcpServers": {
+    "${serverName}": {
+      "url": "${url}"
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}`}
+                  id="cline"
+                  name="Cline"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -345,6 +373,19 @@ export default function Content({
               className="h-6 w-6 mr-2"
             />
             VSCode
+          </a>
+          <a
+            href="https://cline.tools"
+            className="text-blue-600 hover:text-blue-800 flex items-center transition-colors"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src={getToolFaviconUrl("Cline")}
+              alt="Cline"
+              className="h-6 w-6 mr-2"
+            />
+            Cline
           </a>
         </div>
       </div>
