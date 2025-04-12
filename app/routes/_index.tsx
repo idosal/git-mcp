@@ -1,6 +1,83 @@
-import { Github, Code, Globe, Zap } from "lucide-react";
+import {
+  Github,
+  Code,
+  Globe,
+  Zap,
+  ArrowRight,
+  ExternalLink,
+} from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const [url, setUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    // Basic URL validation
+    let processedUrl = url.trim();
+    if (!processedUrl) {
+      setError("Please use a valid GitHub URL");
+      return;
+    }
+
+    // Add https:// if not present
+    if (!/^https?:\/\//i.test(processedUrl)) {
+      processedUrl = `https://${processedUrl}`;
+    }
+
+    let targetUrl: string | null = null;
+
+    try {
+      const urlObj = new URL(processedUrl);
+      const hostname = urlObj.hostname;
+      const pathname = urlObj.pathname.replace(/^\/+|\/+$/g, "");
+
+      // Case 1: GitHub repository URL (github.com/owner/repo)
+      if (hostname === "github.com") {
+        const parts = pathname.split("/");
+        if (parts.length >= 2) {
+          const owner = parts[0];
+          const repo = parts[1];
+          if (owner && repo) {
+            targetUrl = `https://gitmcp.io/${owner}/${repo}`;
+          }
+        }
+      }
+      // Case 2: GitHub Pages URL (owner.github.io/repo)
+      else if (hostname.endsWith("github.io")) {
+        const owner = hostname.replace(".github.io", "");
+        if (owner && pathname) {
+          const repo = pathname.split("/")[0];
+          if (repo) {
+            targetUrl = `https://${owner}.gitmcp.io/${repo}`;
+          }
+        }
+      }
+
+      if (!targetUrl) {
+        setError(
+          "Invalid GitHub URL format. Please use github.com/owner/repo or owner.github.io/repo",
+        );
+        return;
+      }
+
+      // Open the GitMCP URL in a new tab
+      window.open(targetUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setError("Please enter a valid URL");
+    }
+  };
+
+  const handleTryExample = () => {
+    setUrl("github.com/langchain-ai/langgraph");
+    setError(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       {/* GitHub Link */}
@@ -19,7 +96,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-gray-800 [mask-image:linear-gradient(0deg,rgba(17,24,39,0.7),rgba(17,24,39,0.5))] bg-[length:20px_20px]"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 sm:pb-6">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 sm:py-8 sm:pb-6">
           <div className="text-center">
             <div className="flex justify-center">
               <img
@@ -48,7 +125,46 @@ export default function Home() {
           <div className="text-center mb-8 sm:mb-16">
             <div className="mt-0 max-w-3xl mx-auto sm:mt-6">
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-3">
-                <div className="flex flex-col sm:flex-row items-center pb-3">
+                <form onSubmit={handleSubmit} className="mb-3 mx-12">
+                  <div className="flex rounded-md shadow-sm">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        name="github-url"
+                        id="github-url"
+                        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 pl-3 pr-28 text-base text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        placeholder="Example: github.com/langchain-ai/langgraph"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleTryExample}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-gray-600 hover:bg-gray-500 text-xs text-gray-200 rounded-md transition-colors duration-200"
+                      >
+                        Try Example
+                      </button>
+                    </div>
+                    <button
+                      type="submit"
+                      className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-base font-bold font-mono rounded-md shadow-sm text-gray-900 bg-emerald-400 from-emerald-400 to-emerald-500 hover:from-emerald-400 hover:via-cyan-500/20 hover:to-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+                    >
+                      <span className="text-gray-800">To MCP!</span>
+                    </button>
+                  </div>
+                  {error && (
+                    <p
+                      className="mt-2 text-sm text-red-400"
+                      id="github-url-error"
+                    >
+                      {error}
+                    </p>
+                  )}
+                </form>
+                <div className="flex justify-center py-1">
+                  <div className="w-48 h-px bg-gray-700/70"></div>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center pb-3 pt-2">
                   <div className="flex-1 flex items-center justify-center sm:justify-end text-gray-300 text-sm sm:text-lg font-mono px-2 sm:px-4 mb-2 sm:mb-0">
                     github.com/username/repo
                   </div>
@@ -94,6 +210,7 @@ export default function Home() {
                   <b>gitmcp.io/docs</b>
                 </div>
               </div>
+
               <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto font-light px-2">
                 Simply change the domain from{" "}
                 <span className="text-gray-200 font-medium">github.com</span> or{" "}
@@ -358,7 +475,7 @@ export default function Home() {
               >
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl shadow-lg flex items-center justify-center mb-3 group-hover:from-gray-650 group-hover:to-gray-750 transition-all">
                   <img
-                    src="https://cline.bot/assets/icons/favicon-32x32.png"
+                    src="https://cline.bot/assets/icons/favicon-256x256.png"
                     alt="Cline"
                     className="h-8 w-8 sm:h-10 sm:w-10"
                   />
@@ -373,7 +490,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-950 text-gray-400 py-8 sm:py-12">
+      <footer className="bg-gray-950 text-gray-400 py-4 sm:py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">

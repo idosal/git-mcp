@@ -63,7 +63,7 @@ export default function Content({
       case "VSCode":
         return "https://code.visualstudio.com/assets/favicon.ico";
       case "Cline":
-        return "https://cline.bot/assets/icons/favicon-32x32.png";
+        return "https://cline.bot/assets/icons/favicon-256x256.png";
       default:
         return "https://codeium.com/favicon.ico";
     }
