@@ -1,18 +1,10 @@
-import {
-  Github,
-  Code,
-  Globe,
-  Zap,
-  ArrowRight,
-  ExternalLink,
-} from "lucide-react";
+import { Github, Code, Globe, Zap } from "lucide-react";
 import { useState, type FormEvent, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import Typewriter from "typewriter-effect";
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -96,7 +88,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-gray-800 [mask-image:linear-gradient(0deg,rgba(17,24,39,0.7),rgba(17,24,39,0.5))] bg-[length:20px_20px]"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 sm:py-8 sm:pb-6">
+        <div className="relative max-w-7xl mx-auto px-4 pb-2 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex justify-center">
               <img
@@ -106,17 +98,27 @@ export default function Home() {
               />
             </div>
             <h1 className="max-w-4xl mx-auto text-4xl sm:text-5xl md:text-[72px] font-bold tracking-tight my-6 mb-2 text-white">
-              {/* <h1 className="max-w-4xl mx-auto text-4xl sm:text-5xl md:text-[72px] font-bold tracking-tight my-6 mb-0 bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x"> */}
               GitMCP
             </h1>
             <Carousel />
-            <p className="max-w-3xl mx-auto text-lg sm:text-xl md:text-3xl font-light tracking-tight text-gray-300/90 leading-relaxed">
-              Instantly create a{" "}
+            <div className="max-w-3xl mx-auto flex flex-wrap justify-center text-lg sm:text-xl md:text-3xl font-light tracking-tight text-gray-300/90 leading-relaxed">
+              <span>Instantly available&nbsp;</span>
               <span className="text-emerald-400 font-medium">
-                Remote MCP server
-              </span>{" "}
-              for any GitHub repository
-            </p>
+                remote MCP server&nbsp;
+              </span>
+              <span>for any GitHub&nbsp;</span>
+              <Typewriter
+                options={{
+                  strings: ["repository", "pages"],
+                  autoStart: true,
+                  loop: true,
+                  delay: 40,
+                  deleteSpeed: 15,
+                  pauseFor: 3000,
+                  cursor: "|",
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -145,6 +147,7 @@ export default function Home() {
                   bold={["gitmcp.io", "any"]}
                 />
               </div>
+
               <Divider text="or use this to convert any GitHub URL" />
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-8">
                 <form onSubmit={handleSubmit} className="mb-3 mx-12">
@@ -184,14 +187,6 @@ export default function Home() {
                   )}
                 </form>
               </div>
-
-              <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto font-light px-2">
-                Simply change the domain from{" "}
-                <span className="text-gray-200 font-medium">github.com</span> or{" "}
-                <span className="text-gray-200 font-medium">github.io</span> to{" "}
-                <span className="text-emerald-400 font-medium">gitmcp.io</span>{" "}
-                and get instant AI context for any GitHub repository.
-              </p>
             </div>
           </div>
 

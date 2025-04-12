@@ -50,6 +50,7 @@
     "react-dom": "^19.0.0",
     "react-router": "^7.3.0",
     "react-router-dom": "^7.5.0",
+    "typewriter-effect": "^2.21.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
