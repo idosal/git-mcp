@@ -20,7 +20,9 @@
 </div>
 
 ## What is GitMCP?
-**The end to vibe-hallucinating!** [GitMCP](https://gitmcp.io) is a free, open-source, remote [Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) server that transforms **any** GitHub project (repositories or GitHub pages) into a documentation hub. It allows AI tools like Cursor to access up-to-date documentation and code, ending hallucinations seamlessly.
+**Stop vibe-hallucinating and start vibe-coding!**
+
+[GitMCP](https://gitmcp.io) is a free, open-source, remote [Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) server that transforms **any** GitHub project (repositories or GitHub pages) into a documentation hub. It allows AI tools like Cursor to access up-to-date documentation and code, ending hallucinations seamlessly.
 
 
 ## Features
