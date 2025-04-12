@@ -4,7 +4,8 @@
 
 <p align="center">
   <a href="#features">Features</a> •
-  <a href="#usage">Usage</a> •
+  <a href="#what-is-gitmcp">What is GitMCP</a> •
+  <a href="#getting-started">Getting Started</a> •
   <a href="#how-it-works">How It Works</a> •
   <a href="#examples">Examples</a> •
   <a href="#faq">FAQ</a> •
@@ -19,61 +20,183 @@
 </div>
 
 ## What is GitMCP?
+**The end to vibe-hallucinating!** [GitMCP](https://gitmcp.io
+) is a free, open-source, remote [Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) server that transforms **any** GitHub project (repositories or GitHub pages) to a documentation hub. It allows AI tools like Cursor to seamlessly access up-to-date documentation and code, putting an end to hallucinations.
 
-GitMCP is a free, open-source service that seamlessly transforms any GitHub project into a remote [Model Context Protocol (MCP)](https://modelcontextprotocol.github.io/) endpoint, enabling AI assistants to access and understand the project's documentation effortlessly.
 
 ## Features
 
-- **Empower AI with GitHub Project Access**: Direct your AI assistant to GitMCP for instant access to any GitHub project's documentation, complete with semantic search capabilities to optimize token usage.
-- **Zero Setup Required**: No configurations or modifications needed — GitMCP works out of the box.
-- **Completely Free and Private**: GitMCP is free. We don't collect any personally identifiable information or queries. Plus, you can host it yourself!
-
-## Getting Started (Usage)
-
-To make your GitHub repository accessible to AI assistants via GitMCP, use the following URL formats:
-
-- For GitHub repositories: `gitmcp.io/{owner}/{repo}` 
-- For GitHub Pages sites: `{owner}.gitmcp.io/{repo}`
-- Dynamic endpoint: `gitmcp.io/docs`
-
-Congratulations! The chosen GitHub project is now fully accessible to your AI.
-
-Replace `{owner}` with your GitHub username or organization name and `{repo}` with your repository name. Once configured, your AI assistant can access the project's documentation seamlessly.
-The dynamic endpoint doesn't require a pre-defined repository. When used, your AI assistant can dynamically input any GitHub repository to enjoy GitMCP's features.
+- **Empower AI with the Latest Documentation on Any GitHub project**: Grant your AI assisstant seamless access to GitHub project's documentatio and code. The built-in smart search capabilities help find exactly what the AI needs without using too many tokens!
+- **No Setup Needed**: Simply add the chosen GitMCP URL as an MCP server in your IDE - no downloads, installations, signups, or changes required.
+- **Free and Privacy-Focused**: GitMCP is open-source and is completely free to use. It doesn't collect any personal information or store your queries. You can even self-host it!
 
 <video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video>
 
+## Getting Started
+
+Using GitMCP is as easy as it gets! Just follow these steps:
+
+### Step 1: Choose the type of server you want
+
+Choose one of these URL formats depending on what you want to connect to:
+
+- For GitHub repositories: `gitmcp.io/{owner}/{repo}` 
+- For GitHub Pages sites: `{owner}.gitmcp.io/{repo}`
+- For any repository (dynamic): `gitmcp.io/docs`
+
+Replace `{owner}` with the GitHub username or organization name, and `{repo}` with the repository name.
+
+### Step 2: Connect your AI assistant
+
+Select your AI assistant from the options below and follow the configuration instructions:
+
+#### Connecting Cursor
+
+1. Update your Cursor configuration file at `~/.cursor/mcp.json`:
+   ```json
+   {
+     "mcpServers": {
+       "gitmcp": {
+         "url": "https://gitmcp.io/{owner}/{repo}"
+       }
+     }
+   }
+   ```
+
+#### Connecting Claude Desktop
+
+1. In Claude Desktop, go to Settings > Developer > Edit Config
+2. Replace the configuration with:
+   ```json
+   {
+     "mcpServers": {
+       "gitmcp": {
+         "command": "npx",
+         "args": [
+           "mcp-remote",
+           "https://gitmcp.io/{owner}/{repo}"
+         ]
+       }
+     }
+   }
+   ```
+
+#### Connecting Windsurf
+
+1. Update your Windsurf configuration file at `~/.codeium/windsurf/mcp_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "gitmcp": {
+         "serverUrl": "https://gitmcp.io/{owner}/{repo}"
+       }
+     }
+   }
+   ```
+
+#### Connecting VSCode
+
+1. Update your VSCode configuration file at `.vscode/mcp.json`:
+   ```json
+   {
+     "servers": {
+       "gitmcp": {
+         "type": "sse",
+         "url": "https://gitmcp.io/{owner}/{repo}"
+       }
+     }
+   }
+   ```
+
+#### Connecting Cline
+
+1. Update your Cline configuration file at `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`:
+   ```json
+   {
+     "mcpServers": {
+       "gitmcp": {
+         "url": "https://gitmcp.io/{owner}/{repo}",
+         "disabled": false,
+         "autoApprove": []
+       }
+     }
+   }
+   ```
+
+> **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.
+
 ## How It Works
 
-GitMCP serves as a bridge between your GitHub repository's documentation and AI assistants by implementing the Model Context Protocol (MCP). When an AI assistant requires information from your repository, it sends a request to GitMCP. GitMCP retrieves the relevant content and provides semantic search capabilities, ensuring efficient and accurate information delivery.
+GitMCP connects your AI assistant to GitHub repositories using the Model Context Protocol (MCP), which is a standard that lets AI tools request additional information from external sources.
+
+What happens when you use GitMCP:
+
+1. **You provide the GitMCP URL** to your AI assistant (e.g., `gitmcp.io/microsoft/typescript`). GitMCP exposes tools like documentation fetching, smart search, code search, etc.
+2. **Prompt the AI assistant** on a documentation/code-related questions.
+2. **Your AI send requests** to GitMCP to use its tools (with your approval).
+3. **GitMCP executes the AI's request** and returns the requested data.
+5. **Your AI receives the information** and generates a more accurate, grounded, response without hallucinations.
 
 ## Examples
 
-Here are some examples of how to use GitMCP with different repositories:
+Here are some examples of how to use GitMCP with different AI assistants and repositories:
 
-- **Example 1**: For the repository `https://github.com/octocat/Hello-World`, use: `https://gitmcp.io/octocat/Hello-World`
-- **Example 2**: For the GitHub Pages site `langchain-ai.github.io/langgraph`, use: `https://langchain-ai.gitmcp.io/langgraph`
-- **Example 3**: Use the generic `gitmcp.io/docs` endpoint for your AI to dynamically select a repository
+### Example 1: Using Windsurf with a specific repository
 
-These URLs enable AI assistants to access and interact with the project's documentation through GitMCP.
+For the GitHub repository `https://github.com/microsoft/playwright-mcp`, add `https://gitmcp.io/microsoft/playwright-mcp` as an MCP server to Windsurf.
+
+**Prompt to Claude:**
+> "How do I use the Playwright MCP"
+
+Windsurf will pull the relevant documentation from GitMCP to correctly implement the memory feature.
+
+### Example 2: Using Cursor with a GitHub Pages site
+
+For the GitHub Pages site `langchain-ai.github.io/langgraph, add `https://langchain-ao.gitmcp.io/langgraph` as an MCP server to Cursor.
+
+**Prompt to Cursor:**
+> "Add memory to my LangGraph agent"
+
+Cursor will pull the relevant documentation and code from GitMCP to correctly implement the memory feature.
+
+### Example 3: Using Claude Desktop with the dynamic endpoint
+
+You don't have to pick specific repositories. The generic `gitmcp.io/docs` endpoint allows AI to pick the GitHub project on the fly!
+
+**Prompt to any AI assistant:**
+> "I want to learn about the OpenAI Whisper speech recognition model. Explain how it works.
+
+Claude will pull the data from GitMCP and answer the question.
 
 ## Tools
 
-GitMCP provides a set of tools that can be used to access and interact with the project's documentation.
+GitMCP provides AI assistants with several useful tools to help them access and understand GitHub repositories. These tools XXXXXX
 
-### `fetch_<repo-name>_documentation`: 
-Fetches the documentation for the `{owner}/{repo}` GitHub repository (as extracted from the URL: `gitmcp.io/{owner}/{repo}` or `{owner}.gitmcp.io/{repo}`). Useful for general questions. Retrieves the `llms.txt` file and falls back to `README.md` or other pages if the former is unavailable.
+### `fetch_<repo-name>_documentation`
 
-### `search_<repo-name>_documentation`: 
-It searches the repository's documentation by providing a `query`. This is useful for specific questions. It uses semantic search to find the most relevant documentation. This mitigates the cost of a large documentation set that cannot be provided as direct context to LLMs.
+This tool gets the main documentation from a GitHub repository. It works by retrieving relevant documentation (e.g., `llms.txt`). This gives the AI a good overview of what the project is about
 
-### `fetch_url_content`:
-Fetches content from a URL that was referenced in previously retrieved documentation and converts it to markdown. This enables the AI assistant to access and process additional resources linked within the project documentation (extremely handy for `llms.txt`).
+**When it's useful:** For general questions about a project's purpose, features, or how to get started
 
-### `search_<repo-name>_code`:
-Searches code in the repository using the GitHub code search API. Provides results of code matching the search query, helping AI assistants find relevant implementation details and examples within the codebase.
+### `search_<repo-name>_documentation`
 
-> Note: In the case of a generic `gitmcp.com/docs` usage, the tools are called `fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`. They receive additional `owner` and `repo` arguments.
+This tool lets the AI search through a repository's documentation by providing a specific search query. Instead of loading all documentation (which could be very large), it uses smart search to find just the relevant parts.
+
+**When it's useful:** For specific questions about particular features, functions, or concepts within a project
+
+### `fetch_url_content`
+
+This tool helps the AI get information from links mentioned in the documentation. It retrieves the content from those links and converts it to a format the AI can easily read.
+
+**When it's useful:** When documentation references external information that would help answer your question
+
+### `search_<repo-name>_code`
+
+This tool searches through the actual code in the repository using GitHub's code search. It helps AI find specific code examples or implementation details.
+
+**When it's useful:** When you want examples of how something is implemented or need technical details not covered in documentation
+
+> **Note:** When using the dynamic endpoint (`gitmcp.io/docs`), these tools are named slightly differently (`fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`) and need additional information about which repository to access.
 
 ## FAQ
 
@@ -102,6 +225,40 @@ GitMCP only accesses content that is already publicly available and only when qu
 ## Contributing
 
 We welcome contributions! Please take a look at our [contribution](https://github.com/idosal/git-mcp/blob/main/.github/CONTRIBUTING.md) guidelines.
+
+### Local Development Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/idosal/git-mcp.git
+   cd git-mcp
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or if you prefer pnpm
+   pnpm install
+   ```
+
+3. **Run locally for development**
+   ```bash
+   npm run dev
+   # or
+   pnpm dev
+   ```
+
+#### Using MCP Inspector for Testing
+
+1. Install the MCP Inspector tool:
+   ```bash
+   npx @modelcontextprotocol/inspector
+   ```
+
+2. In the inspector interface (http://localhost:5173):
+   - Set Transport Type to `SSE`
+   - Enter your GitMCP URL (e.g., `http://localhost:8787/docs`)
+   - Click "Connect"
 
 ## License
 
