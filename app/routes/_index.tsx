@@ -351,7 +351,7 @@ export default function Home() {
 
             <div className="flex flex-col items-center">
               <a
-                href="https://cline.tools"
+                href="https://cline.bot"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group hover:opacity-90 transition-opacity flex flex-col items-center"
