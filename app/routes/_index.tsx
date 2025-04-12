@@ -6,7 +6,7 @@ import {
   ArrowRight,
   ExternalLink,
 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
@@ -49,7 +49,7 @@ export default function Home() {
         }
       }
       // Case 2: GitHub Pages URL (owner.github.io/repo)
-      else if (hostname.endsWith("github.io")) {
+      else if (hostname.endsWith(".github.io")) {
         const owner = hostname.replace(".github.io", "");
         if (owner && pathname) {
           const repo = pathname.split("/")[0];
@@ -102,18 +102,20 @@ export default function Home() {
               <img
                 src="/img/icon_cropped.png"
                 alt="GitMCP Logo"
-                className="h-auto w-56 sm:w-80"
+                className="h-auto w-48 sm:w-64 mt-6"
               />
             </div>
-            <h1 className="max-w-4xl mx-auto text-4xl sm:text-5xl md:text-[72px] font-bold tracking-tight my-6 bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x">
+            <h1 className="max-w-4xl mx-auto text-4xl sm:text-5xl md:text-[72px] font-bold tracking-tight my-6 mb-2 text-white">
+              {/* <h1 className="max-w-4xl mx-auto text-4xl sm:text-5xl md:text-[72px] font-bold tracking-tight my-6 mb-0 bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x"> */}
               GitMCP
             </h1>
+            <Carousel />
             <p className="max-w-3xl mx-auto text-lg sm:text-xl md:text-3xl font-light tracking-tight text-gray-300/90 leading-relaxed">
               Instantly create a{" "}
               <span className="text-emerald-400 font-medium">
                 Remote MCP server
               </span>{" "}
-              for any GitHub project
+              for any GitHub repository
             </p>
           </div>
         </div>
@@ -125,6 +127,26 @@ export default function Home() {
           <div className="text-center mb-8 sm:mb-16">
             <div className="mt-0 max-w-3xl mx-auto sm:mt-6">
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-3">
+                <Example
+                  from="github.com/username/repo"
+                  to="gitmcp.io/username/repo"
+                  bold="gitmcp.io"
+                />
+                <Divider simple />
+                <Example
+                  from="username.github.io/repo"
+                  to="username.gitmcp.io/repo"
+                  bold="gitmcp.io"
+                />
+                <Divider simple />
+                <Example
+                  from="any GitHub repository"
+                  to="gitmcp.io/docs"
+                  bold={["gitmcp.io", "any"]}
+                />
+              </div>
+              <Divider text="Or convert any GitHub URL" />
+              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-8">
                 <form onSubmit={handleSubmit} className="mb-3 mx-12">
                   <div className="flex rounded-md shadow-sm">
                     <div className="relative flex-1">
@@ -161,54 +183,6 @@ export default function Home() {
                     </p>
                   )}
                 </form>
-                <div className="flex justify-center py-1">
-                  <div className="w-48 h-px bg-gray-700/70"></div>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center pb-3 pt-2">
-                  <div className="flex-1 flex items-center justify-center sm:justify-end text-gray-300 text-sm sm:text-lg font-mono px-2 sm:px-4 mb-2 sm:mb-0">
-                    github.com/username/repo
-                  </div>
-                  <div className="mx-2 sm:mx-4 text-gray-500 transform rotate-90 sm:rotate-0">
-                    →
-                  </div>
-                  <div className="flex-1 flex items-center justify-center sm:justify-start text-emerald-400 text-sm sm:text-lg font-mono px-2 sm:px-4">
-                    <b>gitmcp.io</b>/username/repo
-                  </div>
-                </div>
-                <div className="flex justify-center py-1">
-                  <div className="w-48 h-px bg-gray-700/70"></div>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center pt-3">
-                  <div className="flex-1 flex items-center justify-center sm:justify-end text-gray-300 text-sm sm:text-lg font-mono px-2 sm:px-4 mb-2 sm:mb-0">
-                    username.github.io/repo
-                  </div>
-                  <div className="mx-2 sm:mx-4 text-gray-500 transform rotate-90 sm:rotate-0">
-                    →
-                  </div>
-                  <div className="flex-1 flex items-center justify-center sm:justify-start text-emerald-400 text-sm sm:text-lg font-mono px-2 sm:px-4">
-                    username.<b>gitmcp.io</b>/repo
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center w-full my-4">
-                <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent to-gray-700"></div>
-                <div className="px-4 py-1 bg-gray-800 text-gray-400 text-sm rounded-full border border-gray-700">
-                  Oh, one more thing!
-                </div>
-                <div className="h-0.5 flex-1 bg-gradient-to-l from-transparent to-gray-700"></div>
-              </div>
-
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-6 sm:mb-8 flex flex-col sm:flex-row items-center">
-                <div className="flex-1 flex items-center justify-center sm:justify-end text-gray-300 text-sm sm:text-lg font-mono px-2 sm:px-4 mb-2 sm:mb-0">
-                  <b>any</b>&nbsp;GitHub repository
-                </div>
-                <div className="mx-2 sm:mx-4 text-gray-500 transform rotate-90 sm:rotate-0">
-                  →
-                </div>
-                <div className="flex-1 flex items-center justify-center sm:justify-start text-emerald-400 text-sm sm:text-lg font-mono px-2 sm:px-4">
-                  <b>gitmcp.io/docs</b>
-                </div>
               </div>
 
               <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto font-light px-2">
@@ -505,6 +479,128 @@ export default function Home() {
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function Example({
+  from,
+  to,
+  bold,
+}: {
+  from: string;
+  to: string;
+  bold: string | string[];
+}) {
+  const withBold = (text: string) => {
+    let result = text;
+    const boldArray = Array.isArray(bold) ? bold : [bold];
+    boldArray.forEach((b) => {
+      result = result.replace(b, `<b>${b}</b>`);
+    });
+    return result;
+  };
+  return (
+    <div className="flex flex-col sm:flex-row items-center pb-3 pt-2">
+      <div className="flex-1 flex items-center justify-center sm:justify-end text-gray-300 text-sm sm:text-lg font-mono px-2 sm:px-4 mb-2 sm:mb-0">
+        <span dangerouslySetInnerHTML={{ __html: withBold(from) }} />
+      </div>
+      <div className="mx-2 sm:mx-4 text-gray-500 transform rotate-90 sm:rotate-0">
+        →
+      </div>
+      <div className="flex-1 flex items-center justify-center sm:justify-start text-emerald-400 text-sm sm:text-lg font-mono px-2 sm:px-4">
+        <span dangerouslySetInnerHTML={{ __html: withBold(to) }} />
+      </div>
+    </div>
+  );
+}
+
+function Divider({ text, simple }: { text?: string; simple?: boolean }) {
+  if (simple) {
+    return (
+      <div className="flex justify-center py-1">
+        <div className="w-48 h-px bg-gray-700/70"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center w-full my-4">
+      <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent to-gray-700"></div>
+      {text && (
+        <div className="px-4 py-1 bg-gray-800 text-gray-400 text-sm rounded-full border border-gray-700">
+          {text}
+        </div>
+      )}
+      <div className="h-0.5 flex-1 bg-gradient-to-l from-transparent to-gray-700"></div>
+    </div>
+  );
+}
+
+function Carousel() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slides = [
+    {
+      text: "Remote documentation server",
+      icon: (
+        <Globe className="mr-2 sm:mr-3 h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-400" />
+      ),
+    },
+    {
+      text: "Connect your IDE to the world",
+      icon: (
+        <Code className="mr-2 sm:mr-3 h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-purple-400" />
+      ),
+    },
+    {
+      text: "Prevent AI code hallucinations",
+      icon: (
+        <Zap className="mr-2 sm:mr-3 h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-emerald-400" />
+      ),
+    },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
+  const getSlideClass = (index: number) => {
+    // Current slide
+    if (index === currentSlide) {
+      return "opacity-100 z-10";
+    }
+
+    // All other slides - simple opacity change for cross-fade
+    return "opacity-0 z-0";
+  };
+
+  return (
+    <div className="relative my-4 mt-0 h-[70px] sm:h-[80px] md:h-[100px] mx-auto max-w-4xl">
+      <div className="overflow-hidden h-full relative ">
+        {slides.map((slide, index) => (
+          <div
+            key={index}
+            className={`absolute w-full h-full flex items-center justify-center transition-opacity duration-2000 ease-in-out ${getSlideClass(index)}`}
+          >
+            <div className="flex items-center justify-center">
+              {/* <div
+                className={`transition-all duration-2000 ${
+                  index === currentSlide ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                {slide.icon}
+              </div> */}
+              <h3 className="text-2xl sm:text-3xl md:text-[48px] font-bold tracking-tight bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x px-4 text-center">
+                {slide.text}
+              </h3>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
