@@ -132,8 +132,8 @@ What happens when you use GitMCP:
 
 1. **You provide the GitMCP URL** to your AI assistant (e.g., `gitmcp.io/microsoft/typescript`). GitMCP exposes tools like documentation fetching, smart search, code search, etc.
 2. **Prompt the AI assistant** on a documentation/code-related questions.
-2. **Your AI send requests** to GitMCP to use its tools (with your approval).
-3. **GitMCP executes the AI's request** and returns the requested data.
+3. **Your AI send requests** to GitMCP to use its tools (with your approval).
+4. **GitMCP executes the AI's request** and returns the requested data.
 5. **Your AI receives the information** and generates a more accurate, grounded, response without hallucinations.
 
 ## Examples
