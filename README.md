@@ -26,9 +26,9 @@
 
 ## Features
 
-- **Empower AI with the Latest Documentation on Any GitHub project**: Grant your AI assisstant seamless access to GitHub project's documentatio and code. The built-in smart search capabilities help find exactly what the AI needs without using too many tokens!
-- **No Setup Needed**: Simply add the chosen GitMCP URL as an MCP server in your IDE - no downloads, installations, signups, or changes required.
-- **Free and Privacy-Focused**: GitMCP is open-source and is completely free to use. It doesn't collect any personal information or store your queries. You can even self-host it!
+- ✨ **Latest Documentation on Any GitHub project**: Grant your AI assisstant seamless access to GitHub project's documentatio and code. The built-in smart search capabilities help find exactly what the AI needs without using too many tokens!
+- 👌 **Zero Setup**: Simply add the chosen GitMCP URL as an MCP server in your IDE - no downloads, installations, signups, or changes required.
+- ✅ **Free and Private**: GitMCP is open-source and is completely free to use. It doesn't collect any personal information or store your queries. You can even self-host it!
 
 <video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video>
 
