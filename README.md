@@ -20,14 +20,14 @@
 </div>
 
 ## What is GitMCP?
-**The end to vibe-hallucinating!** [GitMCP](https://gitmcp.io) is a free, open-source, remote [Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) server that transforms **any** GitHub project (repositories or GitHub pages) to a documentation hub. It allows AI tools like Cursor to seamlessly access up-to-date documentation and code, putting an end to hallucinations.
+**The end to vibe-hallucinating!** [GitMCP](https://gitmcp.io) is a free, open-source, remote [Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) server that transforms **any** GitHub project (repositories or GitHub pages) into a documentation hub. It allows AI tools like Cursor to access up-to-date documentation and code, ending hallucinations seamlessly.
 
 
 ## Features
 
-- ✨ **Latest Documentation on Any GitHub project**: Grant your AI assistant seamless access to GitHub project's documentation and code. The built-in smart search capabilities help find exactly what the AI needs without using too many tokens!
-- 👌 **Zero Setup**: Simply add the chosen GitMCP URL as an MCP server in your IDE - no downloads, installations, signups, or changes required.
-- ✅ **Free and Private**: GitMCP is open-source and is completely free to use. It doesn't collect any personal information or store your queries. You can even self-host it!
+- ✨ **Latest Documentation on Any GitHub project**: Grant your AI assistant seamless access to the GitHub project's documentation and code. The built-in smart search capabilities help find exactly what the AI needs without using too many tokens!
+- 👌 **Zero Setup**: Simply add the chosen GitMCP URL as an MCP server in your IDE  —no downloads, installations, signups, or changes are required.
+- ✅ **Free and Private**: GitMCP is open-source and completely free to use. It doesn't collect personal information or store queries. You can even self-host it!
 
 <video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video>
 
@@ -126,15 +126,15 @@ Select your AI assistant from the options below and follow the configuration ins
 
 ## How It Works
 
-GitMCP connects your AI assistant to GitHub repositories using the Model Context Protocol (MCP), which is a standard that lets AI tools request additional information from external sources.
+GitMCP connects your AI assistant to GitHub repositories using the Model Context Protocol (MCP), a standard that lets AI tools request additional information from external sources.
 
 What happens when you use GitMCP:
 
 1. **You provide the GitMCP URL** to your AI assistant (e.g., `gitmcp.io/microsoft/typescript`). GitMCP exposes tools like documentation fetching, smart search, code search, etc.
-2. **Prompt the AI assistant** on a documentation/code-related questions.
-3. **Your AI send requests** to GitMCP to use its tools (with your approval).
+2. **Prompt the AI assistant** on documentation/code-related questions.
+3. **Your AI sends requests** to GitMCP to use its tools (with your approval).
 4. **GitMCP executes the AI's request** and returns the requested data.
-5. **Your AI receives the information** and generates a more accurate, grounded, response without hallucinations.
+5. **Your AI receives the information** and generates a more accurate, grounded response without hallucinations.
 
 ## Examples
 
@@ -147,7 +147,7 @@ For the GitHub repository `https://github.com/microsoft/playwright-mcp`, add `ht
 **Prompt to Claude:**
 > "How do I use the Playwright MCP"
 
-Windsurf will pull the relevant documentation from GitMCP to correctly implement the memory feature.
+Windsurf will pull the relevant documentation from GitMCP to implement the memory feature correctly.
 
 ### Example 2: Using Cursor with a GitHub Pages site
 
@@ -169,11 +169,11 @@ Claude will pull the data from GitMCP and answer the question.
 
 ## Tools
 
-GitMCP provides AI assistants with several useful tools to help them access and understand GitHub repositories. These tools XXXXXX
+GitMCP provides AI assistants with several valuable tools to help them access, understand, and query GitHub repositories.
 
 ### `fetch_<repo-name>_documentation`
 
-This tool gets the main documentation from a GitHub repository. It works by retrieving relevant documentation (e.g., `llms.txt`). This gives the AI a good overview of what the project is about
+This tool gets the primary documentation from a GitHub repository. It works by retrieving relevant documentation (e.g., `llms.txt`). This gives the AI a good overview of what the project is about
 
 **When it's useful:** For general questions about a project's purpose, features, or how to get started
 
