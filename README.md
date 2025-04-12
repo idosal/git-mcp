@@ -151,7 +151,7 @@ Windsurf will pull the relevant documentation from GitMCP to correctly implement
 
 ### Example 2: Using Cursor with a GitHub Pages site
 
-For the GitHub Pages site `langchain-ai.github.io/langgraph, add `https://langchain-ao.gitmcp.io/langgraph` as an MCP server to Cursor.
+For the GitHub Pages site `langchain-ai.github.io/langgraph`, add `https://langchain-ai.gitmcp.io/langgraph` as an MCP server to Cursor.
 
 **Prompt to Cursor:**
 > "Add memory to my LangGraph agent"
