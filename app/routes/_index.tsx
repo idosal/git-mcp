@@ -145,7 +145,7 @@ export default function Home() {
                   bold={["gitmcp.io", "any"]}
                 />
               </div>
-              <Divider text="Or convert any GitHub URL" />
+              <Divider text="or use this to convert any GitHub URL" />
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-8">
                 <form onSubmit={handleSubmit} className="mb-3 mx-12">
                   <div className="flex rounded-md shadow-sm">
