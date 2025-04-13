@@ -121,7 +121,7 @@ export default function Home() {
                     loop: true,
                     delay: 40,
                     deleteSpeed: 15,
-                    pauseFor: 3000,
+                    pauseFor: 5000,
                     cursor: "",
                     // cursorClassName: "animate-typewriterCursor",
                     // wrapperClassName: "text-2xl sm:text-3xl md:text-[48px] font-bold tracking-tight bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x px-4 text-center"
@@ -183,7 +183,7 @@ export default function Home() {
                 />
               </div>
 
-              <Divider text="or use this to convert any GitHub URL" />
+              <Divider text="or easily convert any GitHub URL with this tool" />
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-8">
                 <form onSubmit={handleSubmit} className="mb-3 mx-12">
                   <div className="flex rounded-md shadow-sm">
