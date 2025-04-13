@@ -132,7 +132,7 @@ export default function Home() {
               </span>
             </div>
 
-            <style jsx global>{`
+            <style jsx="true" global="true">{`
               @keyframes typewriterCursor {
                 0% {
                   opacity: 0;
