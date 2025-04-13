@@ -123,8 +123,6 @@ export default function Home() {
                     deleteSpeed: 15,
                     pauseFor: 5000,
                     cursor: "",
-                    // cursorClassName: "animate-typewriterCursor",
-                    // wrapperClassName: "text-2xl sm:text-3xl md:text-[48px] font-bold tracking-tight bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x px-4 text-center"
                   }}
                 />
               </div>
@@ -133,7 +131,6 @@ export default function Home() {
                   color: "white",
                   animation: "typewriterCursor 1s infinite",
                   fontSize: "42px",
-                  // fontWeight: "bold",
                   lineHeight: "1.33",
                 }}
               >
