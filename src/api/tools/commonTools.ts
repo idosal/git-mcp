@@ -188,6 +188,14 @@ export async function fetchDocumentation({
         }
       }
     }
+    if (!content) {
+      // Try to fetch pre-generated llms.txt on the fly
+      content = (await fetchPreGeneratedLLMsTxt(owner, repo, env)) ?? null;
+      if (content) {
+        console.log(`Fetched pre-generated llms.txt for ${owner}/${repo}`);
+        fileUsed = "llms.txt (generated)";
+      }
+    }
 
     // Fallback to README.md if llms.txt not found in any location
     if (!content) {
@@ -631,4 +639,22 @@ export async function fetchUrlContent({ url, env }: { url: string; env: any }) {
       ],
     };
   }
+}
+
+const BASE_URL = "https://pub-bc322911983247f9b0d27df5f33e0932.r2.dev";
+async function fetchPreGeneratedLLMsTxt(owner: string, repo: string, env: any) {
+  if (owner && repo) {
+    const urlParts = [
+      "githubdocs",
+      owner.replace(/\./g, "-"),
+      repo.replace(/\./g, "-"),
+      "llms.txt",
+    ];
+    const url = new URL(urlParts.join("--"), BASE_URL);
+    const response = await fetch(url);
+    if (response.ok) {
+      return await response.text();
+    }
+  }
+  return null;
 }
