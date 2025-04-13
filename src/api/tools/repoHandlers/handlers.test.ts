@@ -50,6 +50,14 @@ describe("getHandlerByRepoData", () => {
       expect(handler.name).not.toBe("generic");
     });
   });
+  it("should return the react-router handler for react-router", () => {
+    const repoData = getRepoData({
+      requestHost: "gitmcp.io",
+      requestUrl: "/remix-run/react-router",
+    });
+    const handler = getHandlerByRepoData(repoData);
+    expect(handler.name).toBe("react-router");
+  });
   it("should return the default handler for other repos", () => {
     const requests: RequestData[] = [
       {

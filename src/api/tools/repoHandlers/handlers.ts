@@ -3,12 +3,14 @@ import type { RepoHandler } from "./RepoHandler.js";
 import { getDefaultRepoHandler } from "./DefaultRepoHandler.js";
 import { getGenericRepoHandler } from "./GenericRepoHandler.js";
 import { getThreejsRepoHandler } from "./ThreejsRepoHandler.js";
+import { getReactRouterRepoHandler } from "./ReactRouterRepoHandler.js";
 
 const handlers: RepoHandlerMap = {
   // handle all types of urls for three.js
   "all::mrdoob/three.js": getThreejsRepoHandler(),
   // handle only the github type of urls for "generic" repos
   "github::docs/": getGenericRepoHandler(),
+  "all::remix-run/react-router": getReactRouterRepoHandler(),
 };
 
 export function getHandlerByRepoData(repoData: RepoData): RepoHandler {
