@@ -180,7 +180,7 @@ export default function Home() {
                 />
               </div>
 
-              <Divider text="or easily convert any GitHub URL with this tool" />
+              <Divider text="or easily convert any GitHub URL" />
               <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-8">
                 <form onSubmit={handleSubmit} className="mb-3 mx-12">
                   <div className="flex rounded-md shadow-sm">
