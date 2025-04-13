@@ -198,7 +198,7 @@ export async function fetchDocumentation({
       content =
         (await fetchFileFromR2(owner, repo, "llms-full.txt", env)) ?? null;
       if (content) {
-        console.log(`Fetched pre-generated llms.txt for ${owner}/${repo}`);
+        console.log(`Fetched pre-generated llms-full.txt for ${owner}/${repo}`);
         fileUsed = "llms-full.txt (generated)";
       }
     }
