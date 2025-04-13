@@ -48,8 +48,7 @@ Choose one of these URL formats depending on what you want to connect to:
 
 Replace `{owner}` with the GitHub username or organization name, and `{repo}` with the repository name.
 
-For your convinience, you can also use the conversion tool on the landing page to format the GitHub URL into an MCP URL!
-
+For your convenience, you can also use the conversion tool on the landing page to format the GitHub URL into an MCP URL!
 ### Step 2: Connect your AI assistant
 
 Select your AI assistant from the options below and follow the configuration instructions:
