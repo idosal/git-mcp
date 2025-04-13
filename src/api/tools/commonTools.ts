@@ -651,9 +651,13 @@ async function fetchPreGeneratedLLMsTxt(owner: string, repo: string, env: any) {
       "llms.txt",
     ];
     const url = new URL(urlParts.join("--"), BASE_URL);
-    const response = await fetch(url);
-    if (response.ok) {
-      return await response.text();
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        return await response.text();
+      }
+    } catch (error) {
+      // it's alright if it's not found
     }
   }
   return null;
