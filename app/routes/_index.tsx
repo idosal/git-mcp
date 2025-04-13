@@ -100,25 +100,60 @@ export default function Home() {
             <h1 className="max-w-4xl mx-auto text-4xl sm:text-5xl md:text-[72px] font-bold tracking-tight my-6 mb-2 text-white">
               GitMCP
             </h1>
-            <Carousel />
-            <div className="max-w-3xl mx-auto flex flex-wrap justify-center text-lg sm:text-xl md:text-3xl font-light tracking-tight text-gray-300/90 leading-relaxed">
-              <span>Instantly available&nbsp;</span>
-              <span className="text-emerald-400 font-medium">
+            {/* <div className="absolute w-full h-full flex items-center justify-center transition-opacity duration-2000 ease-in-out"> */}
+
+            {/* </div> */}
+            <div className="flex flex-wrap text-center justify-center items-center">
+              <div className="flex flex-wrap justify-center whitespace-pre text-2xl sm:text-3xl md:text-[48px] font-bold tracking-tight bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x text-center">
+                <span>Code with</span>
+                {/* <span className="text-emerald-400 font-medium">
                 remote MCP server&nbsp;
-              </span>
-              <span>for any GitHub&nbsp;</span>
-              <Typewriter
-                options={{
-                  strings: ["repository", "pages"],
-                  autoStart: true,
-                  loop: true,
-                  delay: 40,
-                  deleteSpeed: 15,
-                  pauseFor: 3000,
-                  cursor: "|",
+              </span> */}
+                {/* <span>for any GitHub&nbsp;</span> */}
+                <Typewriter
+                  options={{
+                    strings: [
+                      " confidence",
+                      "out hallucinations",
+                      " any GitHub project",
+                    ],
+                    autoStart: true,
+                    loop: true,
+                    delay: 40,
+                    deleteSpeed: 15,
+                    pauseFor: 3000,
+                    cursor: "",
+                    // cursorClassName: "animate-typewriterCursor",
+                    // wrapperClassName: "text-2xl sm:text-3xl md:text-[48px] font-bold tracking-tight bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x px-4 text-center"
+                  }}
+                />
+              </div>
+              <span
+                style={{
+                  color: "white",
+                  animation: "typewriterCursor 1s infinite",
+                  fontSize: "42px",
+                  // fontWeight: "bold",
+                  lineHeight: "1.33",
                 }}
-              />
+              >
+                |
+              </span>
             </div>
+
+            <style jsx global>{`
+              @keyframes typewriterCursor {
+                0% {
+                  opacity: 0;
+                }
+                50% {
+                  opacity: 1;
+                }
+                100% {
+                  opacity: 0;
+                }
+              }
+            `}</style>
           </div>
         </div>
       </div>
