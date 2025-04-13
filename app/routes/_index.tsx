@@ -198,7 +198,7 @@ export default function Home() {
                     </div>
                     <button
                       type="submit"
-                      className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-base font-bold font-mono rounded-md shadow-sm text-gray-900 bg-emerald-400 from-emerald-400 to-emerald-500 hover:from-emerald-400 hover:via-cyan-500/20 hover:to-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+                      className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-base font-bold font-mono rounded-md shadow-sm text-gray-900 bg-emerald-400 hover:bg-emerald-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
                     >
                       <span className="text-gray-800">To MCP!</span>
                     </button>

@@ -22,7 +22,14 @@ export default function Content({
         <div>
           <span> for the</span>{" "}
           <strong className="text-emerald-500">
-            {owner}/{repo}
+            <a
+              href={`https://github.com/${owner}/${repo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-500 hover:underline"
+            >
+              {owner}/{repo}
+            </a>
           </strong>{" "}
           <span>GitHub Pages</span>
         </div>
@@ -32,7 +39,14 @@ export default function Content({
         <div>
           <span> for the</span>{" "}
           <strong className="text-emerald-500">
-            {owner}/{repo}
+            <a
+              href={`https://github.com/${owner}/${repo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-500 hover:underline"
+            >
+              {owner}/{repo}
+            </a>
           </strong>{" "}
           <span>GitHub repository</span>
         </div>
@@ -86,7 +100,14 @@ export default function Content({
       <div className="max-w-3xl w-full">
         <div className="text-center mb-8">
           <h1 className="text-xl sm:text-4xl font-bold mb-2 relative inline-block">
-            <span className="text-blue-800">GitHub Documentation MCP</span>
+            <a
+              href="https://gitmcp.io"
+              className="text-blue-800 hover:text-blue-600 transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitMCP Documentation Server
+            </a>
           </h1>
           <div className="mt-4 text-lg sm:text-xl text-slate-700">
             {description}
