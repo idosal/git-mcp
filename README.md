@@ -1,10 +1,10 @@
 # GitMCP
 
-<img width="1092" alt="image" src="https://github.com/user-attachments/assets/7f82dc7a-1516-42c4-b779-84e783935782" />
+<img width="1092" alt="image" src="https://github.com/user-attachments/assets/8727a125-a920-4069-b89a-631d785e1c7b" />
 
 <p align="center">
-  <a href="#features">Features</a> •
   <a href="#what-is-gitmcp">What is GitMCP</a> •
+  <a href="#features">Features</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#how-it-works">How It Works</a> •
   <a href="#examples">Examples</a> •
@@ -19,21 +19,22 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/liadyosef?style=social)](https://twitter.com/liadyosef)
 </div>
 
-## What is GitMCP?
+## 🤔 What is GitMCP?
 **Stop vibe-hallucinating and start vibe-coding!**
 
 [GitMCP](https://gitmcp.io) is a free, open-source, remote [Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) server that transforms **any** GitHub project (repositories or GitHub pages) into a documentation hub. It allows AI tools like Cursor to access up-to-date documentation and code, ending hallucinations seamlessly.
 
 
-## Features
+## ✨ Features
 
-- ✨ **Latest Documentation on Any GitHub project**: Grant your AI assistant seamless access to the GitHub project's documentation and code. The built-in smart search capabilities help find exactly what the AI needs without using too many tokens!
-- 👌 **Zero Setup**: Simply add the chosen GitMCP URL as an MCP server in your IDE  —no downloads, installations, signups, or changes are required.
+- 😎 **Latest Documentation on ANY GitHub Project**: Grant your AI assistant seamless access to the GitHub project's documentation and code. The built-in smart search capabilities help find exactly what the AI needs without using too many tokens!
+- 🧠 **No More Hallucinations**: With GitMCP, your AI assistant can provide accurate and relevant answers to your questions.
+- ☁️ **Zero Setup**: GitMCP runs in the cloud. Simply add the chosen GitMCP URL as an MCP server in your IDE — no downloads, installations, signups, or changes are required.
 - ✅ **Free and Private**: GitMCP is open-source and completely free to use. It doesn't collect personal information or store queries. You can even self-host it!
 
 <video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video>
 
-## Getting Started
+## 🚀 Getting Started
 
 Using GitMCP is as easy as it gets! Just follow these steps:
 
@@ -46,6 +47,8 @@ Choose one of these URL formats depending on what you want to connect to:
 - For any repository (dynamic): `gitmcp.io/docs`
 
 Replace `{owner}` with the GitHub username or organization name, and `{repo}` with the repository name.
+
+For your convinience, you can also use the conversion tool on the landing page to format the GitHub URL into an MCP URL!
 
 ### Step 2: Connect your AI assistant
 
@@ -126,7 +129,7 @@ Select your AI assistant from the options below and follow the configuration ins
 
 > **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.
 
-## How It Works
+## ⚙️ How It Works
 
 GitMCP connects your AI assistant to GitHub repositories using the Model Context Protocol (MCP), a standard that lets AI tools request additional information from external sources.
 
@@ -138,7 +141,7 @@ What happens when you use GitMCP:
 4. **GitMCP executes the AI's request** and returns the requested data.
 5. **Your AI receives the information** and generates a more accurate, grounded response without hallucinations.
 
-## Examples
+## 💡 Examples
 
 Here are some examples of how to use GitMCP with different AI assistants and repositories:
 
@@ -169,7 +172,7 @@ You don't have to pick specific repositories. The generic `gitmcp.io/docs` endpo
 
 Claude will pull the data from GitMCP and answer the question.
 
-## Tools
+## 🛠️ Tools
 
 GitMCP provides AI assistants with several valuable tools to help them access, understand, and query GitHub repositories.
 
@@ -199,7 +202,7 @@ This tool searches through the actual code in the repository using GitHub's code
 
 > **Note:** When using the dynamic endpoint (`gitmcp.io/docs`), these tools are named slightly differently (`fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`) and need additional information about which repository to access.
 
-## FAQ
+## ❓ FAQ
 
 ### What is the Model Context Protocol?
 
@@ -217,13 +220,13 @@ Absolutely! GitMCP works with any public GitHub repository without requiring any
 
 No, GitMCP is a free service to the community with no associated costs.
 
-## Privacy
+## 🔒 Privacy
 
 GitMCP is deeply committed to its users' privacy. The service doesn't have access to or store any personally identifiable information as it doesn't require authentication. In addition, it doesn't store any queries sent by the agents. Moreover, as GitMCP is an open-source project, it can be deployed independently in your environment.
 
 GitMCP only accesses content that is already publicly available and only when queried by a user. GitMCP does not automatically scrape repositories. Before accessing any GitHub Pages site, the code checks for `robots.txt` rules and follows the directives set by site owners, allowing them to opt out. Please note that GitMCP doesn't permanently store data regarding the GitHub projects or their content.
 
-## Contributing
+## 👥 Contributing
 
 We welcome contributions! Please take a look at our [contribution](https://github.com/idosal/git-mcp/blob/main/.github/CONTRIBUTING.md) guidelines.
 
@@ -261,7 +264,7 @@ We welcome contributions! Please take a look at our [contribution](https://githu
    - Enter your GitMCP URL (e.g., `http://localhost:8787/docs`)
    - Click "Connect"
 
-## License
+## 📄 License
 
 This project is licensed under the [Apache License 2.0](LICENSE).
 
