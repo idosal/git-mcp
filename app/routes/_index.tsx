@@ -106,7 +106,7 @@ export default function Home() {
                 <Typewriter
                   options={{
                     strings: [
-                      " a remote MCP documentation server",
+                      " a remote MCP doc server",
                       " confidence",
                       "out hallucinations",
                       " any GitHub project",
