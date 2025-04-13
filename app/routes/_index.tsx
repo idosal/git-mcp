@@ -100,16 +100,9 @@ export default function Home() {
             <h1 className="max-w-4xl mx-auto text-4xl sm:text-5xl md:text-[72px] font-bold tracking-tight my-6 mb-2 text-white">
               GitMCP
             </h1>
-            {/* <div className="absolute w-full h-full flex items-center justify-center transition-opacity duration-2000 ease-in-out"> */}
-
-            {/* </div> */}
             <div className="flex flex-wrap text-center justify-center items-center">
-              <div className="flex flex-wrap justify-center whitespace-pre text-2xl sm:text-3xl md:text-[48px] font-bold tracking-tight bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x text-center">
-                <span>Code with</span>
-                {/* <span className="text-emerald-400 font-medium">
-                remote MCP server&nbsp;
-              </span> */}
-                {/* <span>for any GitHub&nbsp;</span> */}
+              <div className="flex flex-wrap justify-center whitespace-pre text-2xl sm:text-3xl md:text-[48px] tracking-tight bg-gradient-to-r from-blue-500 via-emerald-400 to-purple-500 text-gradient animate-gradient-x text-center">
+                <span className="font-bold">Code with</span>
                 <Typewriter
                   options={{
                     strings: [
@@ -121,7 +114,8 @@ export default function Home() {
                     loop: true,
                     delay: 40,
                     deleteSpeed: 15,
-                    pauseFor: 5000,
+                    pauseFor: 4500,
+                    wrapperClassName: "font-extrabold",
                     cursor: "",
                   }}
                 />
