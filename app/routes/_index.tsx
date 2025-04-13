@@ -176,7 +176,7 @@ export default function Home() {
               </div>
 
               <Divider text="or easily convert any GitHub URL" />
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 mb-8">
+              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-2 sm:pt-2  mb-8">
                 <form onSubmit={handleSubmit} className="mb-3 mx-12">
                   <div className="flex rounded-md shadow-sm">
                     <div className="relative flex-1">
@@ -214,6 +214,20 @@ export default function Home() {
                   )}
                 </form>
               </div>
+              <p className="max-w-3xl mx-auto text-lg sm:text-xl md:text-3xl font-light tracking-tight text-gray-300/90 leading-relaxed">
+                Instantly create a{" "}
+                <span className="text-emerald-400 font-medium">
+                  Remote MCP server
+                </span>{" "}
+                for any GitHub repository
+              </p>
+              <p className="text-base pt-2 sm:text-xl text-gray-300 max-w-3xl mx-auto font-light px-2">
+                Simply change the domain from{" "}
+                <span className="text-gray-200 font-medium">github.com</span> or{" "}
+                <span className="text-gray-200 font-medium">github.io</span> to{" "}
+                <span className="text-emerald-400 font-medium">gitmcp.io</span>{" "}
+                and get instant AI context for any GitHub repository.
+              </p>
             </div>
           </div>
 
