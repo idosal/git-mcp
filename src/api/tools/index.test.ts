@@ -111,6 +111,10 @@ describe("Tools Module", () => {
           description:
             "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
         },
+        match_common_libs_owner_repo_mapping: {
+          description:
+            "Match a library name to an owner/repo. Don't use it if you have an owner and repo already. Use this first if only a library name was provided. If found - you can use owner and repo to call other tools. If not found - try to use the library name directly in other tools.",
+        },
         search_generic_documentation: {
           description:
             "Semantically search in documentation for any GitHub repository by providing owner, project name, and search query. Useful for specific queries. Don't call if you already used fetch_generic_documentation on this owner and project name.",
