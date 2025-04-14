@@ -16,7 +16,7 @@ import type { RepoHandler, Tool } from "./RepoHandler.js";
 
 class DefaultRepoHandler implements RepoHandler {
   name = "default";
-  getTools(repoData: RepoData, env: any): Array<Tool> {
+  getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
     // Generate a dynamic description based on the URL
     const fetchToolName = generateFetchToolName(repoData);
     const fetchToolDescription = generateFetchToolDescription(repoData);
@@ -32,7 +32,7 @@ class DefaultRepoHandler implements RepoHandler {
         description: fetchToolDescription,
         paramsSchema: undefined,
         cb: async () => {
-          return fetchDocumentation({ repoData, env });
+          return fetchDocumentation({ repoData, env, ctx });
         },
       },
       {
@@ -48,6 +48,7 @@ class DefaultRepoHandler implements RepoHandler {
             repoData,
             query,
             env,
+            ctx,
           });
         },
       },
@@ -91,24 +92,28 @@ class DefaultRepoHandler implements RepoHandler {
   async fetchDocumentation({
     repoData,
     env,
+    ctx,
   }: {
     repoData: RepoData;
     env: any;
+    ctx: any;
   }): Promise<{
     fileUsed: string;
     content: { type: "text"; text: string }[];
   }> {
-    return await fetchDocumentation({ repoData, env });
+    return await fetchDocumentation({ repoData, env, ctx });
   }
 
   async searchRepositoryDocumentation({
     repoData,
     query,
     env,
+    ctx,
   }: {
     repoData: RepoData;
     query: string;
     env: any;
+    ctx: any;
   }): Promise<{
     searchQuery: string;
     content: { type: "text"; text: string }[];
@@ -117,6 +122,7 @@ class DefaultRepoHandler implements RepoHandler {
       repoData,
       query,
       env,
+      ctx,
     });
   }
 }

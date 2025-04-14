@@ -6,8 +6,9 @@ export function getMcpTools(
   requestHost: string,
   requestUrl?: string,
   env?: any,
+  ctx?: any,
 ): Array<Tool> {
   const repoData = getRepoData({ requestHost, requestUrl });
   const handler = getHandlerByRepoData(repoData);
-  return handler.getTools(repoData, env);
+  return handler.getTools(repoData, env, ctx);
 }

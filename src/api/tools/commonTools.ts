@@ -17,10 +17,12 @@ import { generateServerName } from "../../shared/nameUtils.js";
 export async function fetchDocumentation({
   repoData,
   env,
+  ctx,
   initiatedFromSearch = false,
 }: {
   repoData: RepoData;
   env: any;
+  ctx: any;
   initiatedFromSearch?: boolean;
 }): Promise<{
   fileUsed: string;
@@ -245,33 +247,7 @@ export async function fetchDocumentation({
 
     // Store documentation in vector database for later search
     if (content && owner && repo) {
-      try {
-        // First check if vectors exist in KV cache
-        let vectorsExist = await getIsIndexedFromCache(owner, repo, env);
-
-        // Only store vectors if they don't exist yet
-        if (!vectorsExist) {
-          // Pass the Vectorize binding from env
-          await storeDocumentationVectors(
-            owner,
-            repo,
-            content,
-            fileUsed,
-            env.VECTORIZE,
-          );
-
-          // Update the cache to indicate vectors now exist
-          await cacheIsIndexed(owner, repo, true, env);
-          console.log(`Stored documentation vectors for ${owner}/${repo}`);
-        } else {
-          console.log(
-            `Documentation vectors already exist for ${owner}/${repo}, skipping indexing`,
-          );
-        }
-      } catch (error) {
-        console.error(`Failed to store documentation vectors: ${error}`);
-        // Continue despite vector storage failure
-      }
+      ctx.waitUntil(indexDocumentation(owner, repo, content, fileUsed, env));
     }
   }
 
@@ -291,6 +267,41 @@ export async function fetchDocumentation({
   };
 }
 
+async function indexDocumentation(
+  owner: string,
+  repo: string,
+  content: string,
+  fileUsed: string,
+  env: any,
+) {
+  try {
+    // First check if vectors exist in KV cache
+    let vectorsExist = await getIsIndexedFromCache(owner, repo, env);
+
+    // Only store vectors if they don't exist yet
+    if (!vectorsExist) {
+      // Pass the Vectorize binding from env
+      await storeDocumentationVectors(
+        owner,
+        repo,
+        content,
+        fileUsed,
+        env.VECTORIZE,
+      );
+
+      // Update the cache to indicate vectors now exist
+      await cacheIsIndexed(owner, repo, true, env);
+      console.log(`Stored documentation vectors for ${owner}/${repo}`);
+    } else {
+      console.log(
+        `Documentation vectors already exist for ${owner}/${repo}, skipping indexing`,
+      );
+    }
+  } catch (error) {
+    console.error(`Failed to store documentation vectors: ${error}`);
+    // Continue despite vector storage failure
+  }
+}
 /**
  * Search documentation using vector search
  * Will fetch and index documentation if none exists
@@ -300,11 +311,13 @@ export async function searchRepositoryDocumentation({
   query,
   forceReindex = false,
   env,
+  ctx,
 }: {
   repoData: RepoData;
   query: string;
   forceReindex?: boolean;
   env: any;
+  ctx: any;
 }): Promise<{
   searchQuery: string;
   content: { type: "text"; text: string }[];
@@ -344,7 +357,7 @@ export async function searchRepositoryDocumentation({
       await cacheIsIndexed(owner, repo, false, env);
 
       // Fetch the documentation - pass env
-      const docResult = await fetchDocumentation({ repoData, env });
+      const docResult = await fetchDocumentation({ repoData, env, ctx });
       const content = docResult.content[0].text;
       const fileUsed = docResult.fileUsed;
 

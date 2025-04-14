@@ -76,9 +76,10 @@ export class MyMCP extends McpAgent {
 
     // Access env from this.env (Cloudflare worker environment is accessible here)
     const env = this.env;
+    const ctx = this.ctx;
 
     // Pass env to getMcpTools
-    getMcpTools(host, canonicalUrl, env).forEach((tool) => {
+    getMcpTools(host, canonicalUrl, env, ctx).forEach((tool) => {
       this.server.tool(
         tool.name,
         tool.description,

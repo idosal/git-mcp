@@ -10,7 +10,7 @@ import {
 
 class GenericRepoHandler implements RepoHandler {
   name = "generic";
-  getTools(_: RepoData, env?: any): Array<Tool> {
+  getTools(_: RepoData, env: any, ctx: any): Array<Tool> {
     console.debug("Creating tools for docs page");
 
     return [
@@ -31,7 +31,7 @@ class GenericRepoHandler implements RepoHandler {
             urlType: "github",
             host: "gitmcp.io",
           };
-          return fetchDocumentation({ repoData, env });
+          return fetchDocumentation({ repoData, env, ctx });
         },
       },
       {
@@ -54,7 +54,7 @@ class GenericRepoHandler implements RepoHandler {
             urlType: "github",
             host: "gitmcp.io",
           };
-          return searchRepositoryDocumentation({ repoData, query, env });
+          return searchRepositoryDocumentation({ repoData, query, env, ctx });
         },
       },
       {
@@ -103,29 +103,33 @@ class GenericRepoHandler implements RepoHandler {
   async fetchDocumentation({
     repoData,
     env,
+    ctx,
   }: {
     repoData: RepoData;
-    env?: any;
+    env: any;
+    ctx: any;
   }): Promise<{
     fileUsed: string;
     content: { type: "text"; text: string }[];
   }> {
-    return await fetchDocumentation({ repoData, env });
+    return await fetchDocumentation({ repoData, env, ctx });
   }
 
   async searchRepositoryDocumentation({
     repoData,
     query,
     env,
+    ctx,
   }: {
     repoData: RepoData;
     query: string;
-    env?: any;
+    env: any;
+    ctx: any;
   }): Promise<{
     searchQuery: string;
     content: { type: "text"; text: string }[];
   }> {
-    return await searchRepositoryDocumentation({ repoData, query, env });
+    return await searchRepositoryDocumentation({ repoData, query, env, ctx });
   }
 }
 

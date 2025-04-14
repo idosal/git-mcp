@@ -8,7 +8,7 @@ import {
 } from "./threejs/utils.js";
 class ThreejsRepoHandler implements RepoHandler {
   name = "threejs";
-  getTools(repoData: RepoData, env?: any): Array<Tool> {
+  getTools(repoData: RepoData, env: any): Array<Tool> {
     return [
       {
         name: "get_reference_docs_list",
@@ -61,6 +61,7 @@ class ThreejsRepoHandler implements RepoHandler {
   }: {
     repoData: RepoData;
     env: any;
+    ctx: any;
   }): Promise<{
     fileUsed: string;
     content: { type: "text"; text: string }[];

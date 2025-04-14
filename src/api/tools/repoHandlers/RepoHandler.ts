@@ -9,15 +9,17 @@ export interface Tool {
 
 export interface RepoHandler {
   name: string;
-  getTools(repoData: RepoData, env: any): Array<Tool>;
+  getTools(repoData: RepoData, env: any, ctx: any): Array<Tool>;
 
   // For the generic MCP to call
   fetchDocumentation({
     repoData,
     env,
+    ctx,
   }: {
     repoData: RepoData;
-    env?: any;
+    env: any;
+    ctx: any;
   }): Promise<{
     fileUsed: string;
     content: { type: "text"; text: string }[];
