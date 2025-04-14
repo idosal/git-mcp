@@ -216,11 +216,13 @@ export async function fetchDocumentation({
       console.log(`llms.txt not found, trying README.md`);
       // Only use static approach for README, no search API
       // Try main branch first
+      const readmeLocation = getReadmeMDLocationByRepoData(repoData);
+
       content = await fetchFileFromGitHub(
         owner,
         repo,
         "main",
-        "README.md",
+        readmeLocation,
         env,
         false,
       );
@@ -232,7 +234,7 @@ export async function fetchDocumentation({
           owner,
           repo,
           "master",
-          "README.md",
+          readmeLocation,
           env,
         );
         fileUsed = "readme.md (master branch)";
@@ -884,4 +886,16 @@ export function generateCodeSearchToolDescription({
     // Return default description if there's any error parsing the URL
     return "Search code in the current repository.";
   }
+}
+
+const readmeMdLocations: Record<string, `${string}/${string}`> = {
+  "vercel/next.js": "packages/next/README.md",
+};
+function getReadmeMDLocationByRepoData(repoData: RepoData): string {
+  if (!repoData.owner || !repoData.repo) {
+    return "README.md";
+  }
+  const readmeLocation =
+    readmeMdLocations[`${repoData.owner}/${repoData.repo}`];
+  return readmeLocation ?? "README.md";
 }
