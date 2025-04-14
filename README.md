@@ -19,6 +19,14 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/liadyosef?style=social)](https://twitter.com/liadyosef)
 </div>
 
+<div align="center">
+  <a href="https://www.pulsemcp.com/servers/idosal-git-mcp"><img src="https://www.pulsemcp.com/badge/top-pick/idosal-git-mcp" width="400" alt="Pulse MCP Badge"></a>
+</div>
+
+<br/>
+
+
+
 ## 🤔 What is GitMCP?
 **Stop vibe-hallucinating and start vibe-coding!**
 
