@@ -15,7 +15,7 @@ export async function fetchFileFromR2(
         return await response.text();
       }
     } catch (error) {
-      console.log("Failed to fetch from e2", error);
+      console.log("Failed to fetch from r2", error);
     }
   }
   return null;

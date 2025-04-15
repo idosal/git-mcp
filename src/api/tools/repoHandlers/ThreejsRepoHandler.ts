@@ -6,13 +6,16 @@ import {
   getReferenceDocsListAsMarkdown,
   fetchThreeJsUrlsAsMarkdown,
 } from "./threejs/utils.js";
-import { searchRepositoryDocumentationAutoRag } from "../commonTools.js";
+import {
+  fetchUrlContent,
+  searchRepositoryDocumentationAutoRag,
+} from "../commonTools.js";
 class ThreejsRepoHandler implements RepoHandler {
   name = "threejs";
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
     return [
       {
-        name: "get_reference_docs_list",
+        name: "get_threejs_reference_docs_list",
         description:
           "Get the reference docs list. This should be the first step. It will return a list of all the reference docs and manuals and their corresponding urls.",
         paramsSchema: {},
@@ -21,7 +24,7 @@ class ThreejsRepoHandler implements RepoHandler {
         },
       },
       {
-        name: "get_specific_docs_content",
+        name: "get_threejs_specific_docs_content",
         description:
           "Get the content of specific docs or manuals. This should be the second step. It will return the content of the specific docs or manuals. You can pass in a list of document or manual names.",
         paramsSchema: {
@@ -43,7 +46,7 @@ class ThreejsRepoHandler implements RepoHandler {
         },
       },
       {
-        name: "fetch_urls_inside_docs",
+        name: "fetch_threejs_urls_inside_docs",
         description:
           "Fetch content from URLs. Return the content of the pages as markdown.",
         paramsSchema: {
@@ -54,24 +57,35 @@ class ThreejsRepoHandler implements RepoHandler {
         },
       },
       {
-        name: "search_repository_documentation",
+        name: "fetch_url_content",
         description:
-          "Semantically search the repository documentation for the given query. Use this if you need to find information you don't have in the reference docs.",
+          "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
         paramsSchema: {
-          query: z
-            .string()
-            .describe("The query to search the repository documentation for"),
+          url: z.string().describe("The URL of the document or page to fetch"),
         },
-        cb: async ({ query }) => {
-          return await searchRepositoryDocumentationAutoRag({
-            repoData,
-            query,
-            env,
-            ctx,
-            autoragPipeline: "llms-txt-threejs-rag",
-          });
+        cb: async ({ url }) => {
+          return fetchUrlContent({ url, env });
         },
       },
+      // {
+      //   name: "search_repository_documentation",
+      //   description:
+      //     "Semantically search the repository documentation for the given query. Use this if you need to find information you don't have in the reference docs.",
+      //   paramsSchema: {
+      //     query: z
+      //       .string()
+      //       .describe("The query to search the repository documentation for"),
+      //   },
+      //   cb: async ({ query }) => {
+      //     return await searchRepositoryDocumentationAutoRag({
+      //       repoData,
+      //       query,
+      //       env,
+      //       ctx,
+      //       autoragPipeline: "llms-txt-threejs-rag",
+      //     });
+      //   },
+      // },
     ];
   }
 
