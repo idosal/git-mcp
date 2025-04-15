@@ -6,9 +6,10 @@ import {
   getReferenceDocsListAsMarkdown,
   fetchThreeJsUrlsAsMarkdown,
 } from "./threejs/utils.js";
+import { searchRepositoryDocumentationAutoRag } from "../commonTools.js";
 class ThreejsRepoHandler implements RepoHandler {
   name = "threejs";
-  getTools(repoData: RepoData, env: any): Array<Tool> {
+  getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
     return [
       {
         name: "get_reference_docs_list",
@@ -50,6 +51,25 @@ class ThreejsRepoHandler implements RepoHandler {
         },
         cb: async ({ urls }) => {
           return await fetchThreeJsUrlsAsMarkdown(urls);
+        },
+      },
+      {
+        name: "search_repository_documentation",
+        description:
+          "Semantically search the repository documentation for the given query. Use this if you need to find information you don't have in the reference docs.",
+        paramsSchema: {
+          query: z
+            .string()
+            .describe("The query to search the repository documentation for"),
+        },
+        cb: async ({ query }) => {
+          return await searchRepositoryDocumentationAutoRag({
+            repoData,
+            query,
+            env,
+            ctx,
+            autoragPipeline: "llms-txt-threejs-rag",
+          });
         },
       },
     ];

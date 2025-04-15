@@ -341,17 +341,19 @@ export async function searchRepositoryDocumentationAutoRag({
   query,
   env,
   ctx,
+  autoragPipeline,
 }: {
   repoData: RepoData;
   query: string;
   env: any;
   ctx: any;
+  autoragPipeline: string;
 }): Promise<{
   searchQuery: string;
   content: { type: "text"; text: string }[];
 }> {
   console.log("got here", repoData, query);
-  const answer = await env.AI.autorag("llms-txt-rag").aiSearch({
+  const answer = await env.AI.autorag(autoragPipeline).aiSearch({
     query: query,
     rewrite_query: true,
     max_num_results: 5,

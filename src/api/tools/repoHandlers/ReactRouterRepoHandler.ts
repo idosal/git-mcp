@@ -32,6 +32,7 @@ class ReactRouterRepoHandler implements RepoHandler {
           query,
           env,
           ctx,
+          autoragPipeline: "llms-txt-rag",
         });
       },
     };
@@ -58,7 +59,6 @@ class ReactRouterRepoHandler implements RepoHandler {
     return await fetchDocumentation({ repoData, env, ctx });
   }
 
-  // Add the required search method, delegating to the common implementation
   async searchRepositoryDocumentation({
     repoData,
     query,
@@ -78,6 +78,7 @@ class ReactRouterRepoHandler implements RepoHandler {
       query,
       env,
       ctx,
+      autoragPipeline: "llms-txt-rag",
     });
   }
 }
