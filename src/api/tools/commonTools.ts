@@ -234,7 +234,7 @@ export async function fetchDocumentation({
         false,
       );
       fileUsed = "readme.md";
-      docsPath = constructGithubUrl(owner, repo, "main", "README.md");
+      docsPath = constructGithubUrl(owner, repo, docsBranch, "README.md");
     }
 
     if (!content) {
@@ -934,6 +934,7 @@ export function generateCodeSearchToolDescription({
 const readmeMdLocations: Record<string, `${string}/${string}`> = {
   "vercel/next.js": "packages/next/README.md",
 };
+
 function getReadmeMDLocationByRepoData(repoData: RepoData): string {
   if (!repoData.owner || !repoData.repo) {
     return "README.md";
