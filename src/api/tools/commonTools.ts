@@ -211,7 +211,8 @@ export async function fetchDocumentation({
     }
     if (!content) {
       // Try to fetch pre-generated llms.txt
-      content = (await fetchFileFromR2(owner, repo, "llms.txt", env)) ?? null;
+      content =
+        (await fetchFileFromR2(owner, repo, "docs/llms.txt", env)) ?? null;
       if (content) {
         console.log(`Fetched pre-generated llms.txt for ${owner}/${repo}`);
         fileUsed = "llms.txt (generated)";
@@ -334,6 +335,65 @@ async function indexDocumentation(
     // Continue despite vector storage failure
   }
 }
+
+export async function searchRepositoryDocumentationAutoRag({
+  repoData,
+  query,
+  env,
+  ctx,
+}: {
+  repoData: RepoData;
+  query: string;
+  env: any;
+  ctx: any;
+}): Promise<{
+  searchQuery: string;
+  content: { type: "text"; text: string }[];
+}> {
+  console.log("got here", repoData, query);
+  const answer = await env.AI.autorag("llms-txt-rag").aiSearch({
+    query: query,
+    rewrite_query: true,
+    max_num_results: 5,
+    ranking_options: {
+      score_threshold: 0.6,
+    },
+  });
+
+  console.log(answer);
+
+  let responseText =
+    `## Query\n\nOriginal: ${query}.\n\nRewritten: ${answer.search_query}\n\n## Answer\n\n${answer.response}\n\n` ||
+    `No results found for: "${query}"`;
+
+  // Add source data if available
+  if (answer.data && answer.data.length > 0) {
+    responseText += "\n\n### Sources:\n";
+
+    for (const item of answer.data) {
+      responseText += `\n#### ${item.filename || "Unnamed Source"} (Score: ${item.score.toFixed(2)})\n`;
+
+      if (item.content && item.content.length > 0) {
+        for (const content of item.content) {
+          if (content.text) {
+            responseText += `- ${content.text}\n`;
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    searchQuery: answer.search_query || query,
+    content: [
+      {
+        type: "text",
+        text: responseText,
+      },
+    ],
+  };
+}
+
 /**
  * Search documentation using vector search
  * Will fetch and index documentation if none exists
