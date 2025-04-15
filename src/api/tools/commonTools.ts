@@ -1,5 +1,10 @@
 import type { RepoData } from "../../shared/repoData.js";
-import { fetchFileFromGitHub, searchGitHubRepo } from "../utils/github.js";
+import {
+  constructGithubUrl,
+  fetchFileFromGitHub,
+  getRepoBranch,
+  searchGitHubRepo,
+} from "../utils/github.js";
 import { formatSearchResults } from "../utils/helpers.js";
 import { fetchFileWithRobotsTxtCheck } from "../utils/robotsTxt.js";
 import { getCachedFilePath, cacheFilePath } from "../utils/cache.js";
@@ -33,6 +38,8 @@ export async function fetchDocumentation({
   // Initialize fileUsed to prevent "used before assigned" error
   let fileUsed = "unknown";
   let content: string | null = null;
+  let docsPath: string = "";
+  let docsBranch: string = "";
   let blockedByRobots = false;
 
   // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
@@ -111,13 +118,14 @@ export async function fetchDocumentation({
         env,
       );
       if (content) {
-        fileUsed =
-          "${cachedPath.path} (${cachedPath.branch} branch, from cache)";
+        fileUsed = `${cachedPath.path}`;
       }
     }
 
     // If no cached path or cached path failed, try static paths
     if (!content) {
+      docsBranch = await getRepoBranch(owner, repo);
+
       console.log(`No cached path for ${owner}/${repo}, trying static paths`);
       const possibleLocations = [
         "docs/docs/llms.txt", // Current default
@@ -132,25 +140,13 @@ export async function fetchDocumentation({
           promise: fetchFileFromGitHub(
             owner,
             repo,
-            "main",
+            docsBranch,
             location,
             env,
             false,
           ),
           location,
-          branch: "main",
-        },
-        {
-          promise: fetchFileFromGitHub(
-            owner,
-            repo,
-            "master",
-            location,
-            env,
-            false,
-          ),
-          location,
-          branch: "master",
+          branch: docsBranch,
         },
       ]);
 
@@ -169,7 +165,7 @@ export async function fetchDocumentation({
         );
         if (mainResult) {
           content = mainResult.content;
-          fileUsed = `${mainResult.location} (${mainResult.branch} branch)`;
+          fileUsed = `llms.txt`;
           await cacheFilePath(
             owner,
             repo,
@@ -177,6 +173,13 @@ export async function fetchDocumentation({
             mainResult.location,
             mainResult.branch,
             env,
+          );
+
+          docsPath = constructGithubUrl(
+            owner,
+            repo,
+            mainResult.branch,
+            mainResult.location,
           );
           break;
         }
@@ -188,9 +191,11 @@ export async function fetchDocumentation({
           `llms.txt not found in static paths, trying GitHub Search API`,
         );
 
-        content = await searchGitHubRepo(owner, repo, "llms.txt", env);
-        if (content) {
-          fileUsed = "llms.txt (found via GitHub Search API)";
+        const result = await searchGitHubRepo(owner, repo, "llms.txt", env);
+        if (result) {
+          content = result.content;
+          docsPath = result.path;
+          fileUsed = "llms.txt";
         }
       }
     }
@@ -223,33 +228,31 @@ export async function fetchDocumentation({
       content = await fetchFileFromGitHub(
         owner,
         repo,
-        "main",
+        docsBranch,
         readmeLocation,
         env,
         false,
       );
-      fileUsed = "readme.md (main branch)";
-
-      // If not found, try master branch
-      if (!content) {
-        content = await fetchFileFromGitHub(
-          owner,
-          repo,
-          "master",
-          readmeLocation,
-          env,
-        );
-        fileUsed = "readme.md (master branch)";
-      }
+      fileUsed = "readme.md";
+      docsPath = constructGithubUrl(owner, repo, "main", "README.md");
     }
 
     if (!content) {
       console.error(`Failed to find documentation for ${owner}/${repo}`);
     }
 
-    // Store documentation in vector database for later search
     if (content && owner && repo) {
-      ctx.waitUntil(indexDocumentation(owner, repo, content, fileUsed, env));
+      ctx.waitUntil(
+        indexDocumentation(
+          owner,
+          repo,
+          content,
+          fileUsed,
+          docsPath,
+          docsBranch,
+          env,
+        ),
+      );
     }
   }
 
@@ -274,8 +277,35 @@ async function indexDocumentation(
   repo: string,
   content: string,
   fileUsed: string,
+  docsPath: string,
+  docsBranch: string,
   env: any,
 ) {
+  // try {
+  //   if (env.MY_QUEUE) {
+  //     // Construct repo URL and llms URL if applicable
+  //     const repoUrl = `https://github.com/${owner}/${repo}`;
+
+  //     // Prepare and send message to queue
+  //     const message = {
+  //       owner,
+  //       repo,
+  //       repo_url: repoUrl,
+  //       file_url: docsPath,
+  //       content_length: content.length,
+  //       file_used: fileUsed,
+  //       docs_branch: docsBranch
+  //     };
+
+  //     await env.MY_QUEUE.send(JSON.stringify(message));
+  //     console.log(`Queued documentation processing for ${owner}/${repo}`, message);
+  //   } else {
+  //     console.error("Queue 'MY_QUEUE' not available in environment");
+  //   }
+  // } catch (e) {
+  //   console.log(`Failed to find documentation for ${owner}/${repo}`, e)
+  // }
+
   try {
     // First check if vectors exist in KV cache
     let vectorsExist = await getIsIndexedFromCache(owner, repo, env);

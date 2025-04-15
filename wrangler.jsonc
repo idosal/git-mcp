@@ -33,7 +33,7 @@
 			{
 				"class_name": "MyMCP",
 				"name": "MCP_OBJECT"
-			}
+			},
 		]
 	},
 	"vectorize": [
@@ -45,8 +45,28 @@
 	"kv_namespaces": [
 		{
 			"binding": "CACHE_KV",
-			"id": "c5dd8e05242a471b9d7bf12f0ddcee3a"		}
+			"id": "c5dd8e05242a471b9d7bf12f0ddcee3a",
+			"preview_id": "bfc078682a3a4e33a8b6dfcca09af94f"
+		}
 	],
+	"ai": {
+		"binding": "AI"
+	},
+	"r2_buckets": [
+		{
+			"binding": "DOCS_BUCKET",
+			"bucket_name": "llms-storage",
+			"preview_bucket_name": "llms-store-preview"
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"binding": "MY_QUEUE",
+				"queue": "my-queue"
+			}
+		]
+	},
 	"observability": {
 		"enabled": true
 	},
