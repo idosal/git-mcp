@@ -78,6 +78,8 @@ export default function Content({
         return "https://code.visualstudio.com/assets/favicon.ico";
       case "Cline":
         return "https://cline.bot/assets/icons/favicon-256x256.png";
+      case "Highlight AI":
+        return "https://highlightai.com/favicon.ico";
       default:
         return "https://codeium.com/favicon.ico";
     }
@@ -167,50 +169,55 @@ export default function Content({
           {/* Tabs for different integrations */}
           <div className="mb-6">
             <div className="flex flex-wrap border-b border-slate-200 mb-4">
-              {["Cursor", "Claude Desktop", "Windsurf", "VSCode", "Cline"].map(
-                (tab, index) => (
-                  <button
-                    key={tab}
-                    className={`py-2 px-3 sm:px-4 font-medium text-xs sm:text-sm focus:outline-none cursor-pointer ${
-                      activeTabIndex === index
-                        ? "text-blue-600 border-b-2 border-blue-600"
-                        : "text-slate-600 hover:text-blue-600"
-                    }`}
-                    onClick={(e) => {
-                      setActiveTabIndex(index);
+              {[
+                "Cursor",
+                "Claude Desktop",
+                "Windsurf",
+                "VSCode",
+                "Cline",
+                "Highlight AI",
+              ].map((tab, index) => (
+                <button
+                  key={tab}
+                  className={`py-2 px-3 sm:px-4 font-medium text-xs sm:text-sm focus:outline-none cursor-pointer ${
+                    activeTabIndex === index
+                      ? "text-blue-600 border-b-2 border-blue-600"
+                      : "text-slate-600 hover:text-blue-600"
+                  }`}
+                  onClick={(e) => {
+                    setActiveTabIndex(index);
 
-                      // Hide all tab contents
-                      document
-                        .querySelectorAll(".tab-content")
-                        .forEach((content) => {
-                          content.classList.add("hidden");
-                        });
+                    // Hide all tab contents
+                    document
+                      .querySelectorAll(".tab-content")
+                      .forEach((content) => {
+                        content.classList.add("hidden");
+                      });
 
-                      // Show the selected tab content
-                      document
-                        .getElementById(
-                          `tab-${tab.replace(/\s+/g, "-").toLowerCase()}`,
-                        )
-                        ?.classList.remove("hidden");
-                    }}
-                  >
-                    <div className="flex items-center">
-                      <img
-                        src={getToolFaviconUrl(tab)}
-                        alt={tab}
-                        className="h-4 w-4 mr-2 inline-block"
-                      />
-                      <span
-                        className={`${
-                          activeTabIndex === index ? "inline" : "hidden"
-                        } sm:inline`}
-                      >
-                        {tab}
-                      </span>
-                    </div>
-                  </button>
-                ),
-              )}
+                    // Show the selected tab content
+                    document
+                      .getElementById(
+                        `tab-${tab.replace(/\s+/g, "-").toLowerCase()}`,
+                      )
+                      ?.classList.remove("hidden");
+                  }}
+                >
+                  <div className="flex items-center">
+                    <img
+                      src={getToolFaviconUrl(tab)}
+                      alt={tab}
+                      className="h-4 w-4 mr-2 inline-block"
+                    />
+                    <span
+                      className={`${
+                        activeTabIndex === index ? "inline" : "hidden"
+                      } sm:inline`}
+                    >
+                      {tab}
+                    </span>
+                  </div>
+                </button>
+              ))}
             </div>
 
             {/* Tab content */}
@@ -339,6 +346,52 @@ export default function Content({
                 />
               </div>
             </div>
+
+            <div id="tab-highlight-ai" className="tab-content hidden">
+              <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
+                <div className="p-4">
+                  <p className="text-sm text-slate-700 mb-4">
+                    Download and setup Highlight AI from{" "}
+                    <a
+                      href="https://highlightai.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      highlightai.com
+                    </a>
+                  </p>
+
+                  <p className="text-sm text-slate-700 mb-4">
+                    Enter this URL as SSE URL:{" "}
+                    <code className="bg-slate-200 px-2 py-1 rounded text-blue-700 break-words block my-3">
+                      {url}
+                    </code>
+                  </p>
+
+                  <div className="my-6">
+                    <img
+                      src="https://mintlify.s3.us-west-1.amazonaws.com/highlight-898689a5/images/sse-plugin-setup.png"
+                      alt="Highlight AI MCP"
+                      className="w-full rounded shadow-md"
+                    />
+                  </div>
+
+                  <p className="text-sm text-slate-700 mt-4">
+                    For more details on adding custom MCP servers, refer to{" "}
+                    <a
+                      href="https://docs.highlightai.com/learn/developers/plugins/custom-plugins-setup"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      the documentation
+                    </a>
+                    .
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -407,6 +460,19 @@ export default function Content({
               className="h-6 w-6 mr-2"
             />
             Cline
+          </a>
+          <a
+            href="https://highlightai.com"
+            className="text-blue-600 hover:text-blue-800 flex items-center transition-colors"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src={getToolFaviconUrl("Highlight AI")}
+              alt="Highlight AI"
+              className="h-6 w-6 mr-2"
+            />
+            Highlight AI
           </a>
         </div>
       </div>
