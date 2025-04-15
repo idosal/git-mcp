@@ -363,7 +363,7 @@ export async function searchRepositoryDocumentationAutoRag({
   console.log(answer);
 
   let responseText =
-    `## Query\n\nOriginal: ${query}.\n\nRewritten: ${answer.search_query}\n\n## Answer\n\n${answer.response}\n\n` ||
+    `## Query\n\nOriginal: ${query}.\n\ns## Answer\n\n${answer.response}\n\n` ||
     `No results found for: "${query}"`;
 
   // Add source data if available
