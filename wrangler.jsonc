@@ -1,0 +1,74 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "git-mcp",
+	"main": "src/index.ts",
+	"compatibility_flags": [
+		"nodejs_compat",
+	],
+	"compatibility_date": "2025-03-10",
+	"routes": [
+		{
+		"pattern": "gitmcp.io",
+		"custom_domain": true
+		}
+ 	],
+	 "analytics_engine_datasets": [
+		{
+			"binding": "MY_METRICS",
+     		"dataset": "my_metrics_dataset"
+		}
+	],
+	"migrations": [
+		{
+			"new_sqlite_classes": ["MyMCP"],
+			"tag": "v1"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "MyMCP",
+				"name": "MCP_OBJECT"
+			},
+		]
+	},
+	"vectorize": [
+		{
+			"binding": "VECTORIZE",
+			"index_name": "gitmcp-github-docs-idx"
+		}
+  	],
+	"kv_namespaces": [
+		{
+			"binding": "CACHE_KV",
+			"id": "c5dd8e05242a471b9d7bf12f0ddcee3a",
+			"preview_id": "bfc078682a3a4e33a8b6dfcca09af94f"
+		}
+	],
+	"ai": {
+		"binding": "AI"
+	},
+	"r2_buckets": [
+		{
+			"binding": "DOCS_BUCKET",
+			"bucket_name": "llms-storage",
+			"preview_bucket_name": "llms-store-preview"
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"binding": "MY_QUEUE",
+				"queue": "my-queue"
+			}
+		]
+	},
+	"observability": {
+		"enabled": true
+	},
+	"assets": { "directory": "./static/", "binding": "ASSETS" }
+}
