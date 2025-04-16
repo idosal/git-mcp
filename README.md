@@ -3,15 +3,15 @@
 <img width="1092" alt="image" src="https://github.com/user-attachments/assets/087883c3-99e9-4c47-af49-07d02769bddd" />
 
 <p align="center">
-  <a href="#what-is-gitmcp">What is GitMCP</a> •
-  <a href="#features">Features</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#how-it-works">How It Works</a> •
-  <a href="#examples">Examples</a> •
-  <a href="#faq">FAQ</a> •
-  <a href="#privacy">Privacy</a> •
-  <a href="#contributing">Contributing</a> •
-  <a href="#license">License</a>
+  <a href="#-what-is-gitmcp">What is GitMCP</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-how-it-works">How It Works</a> •
+  <a href="#-examples">Examples</a> •
+  <a href="#-faq">FAQ</a> •
+  <a href="#-privacy">Privacy</a> •
+  <a href="#-contributing">Contributing</a> •
+  <a href="#-license">License</a>
 </p>
 <div align="center">
 
