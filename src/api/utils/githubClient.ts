@@ -3,6 +3,8 @@
  * This file contains utilities for making GitHub API requests with proper rate limiting handling
  */
 
+import { constructGithubUrl } from "./github";
+
 // Default time between API requests in ms (to avoid hitting rate limits)
 const DEFAULT_DELAY = 1000;
 // Default number of retries for rate-limited requests
@@ -309,7 +311,7 @@ export async function fetchRawFile(
   env: any,
   useAuth = false,
 ): Promise<string | null> {
-  const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
+  const url = constructGithubUrl(owner, repo, branch, path);
 
   // Raw GitHub content doesn't need the GitHub API token
   // But we still use the client for rate limiting

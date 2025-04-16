@@ -1,16 +1,47 @@
-import { fetchDocumentation, generateSearchToolName } from "../commonTools.js";
+import {
+  fetchDocumentation,
+  generateSearchToolDescription,
+  generateSearchToolName,
+  searchRepositoryDocumentationAutoRag,
+} from "../commonTools.js";
 import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
 import { getDefaultRepoHandler } from "./DefaultRepoHandler.js";
+import { z } from "zod";
 
 class ReactRouterRepoHandler implements RepoHandler {
   name = "react-router";
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
+    // Get all default tools, including the search tool which uses Cloudflare Vectorize
     const defaultTools = getDefaultRepoHandler().getTools(repoData, env, ctx);
     const searchToolName = generateSearchToolName(repoData);
-    // filter out the search tool
-    const tools = defaultTools.filter((tool) => tool.name !== searchToolName);
-    return tools;
+    const searchToolDescription = generateSearchToolDescription(repoData);
+
+    // Create our custom search tool
+    const searchTool = {
+      name: searchToolName,
+      description: searchToolDescription,
+      paramsSchema: {
+        query: z
+          .string()
+          .describe("The search query to find relevant documentation"),
+      },
+      cb: async ({ query }: { query: string }) => {
+        return searchRepositoryDocumentationAutoRag({
+          repoData,
+          query,
+          env,
+          ctx,
+          autoragPipeline: "llms-txt-rag",
+        });
+      },
+    };
+
+    // Filter out the default search tool and add our specific implementation
+    const filteredTools = defaultTools.filter(
+      (tool) => tool.name !== searchToolName,
+    );
+    return [...filteredTools, searchTool];
   }
 
   async fetchDocumentation({
@@ -42,15 +73,13 @@ class ReactRouterRepoHandler implements RepoHandler {
     searchQuery: string;
     content: { type: "text"; text: string }[];
   }> {
-    const fetchResult = await fetchDocumentation({
+    return await searchRepositoryDocumentationAutoRag({
       repoData,
+      query,
       env,
       ctx,
+      autoragPipeline: "llms-txt-rag",
     });
-    return {
-      searchQuery: query,
-      content: fetchResult.content,
-    };
   }
 }
 

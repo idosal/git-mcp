@@ -15,7 +15,7 @@ export async function fetchFileFromR2(
         return await response.text();
       }
     } catch (error) {
-      // it's alright if it's not found
+      console.log("Failed to fetch from r2", error);
     }
   }
   return null;
