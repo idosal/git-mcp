@@ -376,14 +376,14 @@ export default function Content({
                   </div>
 
                   <p className="text-sm text-slate-700 mb-4">
-                    Enter this as your server name:{" "}
+                    Enter this as your plugin name:{" "}
                     <code className="bg-slate-200 px-2 py-1 rounded text-blue-700 break-words block my-3">
                       {serverName}
                     </code>
                   </p>
 
                   <p className="text-sm text-slate-700 mb-4">
-                    Enter this URL as SSE URL:{" "}
+                    Enter this URL as the SSE URL:{" "}
                     <code className="bg-slate-200 px-2 py-1 rounded text-blue-700 break-words block my-3">
                       {url}
                     </code>
