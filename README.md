@@ -132,6 +132,29 @@ Select your AI assistant from the options below and follow the configuration ins
    }
    ```
 
+#### Connecting Highlight AI
+
+1. Open Highlight AI and click the plugins icon (@ symbol) in the sidebar
+2. Click **Installed Plugins** at the top of the sidebar
+3. Select **Custom Plugin**
+4. Click **Add a plugin using a custom SSE URL**
+
+![Highlight AI Add Custom Plugin](/public/img/highlight-add-custom-plugin.png)
+
+Enter this as your plugin name:
+```
+gitmcp
+```
+
+Enter this URL as the SSE URL:
+```
+https://gitmcp.io/{owner}/{repo}
+```
+
+![Highlight AI MCP](/public/img/highlight-sse-plugin-setup.png)
+
+For more details on adding custom MCP servers, refer to [the documentation](https://docs.highlightai.com/learn/developers/plugins/custom-plugins-setup).
+
 > **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.
 
 ## ⚙️ How It Works
