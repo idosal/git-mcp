@@ -350,16 +350,36 @@ export default function Content({
             <div id="tab-highlight-ai" className="tab-content hidden">
               <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
                 <div className="p-4">
+                  <ul className="text-sm text-slate-700 mb-4 list-disc pl-5 space-y-2">
+                    <li>
+                      Open Highlight AI and click the plugins icon (@ symbol) in
+                      the sidebar
+                    </li>
+                    <li>
+                      Click <strong>Installed Plugins</strong> at the top of the
+                      sidebar
+                    </li>
+                    <li>
+                      Select <strong>Custom Plugin</strong>
+                    </li>
+                    <li>
+                      Click <strong>Add a plugin using a custom SSE URL</strong>
+                    </li>
+                  </ul>
+
+                  <div className="my-6">
+                    <img
+                      src="/img/highlight-add-custom-plugin.png"
+                      alt="Highlight AI Add Custom Plugin"
+                      className="w-full rounded shadow-md"
+                    />
+                  </div>
+
                   <p className="text-sm text-slate-700 mb-4">
-                    Download and setup Highlight AI from{" "}
-                    <a
-                      href="https://highlightai.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      highlightai.com
-                    </a>
+                    Enter this as your server name:{" "}
+                    <code className="bg-slate-200 px-2 py-1 rounded text-blue-700 break-words block my-3">
+                      {serverName}
+                    </code>
                   </p>
 
                   <p className="text-sm text-slate-700 mb-4">
@@ -371,7 +391,7 @@ export default function Content({
 
                   <div className="my-6">
                     <img
-                      src="https://mintlify.s3.us-west-1.amazonaws.com/highlight-898689a5/images/sse-plugin-setup.png"
+                      src="/img/highlight-sse-plugin-setup.png"
                       alt="Highlight AI MCP"
                       className="w-full rounded shadow-md"
                     />
