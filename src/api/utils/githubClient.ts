@@ -125,7 +125,7 @@ async function respectRateLimits(): Promise<void> {
 export async function githubApiRequest(
   url: string,
   options: RequestInit = {},
-  env: any,
+  env: CloudflareEnvironment,
   retryCount = 0,
   useAuth = true,
 ): Promise<Response | null> {
@@ -134,7 +134,7 @@ export async function githubApiRequest(
     const repoContext = extractRepoContextFromUrl(url);
 
     // Track GitHub query count using Cloudflare analytics
-    if (env.CLOUDFLARE_ANALYTICS && retryCount === 0) {
+    if (env?.CLOUDFLARE_ANALYTICS && retryCount === 0) {
       env.CLOUDFLARE_ANALYTICS.writeDataPoint({
         blobs: [url, repoContext],
         doubles: [1],
@@ -246,7 +246,7 @@ export async function searchCode(
   query: string,
   owner: string,
   repo: string,
-  env: any,
+  env: Env,
   page: number = 1,
   perPage: number = 20,
 ): Promise<any> {
@@ -278,7 +278,7 @@ export async function searchFileByName(
   filename: string,
   owner: string,
   repo: string,
-  env: any,
+  env: Env,
 ): Promise<any> {
   const searchUrl = `https://api.github.com/search/code?q=filename:${encodeURIComponent(filename)}+repo:${owner}/${repo}`;
 
@@ -308,7 +308,7 @@ export async function fetchRawFile(
   repo: string,
   branch: string,
   path: string,
-  env: any,
+  env: Env,
   useAuth = false,
 ): Promise<string | null> {
   const url = constructGithubUrl(owner, repo, branch, path);

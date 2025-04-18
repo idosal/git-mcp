@@ -3,7 +3,6 @@ import {
   fetchUrlContent,
   getCachedRobotsTxt,
 } from "./cache.js";
-
 /**
  * Interface for robots.txt rule
  */
@@ -125,7 +124,7 @@ function isPathAllowed(rules: RobotsRule[], path: string): boolean {
 export async function checkRobotsTxt(
   domain: string,
   path: string,
-  env?: any,
+  env: Env,
 ): Promise<boolean> {
   try {
     const cachedRules = await getCachedRobotsTxt(domain, env);
@@ -173,7 +172,7 @@ export async function checkRobotsTxt(
  */
 export async function fetchFileWithRobotsTxtCheck(
   url: string,
-  env?: any,
+  env: Env,
 ): Promise<{ content: string | null; blockedByRobots: boolean }> {
   try {
     const urlObj = new URL(url);

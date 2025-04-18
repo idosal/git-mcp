@@ -26,7 +26,7 @@ export async function fetchDocumentation({
   initiatedFromSearch = false,
 }: {
   repoData: RepoData;
-  env: any;
+  env: Env;
   ctx: any;
   initiatedFromSearch?: boolean;
 }): Promise<{
@@ -124,7 +124,7 @@ export async function fetchDocumentation({
 
     // If no cached path or cached path failed, try static paths
     if (!content) {
-      docsBranch = await getRepoBranch(owner, repo);
+      docsBranch = await getRepoBranch(owner, repo, env);
 
       console.log(`No cached path for ${owner}/${repo}, trying static paths`);
       const possibleLocations = [
@@ -202,7 +202,7 @@ export async function fetchDocumentation({
 
     if (!content) {
       // Try to fetch pre-generated llms.txt
-      content = (await fetchFileFromR2(owner, repo, "llms.txt", env)) ?? null;
+      content = (await fetchFileFromR2(owner, repo, "llms.txt")) ?? null;
       if (content) {
         console.log(`Fetched pre-generated llms.txt for ${owner}/${repo}`);
         fileUsed = "llms.txt (generated)";
@@ -270,7 +270,7 @@ async function indexDocumentation(
   fileUsed: string,
   docsPath: string,
   docsBranch: string,
-  env: any,
+  env: Env,
 ) {
   // try {
   //   if (env.MY_QUEUE) {
@@ -331,15 +331,20 @@ export async function searchRepositoryDocumentation({
   query,
   env,
   ctx,
+  fallbackSearch = searchRepositoryDocumentationNaive,
 }: {
   repoData: RepoData;
   query: string;
-  env: any;
+  env: Env;
   ctx: any;
+  fallbackSearch?: typeof searchRepositoryDocumentationNaive;
 }): Promise<{
   searchQuery: string;
   content: { type: "text"; text: string }[];
 }> {
+  if (!env.DOCS_BUCKET) {
+    throw new Error("DOCS_BUCKET is not available in environment");
+  }
   const docsInR2 = !!(await env.DOCS_BUCKET.head(
     `${repoData.owner}/${repoData.repo}/llms.txt`,
   ));
@@ -360,7 +365,7 @@ export async function searchRepositoryDocumentation({
   }
 
   console.log("No results in AutoRAG, falling back to naive search");
-  return searchRepositoryDocumentationNaive({
+  return await fallbackSearch({
     repoData,
     query,
     env,
@@ -377,7 +382,7 @@ export async function searchRepositoryDocumentationAutoRag({
 }: {
   repoData: RepoData;
   query: string;
-  env: any;
+  env: Env;
   ctx: any;
   autoragPipeline: string;
 }): Promise<{
@@ -466,7 +471,7 @@ export async function searchRepositoryDocumentationNaive({
   repoData: RepoData;
   query: string;
   forceReindex?: boolean;
-  env: any;
+  env: Env;
   ctx: any;
 }): Promise<{
   searchQuery: string;
@@ -624,7 +629,7 @@ export async function searchRepositoryCode({
   repoData: RepoData;
   query: string;
   page?: number;
-  env: any;
+  env: Env;
 }): Promise<{
   searchQuery: string;
   content: { type: "text"; text: string }[];
@@ -746,7 +751,7 @@ export async function searchRepositoryCode({
   }
 }
 
-export async function fetchUrlContent({ url, env }: { url: string; env: any }) {
+export async function fetchUrlContent({ url, env }: { url: string; env: Env }) {
   try {
     // Use the robotsTxt checking function to respect robots.txt rules
     const result = await fetchFileWithRobotsTxtCheck(url, env);

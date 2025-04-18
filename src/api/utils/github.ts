@@ -20,7 +20,7 @@ export async function fetchFileFromGitHub(
   repo: string,
   branch: string,
   path: string,
-  env: any,
+  env: Env,
   useAuth = false,
 ): Promise<string | null> {
   return await fetchRawFile(owner, repo, branch, path, env, useAuth);
@@ -36,7 +36,7 @@ export async function searchGitHubRepo(
   owner: string,
   repo: string,
   filename: string,
-  env: any,
+  env: Env,
 ): Promise<GitHubFile | null> {
   try {
     // Use the centralized GitHub client to search for the file
@@ -103,7 +103,7 @@ export function constructGithubUrl(
 export async function getRepoBranch(
   owner: string,
   repo: string,
-  env?: any,
+  env: Env,
 ): Promise<string> {
   try {
     // First try to get the actual default branch using GitHub API

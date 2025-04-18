@@ -10,12 +10,16 @@ import {
   fetchUrlContent,
   searchRepositoryDocumentation,
 } from "../commonTools.js";
+
+const GET_REFERENCE_DOCS_LIST_TOOL_NAME = "get_threejs_reference_docs_list";
+const GET_SPECIFIC_DOCS_CONTENT_TOOL_NAME = "get_threejs_specific_docs_content";
+
 class ThreejsRepoHandler implements RepoHandler {
   name = "threejs";
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
     return [
       {
-        name: "get_threejs_reference_docs_list",
+        name: GET_REFERENCE_DOCS_LIST_TOOL_NAME,
         description:
           "Get the reference docs list. This should be the first step. It will return a list of all the reference docs and manuals and their corresponding urls.",
         paramsSchema: {},
@@ -24,17 +28,19 @@ class ThreejsRepoHandler implements RepoHandler {
         },
       },
       {
-        name: "get_threejs_files_inside_docs",
+        name: GET_SPECIFIC_DOCS_CONTENT_TOOL_NAME,
         description:
-          "Get the content of specific docs or manuals by path or name. This should be the second step after fetching the reference docs list to deep dive into the content of the specific docs or manuals.",
+          "Get the content of specific docs or manuals. This should be the second step. It will return the content of the specific docs or manuals. You can pass in a list of document or manual names.",
         paramsSchema: {
           documents: z
             .array(
               z.object({
-                documentName: z.string().describe("The document path or name"),
+                documentName: z
+                  .string()
+                  .describe("The document or manual name"),
               }),
             )
-            .describe("The names or paths of the documents to fetch"),
+            .describe("The documents or manuals names to get the content of"),
         },
         cb: async (args) => {
           return await getReferenceDocsContent({
@@ -58,7 +64,19 @@ class ThreejsRepoHandler implements RepoHandler {
             query,
             env,
             ctx,
+            fallbackSearch: noopFallbackSearch,
           });
+        },
+      },
+      {
+        name: "fetch_threejs_urls_inside_docs",
+        description:
+          "Fetch content from URLs that are inside the reference docs. Ususally contains '#' in the url. Returns the content of the pages as markdown.",
+        paramsSchema: {
+          urls: z.array(z.string()).describe("The URLs of the pages to fetch"),
+        },
+        cb: async ({ urls }) => {
+          return await fetchThreeJsUrlsAsMarkdown(urls);
         },
       },
     ];
@@ -69,7 +87,7 @@ class ThreejsRepoHandler implements RepoHandler {
     env,
   }: {
     repoData: RepoData;
-    env: any;
+    env: Env;
     ctx: any;
   }): Promise<{
     fileUsed: string;
@@ -86,23 +104,24 @@ class ThreejsRepoHandler implements RepoHandler {
     repoData,
     query,
     env,
+    ctx,
   }: {
     repoData: RepoData;
     query: string;
-    env: any;
+    env: Env;
+    ctx: any;
   }): Promise<{
     searchQuery: string;
     content: { type: "text"; text: string }[];
   }> {
     console.debug("Searching repository documentation for threejs");
-    const result = await getReferenceDocsContent({
+    return await searchRepositoryDocumentation({
+      repoData,
+      query,
       env,
-      documents: [{ documentName: query }],
+      ctx,
+      fallbackSearch: noopFallbackSearch,
     });
-    return {
-      searchQuery: query,
-      content: result.content,
-    };
   }
 }
 
@@ -112,4 +131,29 @@ export function getThreejsRepoHandler(): ThreejsRepoHandler {
     threejsRepoHandler = new ThreejsRepoHandler();
   }
   return threejsRepoHandler;
+}
+
+async function noopFallbackSearch({
+  repoData,
+  query,
+  env,
+  ctx,
+}: {
+  repoData: RepoData;
+  query: string;
+  env: Env;
+  ctx: any;
+}): Promise<{
+  searchQuery: string;
+  content: { type: "text"; text: string }[];
+}> {
+  return {
+    searchQuery: query,
+    content: [
+      {
+        type: "text",
+        text: `Please use the ${GET_REFERENCE_DOCS_LIST_TOOL_NAME} tool first to get the list of reference docs and manuals, and then use the ${GET_SPECIFIC_DOCS_CONTENT_TOOL_NAME} tool to get the content of the specific docs or manuals.`,
+      },
+    ],
+  };
 }

@@ -18,7 +18,7 @@ export interface RepoHandler {
     ctx,
   }: {
     repoData: RepoData;
-    env: any;
+    env: Env;
     ctx: any;
   }): Promise<{
     fileUsed: string;
@@ -30,10 +30,12 @@ export interface RepoHandler {
     repoData,
     query,
     env,
+    ctx,
   }: {
     repoData: RepoData;
     query: string;
-    env: any;
+    env: Env;
+    ctx: any;
   }): Promise<{
     searchQuery: string;
     content: { type: "text"; text: string }[];

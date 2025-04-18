@@ -4,7 +4,6 @@ export async function fetchFileFromR2(
   owner: string,
   repo: string,
   filename: string,
-  env: any,
 ) {
   if (owner && repo) {
     const urlParts = [owner, repo, filename];

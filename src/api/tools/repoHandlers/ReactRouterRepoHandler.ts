@@ -49,7 +49,7 @@ class ReactRouterRepoHandler implements RepoHandler {
     ctx,
   }: {
     repoData: RepoData;
-    env: any;
+    env: Env;
     ctx: any;
   }): Promise<{
     fileUsed: string;
@@ -66,7 +66,7 @@ class ReactRouterRepoHandler implements RepoHandler {
   }: {
     repoData: RepoData;
     query: string;
-    env: any;
+    env: Env;
     ctx: any;
   }): Promise<{
     searchQuery: string;

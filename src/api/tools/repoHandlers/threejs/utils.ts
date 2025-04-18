@@ -1,6 +1,5 @@
 import htmlToMd from "html-to-md";
 import { fetchUrlContent } from "../../../utils/cache.js";
-
 const THREEJS_BASE_URL = "https://threejs.org";
 const THREEJS_DOCS_BASE_URL = `${THREEJS_BASE_URL}/docs`;
 const THREEJS_MANUAL_BASE_URL = `${THREEJS_BASE_URL}/manual`;
@@ -12,7 +11,7 @@ const THREEJS_MANUAL_REF_URL = `${THREEJS_MANUAL_BASE_URL}/list.json`;
  */
 async function getByKey(
   key: string,
-  env: any,
+  env: Env,
 ): Promise<{ type: "doc" | "manual"; url: string }> {
   const { docsCacheByInnerKey, manualCacheByInnerKey } =
     await getListFlatCache(env);
@@ -42,7 +41,7 @@ let manualCacheByInnerKey: Record<string, string> | null = null;
 /**
  * Flatten the docs and manual lists
  */
-async function getListFlatCache(env: any) {
+async function getListFlatCache(env: Env) {
   // build the cache if it's not built
   if (!docsCacheByInnerKey || !manualCacheByInnerKey) {
     const { docs, manual } = await getReferenceDocsList({ env });
@@ -71,7 +70,7 @@ async function getListFlatCache(env: any) {
 /**
  * Fetches https://threejs.org/docs/list.json and https://threejs.org/manual/list.json
  */
-async function getReferenceDocsList({ env }: { env: any }): Promise<{
+async function getReferenceDocsList({ env }: { env: Env }): Promise<{
   docs: Record<string, Record<string, Record<string, string>>>;
   manual: Record<string, Record<string, string>>;
 }> {
@@ -101,7 +100,7 @@ async function getReferenceDocsList({ env }: { env: any }): Promise<{
 export async function getReferenceDocsListAsMarkdown({
   env,
 }: {
-  env: any;
+  env: Env;
 }): Promise<{
   filesUsed: string[];
   content: { type: "text"; text: string }[];
@@ -169,7 +168,7 @@ export async function getReferenceDocsContent({
   env,
   documents,
 }: {
-  env: any;
+  env: Env;
   documents: { documentName: string }[];
 }): Promise<{
   filesUsed: string[];

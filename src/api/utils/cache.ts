@@ -53,7 +53,7 @@ export function getUrlContentCacheKey(url: string, format: string): string {
  * @param env - Environment with Cloudflare bindings
  * @returns The cached value or null if not found
  */
-async function getFromCache(key: string, env?: any): Promise<any> {
+async function getFromCache(key: string, env: Env): Promise<any> {
   // Check KV store for cached value
   if (env?.CACHE_KV) {
     try {
@@ -78,8 +78,8 @@ async function getFromCache(key: string, env?: any): Promise<any> {
 async function setInCache(
   key: string,
   value: any,
+  env: Env,
   ttl?: number,
-  env?: any,
 ): Promise<void> {
   // Use provided TTL or generate one with jitter
   const cacheTTL = ttl || getCacheTTL();
@@ -107,7 +107,7 @@ async function setInCache(
 export async function getCachedFilePath(
   owner: string,
   repo: string,
-  env?: any,
+  env: Env,
 ): Promise<{ path: string; branch: string } | null> {
   try {
     const key = getRepoFilePathCacheKey(owner, repo);
@@ -134,11 +134,11 @@ export async function cacheFilePath(
   filename: string,
   path: string,
   branch: string,
-  env?: any,
+  env: Env,
 ): Promise<void> {
   try {
     const key = getRepoFilePathCacheKey(owner, repo);
-    await setInCache(key, { path, branch }, getCacheTTL(), env);
+    await setInCache(key, { path, branch }, env, getCacheTTL());
     console.log(
       `Cached file path for ${filename} in ${owner}/${repo}: ${path}`,
     );
@@ -164,7 +164,7 @@ export function getRobotsTxtCacheKey(domain: string): string {
  */
 export async function getCachedRobotsTxt(
   domain: string,
-  env?: any,
+  env: Env,
 ): Promise<RobotsRule[] | null> {
   try {
     const key = getRobotsTxtCacheKey(domain);
@@ -185,11 +185,11 @@ export async function getCachedRobotsTxt(
 export async function cacheRobotsTxt(
   domain: string,
   rules: RobotsRule[],
-  env?: any,
+  env: Env,
 ): Promise<void> {
   try {
     const key = getRobotsTxtCacheKey(domain);
-    await setInCache(key, rules, getCacheTTL(), env);
+    await setInCache(key, rules, env, getCacheTTL());
   } catch (error) {
     console.warn("Failed to save robots.txt to cache:", error);
   }
@@ -205,7 +205,7 @@ export async function cacheRobotsTxt(
 export async function getIsIndexedFromCache(
   owner: string,
   repo: string,
-  env?: any,
+  env: Env,
 ): Promise<boolean | null> {
   try {
     const key = getIsIndexedCacheKey(owner, repo);
@@ -228,11 +228,11 @@ export async function cacheIsIndexed(
   owner: string,
   repo: string,
   exists: boolean,
-  env?: any,
+  env: Env,
 ): Promise<void> {
   try {
     const key = getIsIndexedCacheKey(owner, repo);
-    await setInCache(key, exists, getCacheTTL(), env);
+    await setInCache(key, exists, env, getCacheTTL());
     console.log(`Cached vector existence for ${owner}/${repo}: ${exists}`);
   } catch (error) {
     console.warn("Failed to save vector existence to cache:", error);

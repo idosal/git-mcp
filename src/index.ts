@@ -4,7 +4,9 @@ import { getMcpTools } from "./api/tools";
 import { createRequestHandler } from "react-router";
 
 declare global {
-  interface CloudflareEnvironment extends Env {}
+  interface CloudflareEnvironment extends Env {
+    CLOUDFLARE_ANALYTICS?: any;
+  }
 }
 declare module "react-router" {
   export interface AppLoadContext {
@@ -75,11 +77,11 @@ export class MyMCP extends McpAgent {
     const canonicalUrl = url.toString();
 
     // Access env from this.env (Cloudflare worker environment is accessible here)
-    const env = this.env;
+    const env = this.env as CloudflareEnvironment;
     const ctx = this.ctx;
 
     // Pass env to getMcpTools
-    getMcpTools(host, canonicalUrl, env, ctx).forEach((tool) => {
+    getMcpTools(env, host, canonicalUrl, ctx).forEach((tool) => {
       this.server.tool(
         tool.name,
         tool.description,

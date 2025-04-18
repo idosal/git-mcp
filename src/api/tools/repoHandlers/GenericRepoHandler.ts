@@ -134,17 +134,6 @@ class GenericRepoHandler implements RepoHandler {
           return searchRepositoryCode({ repoData, query, page, env });
         },
       },
-      {
-        name: "fetch_url_content",
-        description:
-          "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
-        paramsSchema: {
-          url: z.string().describe("The URL of the document or page to fetch"),
-        },
-        cb: async ({ url }) => {
-          return fetchUrlContent({ url, env });
-        },
-      },
     ];
   }
 
@@ -154,7 +143,7 @@ class GenericRepoHandler implements RepoHandler {
     ctx,
   }: {
     repoData: RepoData;
-    env: any;
+    env: Env;
     ctx: any;
   }): Promise<{
     fileUsed: string;
@@ -171,7 +160,7 @@ class GenericRepoHandler implements RepoHandler {
   }: {
     repoData: RepoData;
     query: string;
-    env: any;
+    env: Env;
     ctx: any;
   }): Promise<{
     searchQuery: string;
