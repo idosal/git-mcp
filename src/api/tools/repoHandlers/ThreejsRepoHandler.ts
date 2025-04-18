@@ -8,7 +8,7 @@ import {
 } from "./threejs/utils.js";
 import {
   fetchUrlContent,
-  searchRepositoryDocumentationAutoRag,
+  searchRepositoryDocumentation,
 } from "../commonTools.js";
 class ThreejsRepoHandler implements RepoHandler {
   name = "threejs";
@@ -67,25 +67,24 @@ class ThreejsRepoHandler implements RepoHandler {
           return fetchUrlContent({ url, env });
         },
       },
-      // {
-      //   name: "search_repository_documentation",
-      //   description:
-      //     "Semantically search the repository documentation for the given query. Use this if you need to find information you don't have in the reference docs.",
-      //   paramsSchema: {
-      //     query: z
-      //       .string()
-      //       .describe("The query to search the repository documentation for"),
-      //   },
-      //   cb: async ({ query }) => {
-      //     return await searchRepositoryDocumentationAutoRag({
-      //       repoData,
-      //       query,
-      //       env,
-      //       ctx,
-      //       autoragPipeline: "llms-txt-threejs-rag",
-      //     });
-      //   },
-      // },
+      {
+        name: "search_repository_documentation",
+        description:
+          "Semantically search the repository documentation for the given query. Use this if you need to find information you don't have in the reference docs.",
+        paramsSchema: {
+          query: z
+            .string()
+            .describe("The query to search the repository documentation for"),
+        },
+        cb: async ({ query }) => {
+          return await searchRepositoryDocumentation({
+            repoData,
+            query,
+            env,
+            ctx,
+          });
+        },
+      },
     ];
   }
 

@@ -1,6 +1,9 @@
 import { cacheFilePath } from "./cache.js";
-import { fetchRawFile } from "./githubClient.js";
-import { searchFileByName } from "./githubClient.js";
+import {
+  searchFileByName,
+  githubApiRequest,
+  fetchRawFile,
+} from "./githubClient.js";
 
 /**
  * Fetch file content from a specific path in a GitHub repository
@@ -87,32 +90,55 @@ export function constructGithubUrl(
 }
 
 /**
- * Determines whether a GitHub repository uses 'main' or 'master' as its default branch.
- * First tries to access the repository with 'main', then falls back to 'master' if that fails.
+ * Determines the default branch of a GitHub repository.
+ * First tries to get the actual default branch using GitHub API,
+ * then falls back to checking if 'main' or 'master' branches exist.
  *
  * @param owner - Repository owner or organization
  * @param repo - Repository name
- * @returns The default branch name ('main' or 'master')
- * @throws Error if neither 'main' nor 'master' branches are found
+ * @param env - Environment with API tokens and cache configuration
+ * @returns The default branch name
+ * @throws Error if the default branch cannot be determined
  */
 export async function getRepoBranch(
   owner: string,
   repo: string,
+  env?: any,
 ): Promise<string> {
   try {
-    // First try to access the repository with 'main' branch
-    const mainUrl = `https://github.com/${owner}/${repo}/tree/main/`;
-    const mainResponse = await fetch(mainUrl, { method: "HEAD" });
+    // First try to get the actual default branch using GitHub API
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
+    const response = await githubApiRequest(apiUrl, {}, env);
 
-    if (mainResponse.ok) {
+    if (response && response.ok) {
+      const data = (await response.json()) as { default_branch?: string };
+      if (data && data.default_branch) {
+        return data.default_branch;
+      }
+    }
+
+    // Fall back to the main/master check if API request fails
+    // Try 'main' branch
+    const mainUrl = constructGithubUrl(owner, repo, "main", "");
+    const mainResponse = await githubApiRequest(
+      mainUrl,
+      { method: "HEAD" },
+      env,
+    );
+
+    if (mainResponse && mainResponse.ok) {
       return "main";
     }
 
     // If 'main' branch doesn't exist, try 'master'
-    const masterUrl = `https://github.com/${owner}/${repo}/tree/master/`;
-    const masterResponse = await fetch(masterUrl, { method: "HEAD" });
+    const masterUrl = constructGithubUrl(owner, repo, "master", "");
+    const masterResponse = await githubApiRequest(
+      masterUrl,
+      { method: "HEAD" },
+      env,
+    );
 
-    if (masterResponse.ok) {
+    if (masterResponse && masterResponse.ok) {
       return "master";
     }
 

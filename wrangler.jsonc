@@ -9,7 +9,7 @@
 	"compatibility_flags": [
 		"nodejs_compat",
 	],
-	"compatibility_date": "2025-03-10",
+	"compatibility_date": "2025-04-17",
 	"routes": [
 		{
 		"pattern": "gitmcp.io",
@@ -55,7 +55,7 @@
 	"r2_buckets": [
 		{
 			"binding": "DOCS_BUCKET",
-			"bucket_name": "llms-storage",
+			"bucket_name": "docs-storage",
 			"preview_bucket_name": "llms-store-preview"
 		}
 	],

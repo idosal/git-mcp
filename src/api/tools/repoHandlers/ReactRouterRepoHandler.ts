@@ -2,7 +2,7 @@ import {
   fetchDocumentation,
   generateSearchToolDescription,
   generateSearchToolName,
-  searchRepositoryDocumentationAutoRag,
+  searchRepositoryDocumentation,
 } from "../commonTools.js";
 import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
@@ -27,12 +27,11 @@ class ReactRouterRepoHandler implements RepoHandler {
           .describe("The search query to find relevant documentation"),
       },
       cb: async ({ query }: { query: string }) => {
-        return searchRepositoryDocumentationAutoRag({
+        return searchRepositoryDocumentation({
           repoData,
           query,
           env,
           ctx,
-          autoragPipeline: "llms-txt-rag",
         });
       },
     };
@@ -73,12 +72,11 @@ class ReactRouterRepoHandler implements RepoHandler {
     searchQuery: string;
     content: { type: "text"; text: string }[];
   }> {
-    return await searchRepositoryDocumentationAutoRag({
+    return await searchRepositoryDocumentation({
       repoData,
       query,
       env,
       ctx,
-      autoragPipeline: "llms-txt-rag",
     });
   }
 }

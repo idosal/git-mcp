@@ -199,20 +199,10 @@ export async function fetchDocumentation({
         }
       }
     }
-    // only in case of search, try to fetch pre-generated llms-full.txt
-    if (!content && initiatedFromSearch) {
-      // Try to fetch pre-generated llms-full.txt
-      content =
-        (await fetchFileFromR2(owner, repo, "llms-full.txt", env)) ?? null;
-      if (content) {
-        console.log(`Fetched pre-generated llms-full.txt for ${owner}/${repo}`);
-        fileUsed = "llms-full.txt (generated)";
-      }
-    }
+
     if (!content) {
       // Try to fetch pre-generated llms.txt
-      content =
-        (await fetchFileFromR2(owner, repo, "docs/llms.txt", env)) ?? null;
+      content = (await fetchFileFromR2(owner, repo, "llms.txt", env)) ?? null;
       if (content) {
         console.log(`Fetched pre-generated llms.txt for ${owner}/${repo}`);
         fileUsed = "llms.txt (generated)";
@@ -336,12 +326,54 @@ async function indexDocumentation(
   }
 }
 
+export async function searchRepositoryDocumentation({
+  repoData,
+  query,
+  env,
+  ctx,
+}: {
+  repoData: RepoData;
+  query: string;
+  env: any;
+  ctx: any;
+}): Promise<{
+  searchQuery: string;
+  content: { type: "text"; text: string }[];
+}> {
+  const docsInR2 = !!(await env.DOCS_BUCKET.head(
+    `${repoData.owner}/${repoData.repo}/llms.txt`,
+  ));
+  if (docsInR2) {
+    const autoragResult = await searchRepositoryDocumentationAutoRag({
+      repoData,
+      query,
+      env,
+      ctx,
+      autoragPipeline: "docs-rag",
+    });
+    if (
+      autoragResult?.content[0]?.text?.includes("No results found") === false
+    ) {
+      console.log("Found results in AutoRAG", autoragResult);
+      return autoragResult;
+    }
+  }
+
+  console.log("No results in AutoRAG, falling back to naive search");
+  return searchRepositoryDocumentationNaive({
+    repoData,
+    query,
+    env,
+    ctx,
+  });
+}
+
 export async function searchRepositoryDocumentationAutoRag({
   repoData,
   query,
   env,
   ctx,
-  autoragPipeline,
+  autoragPipeline = "docs-rag",
 }: {
   repoData: RepoData;
   query: string;
@@ -352,7 +384,13 @@ export async function searchRepositoryDocumentationAutoRag({
   searchQuery: string;
   content: { type: "text"; text: string }[];
 }> {
-  console.log("got here", repoData, query);
+  if (!repoData.owner || !repoData.repo) {
+    return {
+      searchQuery: query,
+      content: [{ type: "text", text: "No repository data provided" }],
+    };
+  }
+
   const answer = await env.AI.autorag(autoragPipeline).aiSearch({
     query: query,
     rewrite_query: true,
@@ -360,20 +398,36 @@ export async function searchRepositoryDocumentationAutoRag({
     ranking_options: {
       score_threshold: 0.6,
     },
+    attribute_filter: {
+      type: "eq",
+      property: "folder",
+      value: `${repoData.owner}/${repoData.repo}`,
+    },
   });
 
   console.log(answer);
 
   let responseText =
-    `## Query\n\nOriginal: ${query}.\n\ns## Answer\n\n${answer.response}\n\n` ||
+    `## Query\n\n${query}.\n\n## Answer\n\n${answer.response}\n\n` ||
     `No results found for: "${query}"`;
 
   // Add source data if available
   if (answer.data && answer.data.length > 0) {
     responseText += "\n\n### Sources:\n";
+    const defaultBranch = await getRepoBranch(
+      repoData.owner,
+      repoData.repo,
+      env,
+    );
 
     for (const item of answer.data) {
-      responseText += `\n#### ${item.filename || "Unnamed Source"} (Score: ${item.score.toFixed(2)})\n`;
+      const rawGithubUrl = constructGithubUrl(
+        repoData.owner,
+        repoData.repo,
+        defaultBranch,
+        item.filename.replace(`${repoData.owner}/${repoData.repo}/`, ""),
+      );
+      responseText += `\n#### (${item.filename})[${rawGithubUrl}] (Score: ${item.score.toFixed(2)})\n`;
 
       if (item.content && item.content.length > 0) {
         for (const content of item.content) {
@@ -383,6 +437,8 @@ export async function searchRepositoryDocumentationAutoRag({
         }
       }
     }
+  } else {
+    responseText = `No results found for: "${query}"`;
   }
 
   return {
@@ -400,7 +456,7 @@ export async function searchRepositoryDocumentationAutoRag({
  * Search documentation using vector search
  * Will fetch and index documentation if none exists
  */
-export async function searchRepositoryDocumentation({
+export async function searchRepositoryDocumentationNaive({
   repoData,
   query,
   forceReindex = false,
