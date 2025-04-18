@@ -19,6 +19,9 @@ const { default: fetchFile } = vi.hoisted(() => {
   };
 });
 
+// @ts-ignore
+const mockEnv: Env = {};
+
 describe("Tools Module", () => {
   // Reset mocks before each test
   beforeEach(() => {
@@ -31,94 +34,129 @@ describe("Tools Module", () => {
   });
 
   describe("Tool registration", () => {
-    it("should register tool names correctly for https://gitmcp.io/myorg/myrepo", () => {
-      const mockMcp = new MockMcp();
+    const tests: {
+      host: string;
+      url: string;
+      expectedTools: Record<string, { description: string }>;
+    }[] = [
+      // default handler
+      {
+        host: "gitmcp.io",
+        url: "https://gitmcp.io/myorg/myrepo",
+        expectedTools: {
+          fetch_myrepo_documentation: {
+            description:
+              "Fetch entire documentation file from GitHub repository: myorg/myrepo. Useful for general questions.",
+          },
+          search_myrepo_documentation: {
+            description:
+              "Semantically search within the fetched documentation from GitHub repository: myorg/myrepo. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
+          },
+          fetch_url_content_with_robots_txt_check: {
+            description:
+              "Generic tool to fetch content from a URL, respecting robots.txt rules. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+          },
+          search_myrepo_code: {
+            description:
+              "Search for code within GitHub repository: myorg/myrepo. Returns matching files and code snippets.",
+          },
+        },
+      },
+      // default handler - subdomain
+      {
+        host: "myorg.gitmcp.io",
+        url: "https://myorg.gitmcp.io/myrepo",
+        expectedTools: {
+          fetch_myrepo_documentation: {
+            description:
+              "Fetch entire documentation file from the myorg/myrepo GitHub Pages. Useful for general questions.",
+          },
+          search_myrepo_documentation: {
+            description:
+              "Semantically search within the fetched documentation from the myorg/myrepo GitHub Pages. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
+          },
+          fetch_url_content_with_robots_txt_check: {
+            description:
+              "Generic tool to fetch content from a URL, respecting robots.txt rules. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+          },
+          search_myrepo_code: {
+            description:
+              "Search for code within the myorg/myrepo GitHub repository. Returns matching files and code snippets.",
+          },
+        },
+      },
+      // generic handler
+      {
+        host: "gitmcp.io",
+        url: "https://gitmcp.io/docs",
+        expectedTools: {
+          fetch_generic_documentation: {
+            description:
+              "Fetch documentation for any GitHub repository by providing owner and project name",
+          },
+          search_generic_code: {
+            description:
+              "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets. Supports pagination with 30 results per page.",
+          },
+          fetch_url_content_with_robots_txt_check: {
+            description:
+              "Generic tool to fetch content from a URL, respecting robots.txt rules. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+          },
+          match_common_libs_owner_repo_mapping: {
+            description:
+              "Match a library name to an owner/repo. Don't use it if you have an owner and repo already. Use this first if only a library name was provided. If found - you can use owner and repo to call other tools. If not found - try to use the library name directly in other tools.",
+          },
+          search_generic_documentation: {
+            description:
+              "Semantically search in documentation for any GitHub repository by providing owner, project name, and search query. Useful for specific queries. Don't call if you already used fetch_generic_documentation on this owner and project name.",
+          },
+        },
+      },
+      // three.js handler
+      {
+        host: "gitmcp.io",
+        url: "https://gitmcp.io/mrdoob/three.js",
+        expectedTools: {
+          fetch_threejs_urls_inside_docs: {
+            description:
+              "Fetch content from URLs that are inside the reference docs. Ususally contains '#' in the url. Returns the content of the pages as markdown.",
+          },
+          fetch_url_content_with_robots_txt_check: {
+            description:
+              "Generic tool to fetch content from a URL, respecting robots.txt rules. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+          },
+          get_threejs_reference_docs_list: {
+            description:
+              "Get the reference docs list. This should be the first step. It will return a list of all the reference docs and manuals and their corresponding urls.",
+          },
+          search_threejs_documentation: {
+            description:
+              "Semantically search the repository documentation for the given query. Use this if you need to find information you don't have in the reference docs.",
+          },
+          get_threejs_specific_docs_content: {
+            description:
+              "Get the content of specific docs or manuals. This should be the second step. It will return the content of the specific docs or manuals. You can pass in a list of document or manual names.",
+          },
+        },
+      },
+    ];
 
-      toolsModule
-        .getMcpTools("gitmcp.io", "https://gitmcp.io/myorg/myrepo")
-        .forEach((tool) => {
-          mockMcp.tool(tool.name, tool.description, tool.paramsSchema, tool.cb);
-        });
+    tests.forEach((test) => {
+      it(`should register tool names correctly for ${test.url}`, () => {
+        const mockMcp = new MockMcp();
 
-      expect(mockMcp.getTools()).toEqual({
-        fetch_myrepo_documentation: {
-          description:
-            "Fetch entire documentation file from GitHub repository: myorg/myrepo. Useful for general questions.",
-        },
-        search_myrepo_documentation: {
-          description:
-            "Semantically search within the fetched documentation from GitHub repository: myorg/myrepo. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
-        },
-        fetch_url_content: {
-          description:
-            "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
-        },
-        search_myrepo_code: {
-          description:
-            "Search for code within GitHub repository: myorg/myrepo. Returns matching files and code snippets.",
-        },
-      });
-    });
+        toolsModule
+          .getMcpTools(mockEnv, test.host, test.url)
+          .forEach((tool) => {
+            mockMcp.tool(
+              tool.name,
+              tool.description,
+              tool.paramsSchema,
+              tool.cb,
+            );
+          });
 
-    it("should register tool names correctly for https://myorg.gitmcp.io/myrepo", () => {
-      const mockMcp = new MockMcp();
-
-      toolsModule
-        .getMcpTools("myorg.gitmcp.io", "https://myorg.gitmcp.io/myrepo")
-        .forEach((tool) => {
-          mockMcp.tool(tool.name, tool.description, tool.paramsSchema, tool.cb);
-        });
-
-      expect(mockMcp.getTools()).toEqual({
-        fetch_myrepo_documentation: {
-          description:
-            "Fetch entire documentation file from the myorg/myrepo GitHub Pages. Useful for general questions.",
-        },
-        search_myrepo_documentation: {
-          description:
-            "Semantically search within the fetched documentation from the myorg/myrepo GitHub Pages. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
-        },
-        fetch_url_content: {
-          description:
-            "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
-        },
-        search_myrepo_code: {
-          description:
-            "Search for code within the myorg/myrepo GitHub repository. Returns matching files and code snippets.",
-        },
-      });
-    });
-
-    it("should register tool names correctly for https://gitmcp.io/docs", () => {
-      const mockMcp = new MockMcp();
-
-      toolsModule
-        .getMcpTools("gitmcp.io", "https://gitmcp.io/docs")
-        .forEach((tool) => {
-          mockMcp.tool(tool.name, tool.description, tool.paramsSchema, tool.cb);
-        });
-
-      expect(mockMcp.getTools()).toEqual({
-        fetch_generic_documentation: {
-          description:
-            "Fetch documentation for any GitHub repository by providing owner and project name",
-        },
-        search_generic_code: {
-          description:
-            "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets. Supports pagination with 30 results per page.",
-        },
-        fetch_url_content: {
-          description:
-            "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
-        },
-        match_common_libs_owner_repo_mapping: {
-          description:
-            "Match a library name to an owner/repo. Don't use it if you have an owner and repo already. Use this first if only a library name was provided. If found - you can use owner and repo to call other tools. If not found - try to use the library name directly in other tools.",
-        },
-        search_generic_documentation: {
-          description:
-            "Semantically search in documentation for any GitHub repository by providing owner, project name, and search query. Useful for specific queries. Don't call if you already used fetch_generic_documentation on this owner and project name.",
-        },
+        expect(mockMcp.getTools()).toEqual(test.expectedTools);
       });
     });
   });
