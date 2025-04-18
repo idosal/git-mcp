@@ -68,7 +68,7 @@ class ThreejsRepoHandler implements RepoHandler {
         },
       },
       {
-        name: "search_repository_documentation",
+        name: "search_threejs_documentation",
         description:
           "Semantically search the repository documentation for the given query. Use this if you need to find information you don't have in the reference docs.",
         paramsSchema: {

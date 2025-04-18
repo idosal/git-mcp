@@ -391,7 +391,7 @@ export async function searchRepositoryDocumentationAutoRag({
     };
   }
 
-  const answer = await env.AI.autorag(autoragPipeline).aiSearch({
+  const answer = await env.AI.autorag(autoragPipeline).search({
     query: query,
     rewrite_query: true,
     max_num_results: 5,
@@ -400,15 +400,15 @@ export async function searchRepositoryDocumentationAutoRag({
     },
     attribute_filter: {
       type: "eq",
-      property: "folder",
-      value: `${repoData.owner}/${repoData.repo}`,
+      key: "folder",
+      value: `${repoData.owner}/${repoData.repo}/docs/`,
     },
   });
 
   console.log(answer);
 
   let responseText =
-    `## Query\n\n${query}.\n\n## Answer\n\n${answer.response}\n\n` ||
+    `## Query\n\n${query}.\n\n## Response\n\n` ||
     `No results found for: "${query}"`;
 
   // Add source data if available
