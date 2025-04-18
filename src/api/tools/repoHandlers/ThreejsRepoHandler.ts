@@ -24,47 +24,23 @@ class ThreejsRepoHandler implements RepoHandler {
         },
       },
       {
-        name: "get_threejs_specific_docs_content",
+        name: "get_threejs_files_inside_docs",
         description:
-          "Get the content of specific docs or manuals. This should be the second step. It will return the content of the specific docs or manuals. You can pass in a list of document or manual names.",
+          "Get the content of specific docs or manuals by path or name. This should be the second step after fetching the reference docs list to deep dive into the content of the specific docs or manuals.",
         paramsSchema: {
           documents: z
             .array(
               z.object({
-                documentName: z
-                  .string()
-                  .describe("The document or manual name"),
+                documentName: z.string().describe("The document path or name"),
               }),
             )
-            .describe("The documents or manuals names to get the content of"),
+            .describe("The names or paths of the documents to fetch"),
         },
         cb: async (args) => {
           return await getReferenceDocsContent({
             env,
             documents: args.documents,
           });
-        },
-      },
-      {
-        name: "fetch_threejs_urls_inside_docs",
-        description:
-          "Fetch content from URLs. Return the content of the pages as markdown.",
-        paramsSchema: {
-          urls: z.array(z.string()).describe("The URLs of the pages to fetch"),
-        },
-        cb: async ({ urls }) => {
-          return await fetchThreeJsUrlsAsMarkdown(urls);
-        },
-      },
-      {
-        name: "fetch_url_content",
-        description:
-          "Fetch content from a URL. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
-        paramsSchema: {
-          url: z.string().describe("The URL of the document or page to fetch"),
-        },
-        cb: async ({ url }) => {
-          return fetchUrlContent({ url, env });
         },
       },
       {

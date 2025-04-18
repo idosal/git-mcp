@@ -394,14 +394,14 @@ export async function searchRepositoryDocumentationAutoRag({
   const answer = await env.AI.autorag(autoragPipeline).search({
     query: query,
     rewrite_query: true,
-    max_num_results: 5,
+    max_num_results: 10,
     ranking_options: {
       score_threshold: 0.6,
     },
-    attribute_filter: {
+    filters: {
       type: "eq",
       key: "folder",
-      value: `${repoData.owner}/${repoData.repo}/docs/`,
+      value: `${repoData.owner}/${repoData.repo}/`,
     },
   });
 
