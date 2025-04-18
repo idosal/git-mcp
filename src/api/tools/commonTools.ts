@@ -401,16 +401,16 @@ export async function searchRepositoryDocumentationAutoRag({
     rewrite_query: true,
     max_num_results: 10,
     ranking_options: {
-      score_threshold: 0.6,
+      score_threshold: 0.5,
     },
     filters: {
-      type: "eq",
+      type: "gte",
       key: "folder",
       value: `${repoData.owner}/${repoData.repo}/`,
     },
   });
 
-  console.log(answer);
+  // console.log(answer);
 
   let responseText =
     `## Query\n\n${query}.\n\n## Response\n\n` ||

@@ -73,7 +73,17 @@ class ThreejsRepoHandler implements RepoHandler {
         description:
           "Fetch content from URLs that are inside the reference docs. Ususally contains '#' in the url. Returns the content of the pages as markdown.",
         paramsSchema: {
-          urls: z.array(z.string()).describe("The URLs of the pages to fetch"),
+          urls: z
+            .array(
+              z.object({
+                url: z.string().describe("The URL of the page to fetch"),
+                documentName: z
+                  .string()
+                  .describe("The document or manual name, if known")
+                  .optional(),
+              }),
+            )
+            .describe("The URLs of the pages to fetch"),
         },
         cb: async ({ urls }) => {
           return await fetchThreeJsUrlsAsMarkdown(urls);
