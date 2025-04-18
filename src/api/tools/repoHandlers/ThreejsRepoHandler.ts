@@ -71,7 +71,7 @@ class ThreejsRepoHandler implements RepoHandler {
       {
         name: "fetch_threejs_urls_inside_docs",
         description:
-          "Fetch content from URLs that are inside the reference docs. Ususally contains '#' in the url. Returns the content of the pages as markdown.",
+          "Fetch content from URLs that are inside the reference docs. Usually contains '#' in the url. Returns the content of the pages as markdown.",
         paramsSchema: {
           urls: z
             .array(
