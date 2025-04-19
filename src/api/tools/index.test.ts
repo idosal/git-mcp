@@ -52,9 +52,9 @@ describe("Tools Module", () => {
             description:
               "Semantically search within the fetched documentation from GitHub repository: myorg/myrepo. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
           },
-          fetch_url_content_with_robots_txt_check: {
+          fetch_generic_url_content: {
             description:
-              "Generic tool to fetch content from a URL, respecting robots.txt rules. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+              "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
           },
           search_myrepo_code: {
             description:
@@ -75,9 +75,9 @@ describe("Tools Module", () => {
             description:
               "Semantically search within the fetched documentation from the myorg/myrepo GitHub Pages. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
           },
-          fetch_url_content_with_robots_txt_check: {
+          fetch_generic_url_content: {
             description:
-              "Generic tool to fetch content from a URL, respecting robots.txt rules. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+              "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
           },
           search_myrepo_code: {
             description:
@@ -98,9 +98,9 @@ describe("Tools Module", () => {
             description:
               "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets. Supports pagination with 30 results per page.",
           },
-          fetch_url_content_with_robots_txt_check: {
+          fetch_generic_url_content: {
             description:
-              "Generic tool to fetch content from a URL, respecting robots.txt rules. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+              "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
           },
           match_common_libs_owner_repo_mapping: {
             description:
@@ -121,9 +121,9 @@ describe("Tools Module", () => {
             description:
               "Fetch content from URLs that are inside the reference docs. Usually contains '#' in the url. Returns the content of the pages as markdown.",
           },
-          fetch_url_content_with_robots_txt_check: {
+          fetch_generic_url_content: {
             description:
-              "Generic tool to fetch content from a URL, respecting robots.txt rules. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+              "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
           },
           get_threejs_reference_docs_list: {
             description:

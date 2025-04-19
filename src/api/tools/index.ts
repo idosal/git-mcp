@@ -16,9 +16,9 @@ export function getMcpTools(
   return [
     ...handlerTools,
     {
-      name: "fetch_url_content_with_robots_txt_check",
+      name: "fetch_generic_url_content",
       description:
-        "Generic tool to fetch content from a URL, respecting robots.txt rules. Use this to retrieve referenced documents or pages that were mentioned in previously fetched documentation.",
+        "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
       paramsSchema: {
         url: z.string().describe("The URL of the document or page to fetch"),
       },
