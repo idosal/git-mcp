@@ -18,7 +18,7 @@ export function getMcpTools(
     {
       name: "fetch_generic_url_content",
       description:
-        "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
+        "Generic tool to fetch content from any absolute URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
       paramsSchema: {
         url: z.string().describe("The URL of the document or page to fetch"),
       },

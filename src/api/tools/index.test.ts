@@ -54,7 +54,7 @@ describe("Tools Module", () => {
           },
           fetch_generic_url_content: {
             description:
-              "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
+              "Generic tool to fetch content from any absolute URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
           },
           search_myrepo_code: {
             description:
@@ -77,7 +77,7 @@ describe("Tools Module", () => {
           },
           fetch_generic_url_content: {
             description:
-              "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
+              "Generic tool to fetch content from any absolute URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
           },
           search_myrepo_code: {
             description:
@@ -100,7 +100,7 @@ describe("Tools Module", () => {
           },
           fetch_generic_url_content: {
             description:
-              "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
+              "Generic tool to fetch content from any absolute URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
           },
           match_common_libs_owner_repo_mapping: {
             description:
@@ -123,7 +123,7 @@ describe("Tools Module", () => {
           },
           fetch_generic_url_content: {
             description:
-              "Generic tool to fetch content from any URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
+              "Generic tool to fetch content from any absolute URL, respecting robots.txt rules. Use this to retrieve referenced urls (absolute urls) that were mentioned in previously fetched documentation.",
           },
           get_threejs_reference_docs_list: {
             description:
