@@ -296,10 +296,10 @@ async function indexDocumentation(
     } else {
       console.error("Queue 'MY_QUEUE' not available in environment");
     }
-  } catch (e) {
+  } catch (error) {
     console.warn(
       `Failed to enqueue documentation request for ${owner}/${repo}`,
-      e,
+      error,
     );
   }
 
