@@ -297,7 +297,10 @@ async function indexDocumentation(
       console.error("Queue 'MY_QUEUE' not available in environment");
     }
   } catch (e) {
-    console.log(`Failed to find documentation for ${owner}/${repo}`, e);
+    console.warn(
+      `Failed to enqueue documentation request for ${owner}/${repo}`,
+      e,
+    );
   }
 
   try {
