@@ -86,16 +86,16 @@ export async function fetchDocumentation({
       // If index page was blocked or not available, try readme.md
       if (!content && !blockedByRobots) {
         const readmeResult = await fetchFileWithRobotsTxtCheck(
-          baseURL + "readme.md",
+          baseURL + "README.md",
           env,
         );
 
         if (readmeResult.blockedByRobots) {
           blockedByRobots = true;
-          console.log(`Access to ${baseURL}readme.md disallowed by robots.txt`);
+          console.log(`Access to ${baseURL}README.md disallowed by robots.txt`);
         } else if (readmeResult.content) {
           content = readmeResult.content;
-          fileUsed = "readme.md";
+          fileUsed = "README.md";
         }
       }
     }
@@ -224,7 +224,7 @@ export async function fetchDocumentation({
         env,
         false,
       );
-      fileUsed = "readme.md";
+      fileUsed = "README.md";
       docsPath = constructGithubUrl(owner, repo, docsBranch, "README.md");
     }
 
