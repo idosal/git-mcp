@@ -23,7 +23,6 @@ export async function fetchDocumentation({
   repoData,
   env,
   ctx,
-  initiatedFromSearch = false,
 }: {
   repoData: RepoData;
   env: Env;
@@ -202,10 +201,12 @@ export async function fetchDocumentation({
 
     if (!content) {
       // Try to fetch pre-generated llms.txt
-      content = (await fetchFileFromR2(owner, repo, "llms.txt")) ?? null;
+      content = (await fetchFileFromR2(owner, repo, "llms.txt", env)) ?? null;
       if (content) {
         console.log(`Fetched pre-generated llms.txt for ${owner}/${repo}`);
         fileUsed = "llms.txt (generated)";
+      } else {
+        console.log(`No pre-generated llms.txt found for ${owner}/${repo}`);
       }
     }
 
