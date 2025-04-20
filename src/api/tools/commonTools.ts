@@ -823,12 +823,14 @@ export async function fetchUrlContent({ url, env }: { url: string; env: Env }) {
   }
 }
 
+const LIMIT = 50;
+
 /**
- * Enforces the 60-character limit on the combined server and tool names
+ * Enforces the 50-character limit on the combined server and tool names
  * @param prefix - The prefix for the tool name (fetch_ or search_)
  * @param repo - The repository name
  * @param suffix - The suffix for the tool name (_documentation)
- * @returns A tool name that ensures combined length with server name stays under 60 characters
+ * @returns A tool name that ensures combined length with server name stays under 50 characters
  */
 export function enforceToolNameLengthLimit(
   prefix: string,
@@ -853,38 +855,19 @@ export function enforceToolNameLengthLimit(
   const combinedLength = toolName.length + serverNameLen;
 
   // If combined length is already under limit, return it
-  if (combinedLength <= 60) {
+  if (combinedLength <= LIMIT) {
     return toolName;
   }
 
-  // Step 1: Try shortening "_documentation" to "_docs"
-  if (suffix === "_documentation") {
-    toolName = `${prefix}${repoName}_docs`;
-    if (toolName.length + serverNameLen <= 60) {
-      return toolName;
-    }
+  const shorterSuffix = suffix === "_documentation" ? "_docs" : suffix;
+
+  toolName = `${prefix}${repoName}${shorterSuffix}`;
+  if (toolName.length + serverNameLen <= LIMIT) {
+    return toolName;
   }
 
-  // Step 2: Shorten the repo name by removing words
-  const words = repoName.split("_");
-  if (words.length > 1) {
-    // Keep removing words from the end until we're under the limit or have only one word left
-    let shortenedRepo = repoName;
-    for (let i = words.length - 1; i > 0; i--) {
-      shortenedRepo = words.slice(0, i).join("_");
-      toolName = `${prefix}${shortenedRepo}${suffix === "_documentation" ? "_docs" : suffix}`;
-      if (toolName.length + serverNameLen <= 60) {
-        return toolName;
-      }
-    }
-  }
-
-  // Step 3: As a last resort, truncate to fit
-  const shortenedSuffix = suffix === "_documentation" ? "_docs" : suffix;
-  const maxRepoLength =
-    60 - prefix.length - shortenedSuffix.length - serverNameLen;
-  const truncatedRepo = repoName.substring(0, Math.max(1, maxRepoLength));
-  return `${prefix}${truncatedRepo}${shortenedSuffix}`;
+  // Step 3: As a last resort, change repo name to "repo"
+  return `${prefix}repo${shorterSuffix}`;
 }
 
 /**
@@ -898,7 +881,7 @@ export function generateSearchToolName({ urlType, repo }: RepoData): string {
     // Default tool name as fallback
     let toolName = "search_documentation";
     if (urlType == "subdomain" || urlType == "github") {
-      // Use enforceLengthLimit to ensure the tool name doesn't exceed 60 characters
+      // Use enforceLengthLimit to ensure the tool name doesn't exceed 55 characters
       return enforceToolNameLengthLimit("search_", repo, "_documentation");
     }
     // replace non-alphanumeric characters with underscores
@@ -989,7 +972,7 @@ export function generateFetchToolName({
     let toolName = "fetch_documentation";
 
     if (urlType == "subdomain" || urlType == "github") {
-      // Use enforceLengthLimit to ensure the tool name doesn't exceed 60 characters
+      // Use enforceLengthLimit to ensure the tool name doesn't exceed 55 characters
       return enforceToolNameLengthLimit("fetch_", repo, "_documentation");
     }
 
@@ -1015,7 +998,7 @@ export function generateCodeSearchToolName({
     // Default tool name as fallback
     let toolName = "search_code";
     if (urlType == "subdomain" || urlType == "github") {
-      // Use enforceLengthLimit to ensure the tool name doesn't exceed 60 characters
+      // Use enforceLengthLimit to ensure the tool name doesn't exceed 55 characters
       return enforceToolNameLengthLimit("search_", repo, "_code");
     }
     // replace non-alphanumeric characters with underscores
