@@ -5,8 +5,8 @@ import {
   fetchDocumentation,
   searchRepositoryDocumentation,
   searchRepositoryCode,
-  fetchUrlContent,
 } from "../commonTools.js";
+import { incrementRepoViewCount } from "../../utils/badge.js";
 
 class GenericRepoHandler implements RepoHandler {
   name = "generic";
@@ -48,6 +48,17 @@ class GenericRepoHandler implements RepoHandler {
               ],
             };
           }
+
+          ctx.waitUntil(
+            incrementRepoViewCount(
+              env as CloudflareEnvironment,
+              repo.split("/")[0],
+              repo.split("/")[1],
+            ).catch((err) => {
+              console.error("Error incrementing repo view count:", err);
+            }),
+          );
+
           return {
             content: [
               {
@@ -131,7 +142,7 @@ class GenericRepoHandler implements RepoHandler {
             urlType: "github",
             host: "gitmcp.io",
           };
-          return searchRepositoryCode({ repoData, query, page, env });
+          return searchRepositoryCode({ repoData, query, page, env, ctx });
         },
       },
     ];

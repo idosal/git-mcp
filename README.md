@@ -225,6 +225,37 @@ This tool searches through the actual code in the repository using GitHub's code
 
 > **Note:** When using the dynamic endpoint (`gitmcp.io/docs`), these tools are named slightly differently (`fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`) and need additional information about which repository to access.
 
+## 📊 Documentation View Badge
+
+GitMCP now allows you to add a view counter badge to your repository README to showcase how many times your repository has been accessed through GitMCP tools.
+
+### Adding the Badge to Your Repository
+
+Add the following to your README.md:
+
+```markdown
+[![GitMCP Docs Views](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/OWNER/REPO)](https://gitmcp.io/badge/OWNER/REPO)
+```
+
+Replace `OWNER` with your GitHub username or organization, and `REPO` with your repository name.
+
+### How We Count Views
+
+Increment for each tool call on the specific repository.
+
+This implementation ensures accurate tracking at the function level rather than at a higher level wrapper, providing a true count of how often AI assistants are accessing your repository through GitMCP.
+
+### Customizing the Badge
+
+You can customize the badge appearance with parameters:
+
+| Parameter | Description | Default | Example |
+|-----------|-------------|---------|---------|
+| `label` | Text for the badge label | `GitMCP` | `?label=Docs` |
+| `color` | Color for the badge value | `blue` | `?color=green` |
+
+For more information and examples, see our [badge documentation](https://gitmcp.io/static/badge-usage.md).
+
 ## ❓ FAQ
 
 ### What is the Model Context Protocol?

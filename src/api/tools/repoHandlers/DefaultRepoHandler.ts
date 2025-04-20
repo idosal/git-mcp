@@ -72,6 +72,7 @@ class DefaultRepoHandler implements RepoHandler {
             query,
             page,
             env,
+            ctx,
           });
         },
       },

@@ -625,11 +625,13 @@ export async function searchRepositoryCode({
   query,
   page = 1,
   env,
+  ctx,
 }: {
   repoData: RepoData;
   query: string;
   page?: number;
   env: Env;
+  ctx: any;
 }): Promise<{
   searchQuery: string;
   content: { type: "text"; text: string }[];

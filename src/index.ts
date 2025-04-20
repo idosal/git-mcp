@@ -2,12 +2,22 @@ import { McpAgent } from "agents/mcp";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { getMcpTools } from "./api/tools";
 import { createRequestHandler } from "react-router";
+import {
+  generateBadgeResponse,
+  getRepoViewCount,
+  withViewTracking,
+} from "./api/utils/badge";
+import { getRepoData } from "./shared/repoData";
+
+export { ViewCounterDO } from "./api/utils/ViewCounterDO";
 
 declare global {
   interface CloudflareEnvironment extends Env {
     CLOUDFLARE_ANALYTICS?: any;
+    VIEW_COUNTER: DurableObjectNamespace;
   }
 }
+
 declare module "react-router" {
   export interface AppLoadContext {
     cloudflare: {
@@ -22,21 +32,6 @@ const requestHandler = createRequestHandler(
   import.meta.env.MODE,
 );
 
-// Helper function to add CORS headers to a response
-const addCorsHeaders = (response: Response): Response => {
-  const headers = new Headers(response.headers);
-  headers.set("Access-Control-Allow-Origin", "http://localhost:5173");
-  headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  headers.set("Access-Control-Allow-Credentials", "true");
-
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
-};
-
 // Create CORS preflight response
 const handleCorsPreflightRequest = (): Response => {
   return new Response(null, {
@@ -50,6 +45,21 @@ const handleCorsPreflightRequest = (): Response => {
     },
   });
 };
+
+// Handle badge request for repository
+async function handleBadgeRequest(
+  request: Request,
+  env: CloudflareEnvironment,
+  owner: string,
+  repo: string,
+): Promise<Response> {
+  const url = new URL(request.url);
+  const label = url.searchParams.get("label") || "GitMCP";
+  const color = url.searchParams.get("color") || "blue";
+
+  const count = await getRepoViewCount(env, owner, repo);
+  return generateBadgeResponse(count, label, color);
+}
 
 export class MyMCP extends McpAgent {
   server = new McpServer({
@@ -80,15 +90,22 @@ export class MyMCP extends McpAgent {
     const env = this.env as CloudflareEnvironment;
     const ctx = this.ctx;
 
+    // Get the repository data from the URL
+    const repoData = getRepoData({
+      requestHost: host,
+      requestUrl: canonicalUrl,
+    });
+
     // Pass env to getMcpTools
     getMcpTools(env, host, canonicalUrl, ctx).forEach((tool) => {
       this.server.tool(
         tool.name,
         tool.description,
         tool.paramsSchema,
-        async (args: any) => {
+        // Wrap the callback with view tracking
+        withViewTracking(env, ctx, repoData, async (args: any) => {
           return tool.cb(args);
-        },
+        }),
       );
     });
   }
@@ -105,6 +122,19 @@ export default {
     }
 
     const url = new URL(request.url);
+    const pathname = url.pathname;
+
+    // Handle badge requests
+    if (pathname.startsWith("/badge/")) {
+      // Extract owner and repo from URL pattern: /badge/:owner/:repo
+      const parts = pathname.split("/").filter(Boolean);
+      if (parts.length >= 3 && parts[0] === "badge") {
+        const owner = parts[1];
+        const repo = parts[2];
+        return handleBadgeRequest(request, env, owner, repo);
+      }
+    }
+
     const isSse =
       request.headers.get("accept")?.includes("text/event-stream") &&
       !!url.pathname &&

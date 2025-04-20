@@ -6,10 +6,7 @@ import {
   getReferenceDocsListAsMarkdown,
   fetchThreeJsUrlsAsMarkdown,
 } from "./threejs/utils.js";
-import {
-  fetchUrlContent,
-  searchRepositoryDocumentation,
-} from "../commonTools.js";
+import { searchRepositoryDocumentation } from "../commonTools.js";
 
 const GET_REFERENCE_DOCS_LIST_TOOL_NAME = "get_threejs_reference_docs_list";
 const GET_SPECIFIC_DOCS_CONTENT_TOOL_NAME = "get_threejs_specific_docs_content";
@@ -17,6 +14,8 @@ const GET_SPECIFIC_DOCS_CONTENT_TOOL_NAME = "get_threejs_specific_docs_content";
 class ThreejsRepoHandler implements RepoHandler {
   name = "threejs";
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
+    const { owner, repo } = repoData;
+
     return [
       {
         name: GET_REFERENCE_DOCS_LIST_TOOL_NAME,
