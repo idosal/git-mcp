@@ -272,30 +272,33 @@ async function indexDocumentation(
   docsBranch: string,
   env: Env,
 ) {
-  // try {
-  //   if (env.MY_QUEUE) {
-  //     // Construct repo URL and llms URL if applicable
-  //     const repoUrl = `https://github.com/${owner}/${repo}`;
+  try {
+    if (env.MY_QUEUE) {
+      // Construct repo URL and llms URL if applicable
+      const repoUrl = `https://github.com/${owner}/${repo}`;
 
-  //     // Prepare and send message to queue
-  //     const message = {
-  //       owner,
-  //       repo,
-  //       repo_url: repoUrl,
-  //       file_url: docsPath,
-  //       content_length: content.length,
-  //       file_used: fileUsed,
-  //       docs_branch: docsBranch
-  //     };
+      // Prepare and send message to queue
+      const message = {
+        owner,
+        repo,
+        repo_url: repoUrl,
+        file_url: docsPath,
+        content_length: content.length,
+        file_used: fileUsed,
+        docs_branch: docsBranch,
+      };
 
-  //     await env.MY_QUEUE.send(JSON.stringify(message));
-  //     console.log(`Queued documentation processing for ${owner}/${repo}`, message);
-  //   } else {
-  //     console.error("Queue 'MY_QUEUE' not available in environment");
-  //   }
-  // } catch (e) {
-  //   console.log(`Failed to find documentation for ${owner}/${repo}`, e)
-  // }
+      await env.MY_QUEUE.send(JSON.stringify(message));
+      console.log(
+        `Queued documentation processing for ${owner}/${repo}`,
+        message,
+      );
+    } else {
+      console.error("Queue 'MY_QUEUE' not available in environment");
+    }
+  } catch (e) {
+    console.log(`Failed to find documentation for ${owner}/${repo}`, e);
+  }
 
   try {
     // First check if vectors exist in KV cache
