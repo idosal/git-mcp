@@ -54,11 +54,10 @@ async function handleBadgeRequest(
   repo: string,
 ): Promise<Response> {
   const url = new URL(request.url);
-  const label = url.searchParams.get("label") || "GitMCP";
   const color = url.searchParams.get("color") || "blue";
 
   const count = await getRepoViewCount(env, owner, repo);
-  return generateBadgeResponse(count, label, color);
+  return generateBadgeResponse(count, color, owner, repo);
 }
 
 export class MyMCP extends McpAgent {

@@ -202,21 +202,24 @@ export function withViewTracking<T, R>(
 /**
  * Generates a shields.io-compatible JSON response for a badge
  * @param count The view count to display
- * @param label The label text (defaults to "GitMCP")
  * @param color The badge color (defaults to "blue")
+ * @param owner The repository owner
+ * @param repo The repository name
  * @returns JSON response for shields.io endpoint
  */
 export function generateBadgeResponse(
   count: number,
-  label: string = "GitMCP",
   color: string = "blue",
+  owner: string,
+  repo: string,
 ): Response {
   const badgeData = {
     schemaVersion: 1,
-    label,
+    label: "GitMCP",
     message: count.toString(),
     color,
     cacheSeconds: 300, // Cache for 5 minutes
+    link: [`https://gitmcp.io/${owner}/${repo}`],
   };
 
   return new Response(JSON.stringify(badgeData), {

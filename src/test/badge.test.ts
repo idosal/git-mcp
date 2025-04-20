@@ -188,39 +188,8 @@ describe("Badge utilities", () => {
   });
 
   describe("generateBadgeResponse", () => {
-    it("should generate a badge response with default values", async () => {
-      const response = generateBadgeResponse(42);
-
-      // Mock the text() method to handle the ReadableStream
-      const mockText = vi.fn().mockResolvedValue(
-        JSON.stringify({
-          schemaVersion: 1,
-          label: "GitMCP",
-          message: "42",
-          color: "blue",
-          cacheSeconds: 300,
-        }),
-      );
-
-      vi.spyOn(response, "text").mockImplementation(mockText);
-
-      expect(response.headers.get("Content-Type")).toBe("application/json");
-      expect(response.headers.get("Cache-Control")).toBe(
-        "max-age=300, s-maxage=300",
-      );
-
-      const body = JSON.parse(await response.text());
-      expect(body).toEqual({
-        schemaVersion: 1,
-        label: "GitMCP",
-        message: "42",
-        color: "blue",
-        cacheSeconds: 300,
-      });
-    });
-
     it("should generate a badge response with custom values", async () => {
-      const response = generateBadgeResponse(100, "Custom Label", "green");
+      const response = generateBadgeResponse(100, "green", "owner", "repo");
 
       // Mock the text() method to handle the ReadableStream
       const mockText = vi.fn().mockResolvedValue(
