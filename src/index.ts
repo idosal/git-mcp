@@ -54,7 +54,7 @@ async function handleBadgeRequest(
   repo: string,
 ): Promise<Response> {
   const url = new URL(request.url);
-  const color = url.searchParams.get("color") || "blue";
+  const color = url.searchParams.get("color") || "aquamarine";
 
   const count = await getRepoViewCount(env, owner, repo);
   return generateBadgeResponse(count, color, owner, repo);
