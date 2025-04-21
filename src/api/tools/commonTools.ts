@@ -830,7 +830,7 @@ export async function fetchUrlContent({ url, env }: { url: string; env: Env }) {
   }
 }
 
-const LIMIT = 50;
+export const LIMIT = 51;
 
 /**
  * Enforces the 50-character limit on the combined server and tool names
@@ -873,8 +873,27 @@ export function enforceToolNameLengthLimit(
     return toolName;
   }
 
+  // Step 2: Shorten the repo name by removing words
+  const words = repoName.split("_");
+  if (words.length > 1) {
+    // Keep removing words from the end until we're under the limit or have only one word left
+    let shortenedRepo = repoName;
+    for (let i = words.length - 1; i > 0; i--) {
+      shortenedRepo = words.slice(0, i).join("_");
+      toolName = `${prefix}${shortenedRepo}${shorterSuffix}`;
+      if (toolName.length + serverNameLen <= LIMIT) {
+        return toolName;
+      }
+    }
+  }
+
+  const result = `${prefix}repo${shorterSuffix}`;
+  if (result.length + serverNameLen <= LIMIT) {
+    return result;
+  }
+
   // Step 3: As a last resort, change repo name to "repo"
-  return `${prefix}repo${shorterSuffix}`;
+  return `${prefix}${shorterSuffix}`.replace(/__/g, "_");
 }
 
 /**
