@@ -252,7 +252,6 @@ export async function fetchDocumentation({
     fileUsed = "generated";
   }
 
-  // Construct the final result
   const result: FetchDocumentationResult = {
     fileUsed,
     content: [
@@ -265,7 +264,11 @@ export async function fetchDocumentation({
 
   // Cache the final result before returning
   if (owner && repo) {
-    ctx.waitUntil(cacheFetchDocResult(owner, repo, result, cacheTTL, env));
+    ctx.waitUntil(
+      cacheFetchDocResult(owner, repo, result, cacheTTL, env).catch((error) => {
+        console.warn(`Failed to cache fetch documentation result: ${error}`);
+      }),
+    );
   }
 
   return result;
