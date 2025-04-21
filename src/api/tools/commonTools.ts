@@ -103,16 +103,16 @@ export async function fetchDocumentation({
       // If index page was blocked or not available, try readme.md
       if (!content && !blockedByRobots) {
         const readmeResult = await fetchFileWithRobotsTxtCheck(
-          baseURL + "readme.md",
+          baseURL + "README.md",
           env,
         );
 
         if (readmeResult.blockedByRobots) {
           blockedByRobots = true;
-          console.log(`Access to ${baseURL}readme.md disallowed by robots.txt`);
+          console.log(`Access to ${baseURL}README.md disallowed by robots.txt`);
         } else if (readmeResult.content) {
           content = readmeResult.content;
-          fileUsed = "readme.md";
+          fileUsed = "README.md";
         }
       }
     }
@@ -199,10 +199,13 @@ export async function fetchDocumentation({
 
     // Try R2 fallback if llms.txt wasn't found via GitHub
     if (!content) {
-      content = (await fetchFileFromR2(owner, repo, "llms.txt")) ?? null;
+      // Try to fetch pre-generated llms.txt
+      content = (await fetchFileFromR2(owner, repo, "llms.txt", env)) ?? null;
       if (content) {
         console.log(`Fetched pre-generated llms.txt for ${owner}/${repo}`);
         fileUsed = "llms.txt (generated)";
+      } else {
+        console.log(`No pre-generated llms.txt found for ${owner}/${repo}`);
       }
     }
 
@@ -224,7 +227,7 @@ export async function fetchDocumentation({
         env,
         false,
       );
-      fileUsed = "readme.md";
+      fileUsed = "README.md";
       docsPath = constructGithubUrl(owner, repo, docsBranch, "README.md");
     }
 
@@ -283,30 +286,36 @@ async function indexDocumentation(
   docsBranch: string,
   env: Env,
 ) {
-  // try {
-  //   if (env.MY_QUEUE) {
-  //     // Construct repo URL and llms URL if applicable
-  //     const repoUrl = `https://github.com/${owner}/${repo}`;
+  try {
+    if (env.MY_QUEUE) {
+      // Construct repo URL and llms URL if applicable
+      const repoUrl = `https://github.com/${owner}/${repo}`;
 
-  //     // Prepare and send message to queue
-  //     const message = {
-  //       owner,
-  //       repo,
-  //       repo_url: repoUrl,
-  //       file_url: docsPath,
-  //       content_length: content.length,
-  //       file_used: fileUsed,
-  //       docs_branch: docsBranch
-  //     };
+      // Prepare and send message to queue
+      const message = {
+        owner,
+        repo,
+        repo_url: repoUrl,
+        file_url: docsPath,
+        content_length: content.length,
+        file_used: fileUsed,
+        docs_branch: docsBranch,
+      };
 
-  //     await env.MY_QUEUE.send(JSON.stringify(message));
-  //     console.log(`Queued documentation processing for ${owner}/${repo}`, message);
-  //   } else {
-  //     console.error("Queue 'MY_QUEUE' not available in environment");
-  //   }
-  // } catch (e) {
-  //   console.log(`Failed to find documentation for ${owner}/${repo}`, e)
-  // }
+      await env.MY_QUEUE.send(JSON.stringify(message));
+      console.log(
+        `Queued documentation processing for ${owner}/${repo}`,
+        message,
+      );
+    } else {
+      console.error("Queue 'MY_QUEUE' not available in environment");
+    }
+  } catch (error) {
+    console.warn(
+      `Failed to enqueue documentation request for ${owner}/${repo}`,
+      error,
+    );
+  }
 
   try {
     // First check if vectors exist in KV cache
@@ -836,12 +845,14 @@ export async function fetchUrlContent({ url, env }: { url: string; env: Env }) {
   }
 }
 
+export const LIMIT = 51;
+
 /**
- * Enforces the 60-character limit on the combined server and tool names
+ * Enforces the 50-character limit on the combined server and tool names
  * @param prefix - The prefix for the tool name (fetch_ or search_)
  * @param repo - The repository name
  * @param suffix - The suffix for the tool name (_documentation)
- * @returns A tool name that ensures combined length with server name stays under 60 characters
+ * @returns A tool name that ensures combined length with server name stays under 50 characters
  */
 export function enforceToolNameLengthLimit(
   prefix: string,
@@ -866,16 +877,15 @@ export function enforceToolNameLengthLimit(
   const combinedLength = toolName.length + serverNameLen;
 
   // If combined length is already under limit, return it
-  if (combinedLength <= 60) {
+  if (combinedLength <= LIMIT) {
     return toolName;
   }
 
-  // Step 1: Try shortening "_documentation" to "_docs"
-  if (suffix === "_documentation") {
-    toolName = `${prefix}${repoName}_docs`;
-    if (toolName.length + serverNameLen <= 60) {
-      return toolName;
-    }
+  const shorterSuffix = suffix === "_documentation" ? "_docs" : suffix;
+
+  toolName = `${prefix}${repoName}${shorterSuffix}`;
+  if (toolName.length + serverNameLen <= LIMIT) {
+    return toolName;
   }
 
   // Step 2: Shorten the repo name by removing words
@@ -885,19 +895,20 @@ export function enforceToolNameLengthLimit(
     let shortenedRepo = repoName;
     for (let i = words.length - 1; i > 0; i--) {
       shortenedRepo = words.slice(0, i).join("_");
-      toolName = `${prefix}${shortenedRepo}${suffix === "_documentation" ? "_docs" : suffix}`;
-      if (toolName.length + serverNameLen <= 60) {
+      toolName = `${prefix}${shortenedRepo}${shorterSuffix}`;
+      if (toolName.length + serverNameLen <= LIMIT) {
         return toolName;
       }
     }
   }
 
-  // Step 3: As a last resort, truncate to fit
-  const shortenedSuffix = suffix === "_documentation" ? "_docs" : suffix;
-  const maxRepoLength =
-    60 - prefix.length - shortenedSuffix.length - serverNameLen;
-  const truncatedRepo = repoName.substring(0, Math.max(1, maxRepoLength));
-  return `${prefix}${truncatedRepo}${shortenedSuffix}`;
+  const result = `${prefix}repo${shorterSuffix}`;
+  if (result.length + serverNameLen <= LIMIT) {
+    return result;
+  }
+
+  // Step 3: As a last resort, change repo name to "repo"
+  return `${prefix}${shorterSuffix}`.replace(/__/g, "_");
 }
 
 /**
@@ -911,7 +922,7 @@ export function generateSearchToolName({ urlType, repo }: RepoData): string {
     // Default tool name as fallback
     let toolName = "search_documentation";
     if (urlType == "subdomain" || urlType == "github") {
-      // Use enforceLengthLimit to ensure the tool name doesn't exceed 60 characters
+      // Use enforceLengthLimit to ensure the tool name doesn't exceed 55 characters
       return enforceToolNameLengthLimit("search_", repo, "_documentation");
     }
     // replace non-alphanumeric characters with underscores
@@ -1002,7 +1013,7 @@ export function generateFetchToolName({
     let toolName = "fetch_documentation";
 
     if (urlType == "subdomain" || urlType == "github") {
-      // Use enforceLengthLimit to ensure the tool name doesn't exceed 60 characters
+      // Use enforceLengthLimit to ensure the tool name doesn't exceed 55 characters
       return enforceToolNameLengthLimit("fetch_", repo, "_documentation");
     }
 
@@ -1028,7 +1039,7 @@ export function generateCodeSearchToolName({
     // Default tool name as fallback
     let toolName = "search_code";
     if (urlType == "subdomain" || urlType == "github") {
-      // Use enforceLengthLimit to ensure the tool name doesn't exceed 60 characters
+      // Use enforceLengthLimit to ensure the tool name doesn't exceed 55 characters
       return enforceToolNameLengthLimit("search_", repo, "_code");
     }
     // replace non-alphanumeric characters with underscores
