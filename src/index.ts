@@ -57,9 +57,8 @@ async function handleBadgeRequest(
   const color = url.searchParams.get("color") || "aquamarine";
 
   const count = await getRepoViewCount(env, owner, repo);
-  return generateBadgeResponse(count, color, owner, repo);
+  return generateBadgeResponse(count, color);
 }
-
 export class MyMCP extends McpAgent {
   server = new McpServer({
     name: "GitMCP",
