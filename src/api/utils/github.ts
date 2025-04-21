@@ -70,7 +70,12 @@ export async function searchGitHubRepo(
       env,
     );
 
-    ctx.waitUntil(cacheFilePath(owner, repo, filename, filePath, branch, env));
+    if (content) {
+      ctx.waitUntil(
+        cacheFilePath(owner, repo, filename, filePath, branch, env),
+      );
+      return { content, path: filePath };
+    }
 
     return null;
   } catch (error) {
