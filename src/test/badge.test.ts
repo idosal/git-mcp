@@ -189,7 +189,7 @@ describe("Badge utilities", () => {
 
   describe("generateBadgeResponse", () => {
     it("should generate a badge response with custom values", async () => {
-      const response = generateBadgeResponse(100, "green", "owner", "repo");
+      const response = generateBadgeResponse(100, "green");
 
       // Mock the text() method to handle the ReadableStream
       const mockText = vi.fn().mockResolvedValue(

@@ -1,4 +1,4 @@
-import { cacheFilePath } from "./cache.js";
+import { cacheFilePath, getCachedFilePath } from "./cache.js";
 import {
   searchFileByName,
   githubApiRequest,
@@ -36,39 +36,41 @@ export async function searchGitHubRepo(
   owner: string,
   repo: string,
   filename: string,
+  branch: string,
   env: Env,
+  ctx: ExecutionContext,
 ): Promise<GitHubFile | null> {
   try {
-    // Use the centralized GitHub client to search for the file
-    const data = await searchFileByName(filename, owner, repo, env);
+    const cachedFile = await getCachedFilePath(owner, repo, env);
+    let filePath = cachedFile?.path || "";
 
-    // Handle search failure
-    if (!data) {
-      return null;
+    if (!filePath) {
+      // Use the centralized GitHub client to search for the file
+      const data = await searchFileByName(filename, owner, repo, env);
+
+      // Handle search failure
+      if (!data) {
+        return null;
+      }
+
+      // Check if we found any matches
+      if (data.total_count === 0 || !data.items || data.items.length === 0) {
+        return null;
+      }
+
+      // Get the first matching file's path
+      filePath = data.items[0]?.path;
     }
 
-    // Check if we found any matches
-    if (data.total_count === 0 || !data.items || data.items.length === 0) {
-      return null;
-    }
+    const content = await fetchFileFromGitHub(
+      owner,
+      repo,
+      branch,
+      filePath,
+      env,
+    );
 
-    // Get the first matching file's path
-    const filePath = data.items[0].path;
-
-    // Try fetching from both main and master branches in parallel
-    const [mainContent, masterContent] = await Promise.all([
-      fetchFileFromGitHub(owner, repo, "main", filePath, env),
-      fetchFileFromGitHub(owner, repo, "master", filePath, env),
-    ]);
-
-    // Cache the successful path
-    if (mainContent) {
-      await cacheFilePath(owner, repo, filename, filePath, "main", env);
-      return { content: mainContent, path: filePath };
-    } else if (masterContent) {
-      await cacheFilePath(owner, repo, filename, filePath, "master", env);
-      return { content: masterContent, path: filePath };
-    }
+    ctx.waitUntil(cacheFilePath(owner, repo, filename, filePath, branch, env));
 
     return null;
   } catch (error) {
@@ -103,7 +105,7 @@ export function constructGithubUrl(
 export async function getRepoBranch(
   owner: string,
   repo: string,
-  env: Env,
+  env: CloudflareEnvironment,
 ): Promise<string> {
   try {
     // First try to get the actual default branch using GitHub API

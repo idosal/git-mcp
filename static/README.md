@@ -46,10 +46,7 @@ Open the file in your text editor and replace it with this configuration:
   "mcpServers": {
     "math": {
       "command": "npx",
-      "args": [
-        "mcp-remote",
-        "http://localhost:8787/sse"
-      ]
+      "args": ["mcp-remote", "http://localhost:8787/sse"]
     }
   }
 }
@@ -85,17 +82,14 @@ You've now connected to your MCP server from a remote MCP client.
 
 ## Connect Claude Desktop to your remote MCP server
 
-Update the Claude configuration file to point to your `workers.dev` URL (ex: `worker-name.account-name.workers.dev/sse`) and restart Claude 
+Update the Claude configuration file to point to your `workers.dev` URL (ex: `worker-name.account-name.workers.dev/sse`) and restart Claude
 
 ```json
 {
   "mcpServers": {
     "math": {
       "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://worker-name.account-name.workers.dev/sse"
-      ]
+      "args": ["mcp-remote", "https://worker-name.account-name.workers.dev/sse"]
     }
   }
 }

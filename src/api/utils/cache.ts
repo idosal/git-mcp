@@ -1,4 +1,5 @@
 import type { RobotsRule } from "./robotsTxt.js";
+import type { FetchDocumentationResult } from "../tools/commonTools.js";
 
 // Define the format options and their corresponding return types
 export type FormatOptions = {
@@ -35,6 +36,16 @@ export function getRepoFilePathCacheKey(owner: string, repo: string): string {
  */
 export function getIsIndexedCacheKey(owner: string, repo: string): string {
   return `vector_exists:${owner}:${repo}`;
+}
+
+/**
+ * Cache key structure for fetchDocumentation results
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @returns Cache key
+ */
+export function getFetchDocCacheKey(owner: string, repo: string): string {
+  return `fetch_doc:${owner}:${repo}`;
 }
 
 /**
@@ -284,5 +295,53 @@ export async function fetchUrlContent<T extends keyof FormatOptions>({
   } catch (error) {
     console.warn(`Failed to fetch URL content (${url}):`, error);
     return null;
+  }
+}
+
+/**
+ * Get cached fetchDocumentation result
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param env - Environment with Cloudflare bindings
+ * @returns The cached FetchDocumentationResult or null if not found
+ */
+export async function getCachedFetchDocResult(
+  owner: string,
+  repo: string,
+  env: Env,
+): Promise<FetchDocumentationResult | null> {
+  try {
+    const key = getFetchDocCacheKey(owner, repo);
+    const result = await getFromCache(key, env);
+    return result as FetchDocumentationResult | null;
+  } catch (error) {
+    console.warn("Failed to retrieve fetchDoc result from cache:", error);
+    return null;
+  }
+}
+
+/**
+ * Cache fetchDocumentation result
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param result - The FetchDocumentationResult to cache
+ * @param ttl - Time to live in seconds
+ * @param env - Environment with Cloudflare bindings
+ */
+export async function cacheFetchDocResult(
+  owner: string,
+  repo: string,
+  result: FetchDocumentationResult,
+  ttl: number,
+  env: Env,
+): Promise<void> {
+  try {
+    const key = getFetchDocCacheKey(owner, repo);
+    await setInCache(key, result, env, ttl);
+    console.log(
+      `Cached fetchDocumentation result for ${owner}/${repo} with TTL ${ttl}s`,
+    );
+  } catch (error) {
+    console.warn("Failed to save fetchDoc result to cache:", error);
   }
 }

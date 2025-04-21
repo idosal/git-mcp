@@ -7,7 +7,6 @@ import {
 } from "../utils/github.js";
 import { formatSearchResults } from "../utils/helpers.js";
 import { fetchFileWithRobotsTxtCheck } from "../utils/robotsTxt.js";
-import { getCachedFilePath, cacheFilePath } from "../utils/cache.js";
 import {
   searchDocumentation,
   storeDocumentationVectors,
@@ -17,23 +16,41 @@ import htmlToMd from "html-to-md";
 import { searchCode } from "../utils/githubClient.js";
 import { fetchFileFromR2 } from "../utils/r2.js";
 import { generateServerName } from "../../shared/nameUtils.js";
+import {
+  getCachedFetchDocResult,
+  cacheFetchDocResult,
+} from "../utils/cache.js";
+
+// Define the return type for fetchDocumentation
+export type FetchDocumentationResult = {
+  fileUsed: string;
+  content: { type: "text"; text: string }[];
+};
 
 // Add env parameter to access Cloudflare's bindings
 export async function fetchDocumentation({
   repoData,
   env,
   ctx,
-  initiatedFromSearch = false,
 }: {
   repoData: RepoData;
-  env: Env;
+  env: CloudflareEnvironment;
   ctx: any;
-  initiatedFromSearch?: boolean;
-}): Promise<{
-  fileUsed: string;
-  content: { type: "text"; text: string }[];
-}> {
+}): Promise<FetchDocumentationResult> {
   const { owner, repo, urlType } = repoData;
+  const cacheTTL = 15 * 60; // 15 minutes in seconds
+
+  // Try fetching from cache first
+  if (owner && repo) {
+    const cachedResult = await getCachedFetchDocResult(owner, repo, env);
+    if (cachedResult) {
+      console.log(
+        `Returning cached fetchDocumentation result for ${owner}/${repo}`,
+      );
+      // Optional: Extend cache TTL if needed, or just return
+      return cachedResult;
+    }
+  }
 
   // Initialize fileUsed to prevent "used before assigned" error
   let fileUsed = "unknown";
@@ -107,101 +124,81 @@ export async function fetchDocumentation({
       fileUsed = "robots.txt restriction";
     }
   } else if (urlType === "github" && owner && repo) {
-    // First check if we have a cached path for llms.txt
-    const cachedPath = await getCachedFilePath(owner, repo, env);
-    if (cachedPath) {
-      content = await fetchFileFromGitHub(
+    // Try static paths + search for llms.txt directly
+    docsBranch = await getRepoBranch(owner, repo, env); // Get branch once
+
+    console.log(`Checking static paths for llms.txt in ${owner}/${repo}`);
+    const possibleLocations = [
+      "docs/docs/llms.txt", // Current default
+      "llms.txt", // Root directory
+      "docs/llms.txt", // Common docs folder
+    ];
+
+    // Create array of all location+branch combinations to try
+    const fetchPromises = possibleLocations.flatMap((location) => [
+      {
+        promise: fetchFileFromGitHub(
+          owner,
+          repo,
+          docsBranch,
+          location,
+          env,
+          false,
+        ),
+        location,
+        branch: docsBranch,
+      },
+    ]);
+
+    // Execute all fetch promises in parallel
+    const results = await Promise.all(
+      fetchPromises.map(async ({ promise, location, branch }) => {
+        const content = await promise;
+        return { content, location, branch };
+      }),
+    );
+
+    for (const location of possibleLocations) {
+      const mainResult = results.find(
+        (r) => r.location === location && r.content !== null,
+      );
+      if (mainResult) {
+        content = mainResult.content;
+        fileUsed = `llms.txt`;
+
+        docsPath = constructGithubUrl(
+          owner,
+          repo,
+          mainResult.branch,
+          mainResult.location,
+        );
+        break;
+      }
+    }
+
+    // Fallback to GitHub Search API if static paths don't work for llms.txt
+    if (!content) {
+      console.log(
+        `llms.txt not found in static paths, trying GitHub Search API`,
+      );
+
+      const result = await searchGitHubRepo(
         owner,
         repo,
-        cachedPath.branch,
-        cachedPath.path,
+        "llms.txt",
+        docsBranch,
         env,
+        ctx,
       );
-      if (content) {
-        fileUsed = `${cachedPath.path}`;
+      if (result) {
+        content = result.content;
+        docsPath = result.path;
+        fileUsed = "llms.txt";
       }
     }
 
-    // If no cached path or cached path failed, try static paths
+    // Try R2 fallback if llms.txt wasn't found via GitHub
     if (!content) {
-      docsBranch = await getRepoBranch(owner, repo, env);
-
-      console.log(`No cached path for ${owner}/${repo}, trying static paths`);
-      const possibleLocations = [
-        "docs/docs/llms.txt", // Current default
-        "llms.txt", // Root directory
-        "docs/llms.txt", // Common docs folder
-        "documentation/llms.txt", // Alternative docs folder
-      ];
-
-      // Create array of all location+branch combinations to try
-      const fetchPromises = possibleLocations.flatMap((location) => [
-        {
-          promise: fetchFileFromGitHub(
-            owner,
-            repo,
-            docsBranch,
-            location,
-            env,
-            false,
-          ),
-          location,
-          branch: docsBranch,
-        },
-      ]);
-
-      // Execute all fetch promises in parallel
-      const results = await Promise.all(
-        fetchPromises.map(async ({ promise, location, branch }) => {
-          const content = await promise;
-          return { content, location, branch };
-        }),
-      );
-
-      for (const location of possibleLocations) {
-        // Check main branch first (matching original priority)
-        const mainResult = results.find(
-          (r) => r.location === location && r.content !== null,
-        );
-        if (mainResult) {
-          content = mainResult.content;
-          fileUsed = `llms.txt`;
-          await cacheFilePath(
-            owner,
-            repo,
-            "llms.txt",
-            mainResult.location,
-            mainResult.branch,
-            env,
-          );
-
-          docsPath = constructGithubUrl(
-            owner,
-            repo,
-            mainResult.branch,
-            mainResult.location,
-          );
-          break;
-        }
-      }
-
-      // Fallback to GitHub Search API if static paths don't work for llms.txt
-      if (!content) {
-        console.log(
-          `llms.txt not found in static paths, trying GitHub Search API`,
-        );
-
-        const result = await searchGitHubRepo(owner, repo, "llms.txt", env);
-        if (result) {
-          content = result.content;
-          docsPath = result.path;
-          fileUsed = "llms.txt";
-        }
-      }
-    }
-
-    if (!content) {
-      // Try to fetch pre-generated llms.txt
       content = (await fetchFileFromR2(owner, repo, "llms.txt")) ?? null;
       if (content) {
         console.log(`Fetched pre-generated llms.txt for ${owner}/${repo}`);
@@ -209,12 +206,15 @@ export async function fetchDocumentation({
       }
     }
 
-    // Fallback to README.md if llms.txt not found in any location
+    // Fallback to README.md if llms.txt not found in any location (GitHub or R2)
     if (!content) {
       console.log(`llms.txt not found, trying README.md`);
-      // Only use static approach for README, no search API
-      // Try main branch first
+      // Use static approach for README
       const readmeLocation = getReadmeMDLocationByRepoData(repoData);
+      // Ensure docsBranch is available (should be fetched above)
+      if (!docsBranch) {
+        docsBranch = await getRepoBranch(owner, repo, env);
+      }
 
       content = await fetchFileFromGitHub(
         owner,
@@ -252,7 +252,8 @@ export async function fetchDocumentation({
     fileUsed = "generated";
   }
 
-  return {
+  // Construct the final result
+  const result: FetchDocumentationResult = {
     fileUsed,
     content: [
       {
@@ -261,6 +262,13 @@ export async function fetchDocumentation({
       },
     ],
   };
+
+  // Cache the final result before returning
+  if (owner && repo) {
+    ctx.waitUntil(cacheFetchDocResult(owner, repo, result, cacheTTL, env));
+  }
+
+  return result;
 }
 
 async function indexDocumentation(
@@ -335,7 +343,7 @@ export async function searchRepositoryDocumentation({
 }: {
   repoData: RepoData;
   query: string;
-  env: Env;
+  env: CloudflareEnvironment;
   ctx: any;
   fallbackSearch?: typeof searchRepositoryDocumentationNaive;
 }): Promise<{
@@ -382,7 +390,7 @@ export async function searchRepositoryDocumentationAutoRag({
 }: {
   repoData: RepoData;
   query: string;
-  env: Env;
+  env: CloudflareEnvironment;
   ctx: any;
   autoragPipeline: string;
 }): Promise<{
@@ -471,7 +479,7 @@ export async function searchRepositoryDocumentationNaive({
   repoData: RepoData;
   query: string;
   forceReindex?: boolean;
-  env: Env;
+  env: CloudflareEnvironment;
   ctx: any;
 }): Promise<{
   searchQuery: string;
