@@ -1057,19 +1057,15 @@ export function generateCodeSearchToolName({
  * @returns A descriptive string for the tool
  */
 export function generateCodeSearchToolDescription({
-  urlType,
   owner,
   repo,
 }: RepoData): string {
   try {
     // Default description as fallback
-    let description = "Search code files in the current repository.";
+    let description =
+      "Search code files in the current repository using the GitHub Search API (exact match).";
 
-    if (urlType == "subdomain") {
-      description = `Search for code within the ${owner}/${repo} GitHub repository. Returns matching files and code snippets.`;
-    } else if (urlType == "github") {
-      description = `Search for code within GitHub repository: ${owner}/${repo}. Returns matching files and code snippets.`;
-    }
+    description = `Search for code within the ${owner}/${repo} GitHub repository. Returns matching files for you to query further if relevant.`;
 
     return description;
   } catch (error) {
