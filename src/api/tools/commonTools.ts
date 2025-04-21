@@ -1060,18 +1060,7 @@ export function generateCodeSearchToolDescription({
   owner,
   repo,
 }: RepoData): string {
-  try {
-    // Default description as fallback
-    let description =
-      "Search code files in the current repository using the GitHub Search API (exact match).";
-
-    description = `Search for code within the ${owner}/${repo} GitHub repository. Returns matching files for you to query further if relevant.`;
-
-    return description;
-  } catch (error) {
-    // Return default description if there's any error parsing the URL
-    return "Search code in the current repository.";
-  }
+  return `Search for code within the ${owner}/${repo} GitHub repository. Returns matching files for you to query further if relevant.`;
 }
 
 const readmeMdLocations: Record<string, `${string}/${string}`> = {
