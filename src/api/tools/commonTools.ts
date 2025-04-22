@@ -219,6 +219,7 @@ export async function fetchDocumentation({
         docsBranch = await getRepoBranch(owner, repo, env);
       }
 
+      // Try README.md (uppercase) first
       content = await fetchFileFromGitHub(
         owner,
         repo,
@@ -227,8 +228,27 @@ export async function fetchDocumentation({
         env,
         false,
       );
-      fileUsed = "README.md";
-      docsPath = constructGithubUrl(owner, repo, docsBranch, "README.md");
+
+      if (content) {
+        fileUsed = "README.md";
+        docsPath = constructGithubUrl(owner, repo, docsBranch, "README.md");
+      } else {
+        // If uppercase README.md not found, try lowercase readme.md
+        console.log(`README.md not found, trying readme.md`);
+        content = await fetchFileFromGitHub(
+          owner,
+          repo,
+          docsBranch,
+          "readme.md",
+          env,
+          false,
+        );
+
+        if (content) {
+          fileUsed = "readme.md";
+          docsPath = constructGithubUrl(owner, repo, docsBranch, "readme.md");
+        }
+      }
     }
 
     if (!content) {
@@ -498,7 +518,8 @@ export async function searchRepositoryDocumentationAutoRag({
     });
 
     if (filteredData.length > 0) {
-      responseText += "\n\n### Sources:\n";
+      responseText +=
+        "### Sources:\nImportant: you can fetch the full content of any source using the fetch_url_content tool\n";
       const defaultBranch = await getRepoBranch(
         repoData.owner,
         repoData.repo,
