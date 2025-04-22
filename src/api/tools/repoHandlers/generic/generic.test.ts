@@ -65,9 +65,9 @@ describe("Generic Repo Handler", () => {
     });
   });
 
-  it("should return library correctly next-auth", async () => {
-    const library = "next-auth";
-    const libraryTitle = "NextAuth";
+  it("should return library correctly Next-Auth", async () => {
+    const library = "Next-Auth";
+    const libraryTitle = "NextAuth.js";
     const owner = "nextauthjs";
     const repo = "next-auth";
 
