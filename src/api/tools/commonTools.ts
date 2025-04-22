@@ -483,7 +483,7 @@ export async function searchRepositoryDocumentationAutoRag({
   };
 
   // Add filters based on R2 listing result
-  if (foldersToSearch.length > 0) {
+  if (foldersToSearch.length > 1) {
     // Success: Apply an array of 'eq' filters for each found folder
     searchRequest.filters = {
       type: "or",
