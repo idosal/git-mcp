@@ -119,7 +119,7 @@ class GenericRepoHandler implements RepoHandler {
       {
         name: "search_generic_code",
         description:
-          "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets. Supports pagination with 30 results per page.",
+          "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files. Supports pagination with 30 results per page.",
         paramsSchema: {
           owner: z
             .string()
@@ -154,7 +154,7 @@ class GenericRepoHandler implements RepoHandler {
     ctx,
   }: {
     repoData: RepoData;
-    env: Env;
+    env: CloudflareEnvironment;
     ctx: any;
   }): Promise<{
     fileUsed: string;
@@ -171,7 +171,7 @@ class GenericRepoHandler implements RepoHandler {
   }: {
     repoData: RepoData;
     query: string;
-    env: Env;
+    env: CloudflareEnvironment;
     ctx: any;
   }): Promise<{
     searchQuery: string;

@@ -58,7 +58,7 @@ describe("Tools Module", () => {
           },
           search_myrepo_code: {
             description:
-              "Search for code within GitHub repository: myorg/myrepo. Returns matching files and code snippets.",
+              "Search for code within the GitHub repository: myorg/myrepo. Returns matching files for you to query further if relevant.",
           },
         },
       },
@@ -81,7 +81,7 @@ describe("Tools Module", () => {
           },
           search_myrepo_code: {
             description:
-              "Search for code within the myorg/myrepo GitHub repository. Returns matching files and code snippets.",
+              "Search for code within the GitHub repository: myorg/myrepo. Returns matching files for you to query further if relevant.",
           },
         },
       },
@@ -96,7 +96,7 @@ describe("Tools Module", () => {
           },
           search_generic_code: {
             description:
-              "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files and code snippets. Supports pagination with 30 results per page.",
+              "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files. Supports pagination with 30 results per page.",
           },
           fetch_generic_url_content: {
             description:
