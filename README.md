@@ -32,7 +32,7 @@
 GitMCP supports **two flavors** -
 
 *   **Specific Repository (`gitmcp.io/{owner}/{repo}` or `{owner}.gitmcp.io/{repo}`):** Use these when you primarily work with a select number of libraries. This ensures your AI assistant always targets the correct project, enhancing security and relevance by preventing access to unintended repositories.
-*   **Generic Server (`docs.gitmcp.io`):** Use this for maximum flexibility when you need to switch between different repositories frequently. The AI assistant will prompt you (or decide based on context) which repository to access for each request. Be mindful that this relies on correctly identifying the target repository each time.
+*   **Generic Server (`gitmcp.io/docs`):** Use this for maximum flexibility when you need to switch between different repositories frequently. The AI assistant will prompt you (or decide based on context) which repository to access for each request. Be mindful that this relies on correctly identifying the target repository each time.
 
 **With GitMCP:**
 
@@ -64,7 +64,7 @@ Choose one of these URL formats depending on what you want to connect to:
 
 - For GitHub repositories: `gitmcp.io/{owner}/{repo}` 
 - For GitHub Pages sites: `{owner}.gitmcp.io/{repo}`
-- For a generic tool that supports any repository (dynamic): `docs.gitmcp.io`
+- For a generic tool that supports any repository (dynamic): `gitmcp.io/docs`
 
 Replace `{owner}` with the GitHub username or organization name, and `{repo}` with the repository name.
 
@@ -159,7 +159,7 @@ SSE URL: `https://gitmcp.io/{owner}/{repo}`
 
 For more details on adding custom MCP servers to HighlightAI, refer to [the documentation](https://docs.highlightai.com/learn/developers/plugins/custom-plugins-setup).
 
-> **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://docs.gitmcp.io` to allow your AI to access any repository on demand.
+> **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.
 
 ## ⚙️ How It Works
 
@@ -204,7 +204,7 @@ Cursor will pull the relevant documentation and code from GitMCP to correctly im
 
 ### Example 3: Using Claude Desktop with the dynamic endpoint
 
-You don't have to pick specific repositories. The generic `docs.gitmcp.io` endpoint allows AI to pick the GitHub project on the fly!
+You don't have to pick specific repositories. The generic `gitmcp.io/docs` endpoint allows AI to pick the GitHub project on the fly!
 
 **Prompt to any AI assistant:**
 > "I want to learn about the OpenAI Whisper speech recognition model. Explain how it works.
@@ -239,7 +239,7 @@ This tool searches through the actual code in the repository using GitHub's code
 
 **When it's useful:** When you want examples of how something is implemented or need technical details not covered in documentation
 
-> **Note:** When using the dynamic endpoint (`docs.gitmcp.io`), these tools are named slightly differently (`fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`) and need additional information about which repository to access.
+> **Note:** When using the dynamic endpoint (`gitmcp.io/docs`), these tools are named slightly differently (`fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`) and need additional information about which repository to access.
 
 ## ❓ FAQ
 
