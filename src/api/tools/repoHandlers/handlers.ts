@@ -9,7 +9,7 @@ const handlers: RepoHandlerMap = {
   // handle all types of urls for three.js
   "all::mrdoob/three.js": getThreejsRepoHandler(),
   // handle only the github type of urls for "generic" repos
-  "github::docs/": getGenericRepoHandler(),
+  "all::docs/": getGenericRepoHandler(),
   "all::remix-run/react-router": getReactRouterRepoHandler(),
 };
 

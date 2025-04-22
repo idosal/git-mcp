@@ -47,6 +47,19 @@ const testCases: {
     },
   },
   {
+    title: "generic (docs) subdomain",
+    input: {
+      requestHost: "docs.gitmcp.io",
+      requestUrls: ["https://docs.gitmcp.io/"],
+    },
+    expected: {
+      owner: "docs",
+      repo: null,
+      urlType: "subdomain",
+      host: "docs.gitmcp.io",
+    },
+  },
+  {
     title: HOST_TEMP_URL,
     input: {
       requestHost: HOST_TEMP_URL,

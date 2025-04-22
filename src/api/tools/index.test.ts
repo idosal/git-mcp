@@ -87,8 +87,8 @@ describe("Tools Module", () => {
       },
       // generic handler
       {
-        host: "gitmcp.io",
-        url: "https://gitmcp.io/docs",
+        host: "docs.gitmcp.io",
+        url: "https://docs.gitmcp.io",
         expectedTools: {
           fetch_generic_documentation: {
             description:

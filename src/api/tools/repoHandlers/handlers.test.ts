@@ -22,22 +22,27 @@ describe("getHandlerByRepoData", () => {
     });
   });
   it("should return the generic handler for generic repos", () => {
-    const repoData = getRepoData({
-      requestHost: "gitmcp.io",
-      requestUrl: "/docs",
+    const requests: RequestData[] = [
+      {
+        requestHost: "gitmcp.io",
+        requestUrl: "/docs",
+      },
+      {
+        requestHost: "docs.gitmcp.io",
+        requestUrl: "/",
+      },
+    ];
+    requests.forEach((request) => {
+      const repoData = getRepoData(request);
+      const handler = getHandlerByRepoData(repoData);
+      expect(handler.name).toBe("generic");
     });
-    const handler = getHandlerByRepoData(repoData);
-    expect(handler.name).toBe("generic");
   });
   it("should not return the generic handler urls that only look generic ", () => {
     const requests: RequestData[] = [
       {
         requestHost: "docs.gitmcp.io",
         requestUrl: "/some-repo",
-      },
-      {
-        requestHost: "docs.gitmcp.io",
-        requestUrl: "/",
       },
       {
         requestHost: "gitmcp.io",

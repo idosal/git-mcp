@@ -53,7 +53,7 @@ export function getRepoData(requestData: RequestData): RepoData {
 
     return {
       owner: subdomain,
-      repo: path,
+      repo: path || null,
       host: requestHost,
       urlType: "subdomain",
     };

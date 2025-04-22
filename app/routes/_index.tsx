@@ -170,7 +170,7 @@ export default function Home() {
                 <Divider simple />
                 <Example
                   from="any GitHub repository"
-                  to="gitmcp.io/docs"
+                  to="docs.gitmcp.io"
                   bold={["gitmcp.io", "any"]}
                 />
               </div>
