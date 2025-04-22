@@ -65,6 +65,29 @@ describe("Generic Repo Handler", () => {
     });
   });
 
+  it("should return library correctly next-auth", async () => {
+    const library = "next-auth";
+    const libraryTitle = "NextAuth";
+    const owner = "nextauthjs";
+    const repo = "next-auth";
+
+    const tool = mockMcp.getTool("match_common_libs_owner_repo_mapping");
+    const result = await tool.cb({ library });
+    expect(result).toEqual({
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({
+            library,
+            libraryTitle,
+            owner,
+            repo,
+          }),
+        },
+      ],
+    });
+  });
+
   it("should return library correctly for unknown library", async () => {
     const library = "UnknownLibrary";
 
