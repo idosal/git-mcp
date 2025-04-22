@@ -467,6 +467,11 @@ export async function searchRepositoryDocumentationAutoRag({
         value: folderPath,
       })),
     };
+
+    searchRequest.ranking_options = {
+      score_threshold: 0.4,
+    };
+
     console.log(
       `Applying ${searchRequest.filters?.filters?.length} 'eq' filters with listed R2 folders.`,
     );
