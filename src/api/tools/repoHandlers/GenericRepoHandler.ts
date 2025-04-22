@@ -53,7 +53,7 @@ class GenericRepoHandler implements RepoHandler {
             incrementRepoViewCount(
               env as CloudflareEnvironment,
               repo.split("/")[0],
-              repo.split("/")[1],
+              repo?.split("/")[1],
             ).catch((err) => {
               console.error("Error incrementing repo view count:", err);
             }),
