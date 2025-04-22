@@ -435,7 +435,10 @@ export async function searchRepositoryDocumentationAutoRag({
 
       // R2 list returns full paths in delimitedPrefixes
       if (listed.delimitedPrefixes) {
-        foldersToSearch = foldersToSearch.concat(listed.delimitedPrefixes);
+        const ensuredFolders = listed.delimitedPrefixes.map((prefix) =>
+          prefix.endsWith("/") ? prefix : prefix + "/",
+        );
+        foldersToSearch = foldersToSearch.concat(ensuredFolders);
       }
 
       if (listed.truncated) {
@@ -457,11 +460,9 @@ export async function searchRepositoryDocumentationAutoRag({
       `Error listing R2 folders for ${r2Prefix}, falling back to gte filter: ${error}`,
     );
     r2ListError = true;
-    // Fallback filter will be applied below
   }
 
   // Define the base search request structure (without filters initially)
-  // We assume AutoRagSearchRequest type includes an optional 'filters' array property
   const searchRequest = {
     query: query,
     rewrite_query: true,
@@ -469,26 +470,20 @@ export async function searchRepositoryDocumentationAutoRag({
     ranking_options: {
       score_threshold: 0.5,
     },
-    filters: [] as {
+    filters: {} as {
       type: string;
-      key: string;
+      filters?: {
+        type: string;
+        key: string;
+        value: string;
+      }[];
+      key?: string;
       value?: string;
-      values?: string[];
-    }[], // Initialize filters as an empty array with a basic type
+    }, // Initialize filters as an empty array with a basic type
   };
 
   // Add filters based on R2 listing result
-  if (r2ListError) {
-    // Fallback: Apply a single 'gte' filter for the base prefix
-    searchRequest.filters = [
-      {
-        type: "gte",
-        key: "folder",
-        value: r2Prefix,
-      },
-    ];
-    console.log("Applying fallback 'gte' filter due to R2 list error.");
-  } else if (foldersToSearch.length > 0) {
+  if (foldersToSearch.length > 0) {
     // Success: Apply an array of 'eq' filters for each found folder
     searchRequest.filters = {
       type: "or",
@@ -499,19 +494,19 @@ export async function searchRepositoryDocumentationAutoRag({
       })),
     };
     console.log(
-      `Applying ${searchRequest.filters.length} 'eq' filters with listed R2 folders.`,
+      `Applying ${searchRequest.filters?.filters?.length} 'eq' filters with listed R2 folders.`,
     );
   } else {
-    // Edge case: List succeeds but returns nothing (shouldn't happen with root included)
-    console.warn(
-      `No folders found for ${r2Prefix}, proceeding without folder filter.`,
-    );
-    // searchRequest.filters remains empty in this case
+    // Fallback: Apply a single 'gte' filter for the base prefix
+    searchRequest.filters = {
+      type: "gte",
+      key: "folder",
+      value: r2Prefix,
+    };
+    console.log("Applying fallback 'gte' filter due to R2 list error.");
   }
 
   const answer = await env.AI.autorag(autoragPipeline).search(searchRequest);
-
-  // console.log(answer);
 
   let responseText =
     `## Query\n\n${query}.\n\n## Response\n\n` ||
