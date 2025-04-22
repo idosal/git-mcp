@@ -419,24 +419,14 @@ export async function searchRepositoryDocumentationAutoRag({
   const answer = await env.AI.autorag(autoragPipeline).search({
     query: query,
     rewrite_query: true,
-    max_num_results: 10,
+    max_num_results: 30,
     ranking_options: {
       score_threshold: 0.5,
     },
     filters: {
-      type: "and",
-      filters: [
-        {
-          type: "gte",
-          key: "folder",
-          value: `${repoData.owner}/${repoData.repo}/`,
-        },
-        {
-          type: "lt",
-          key: "folder",
-          value: `${repoData.owner}/${repoData.repo}/~`,
-        },
-      ],
+      type: "gte",
+      key: "folder",
+      value: `${repoData.owner}/${repoData.repo}/`,
     },
   });
 
@@ -448,29 +438,37 @@ export async function searchRepositoryDocumentationAutoRag({
 
   // Add source data if available
   if (answer.data && answer.data.length > 0) {
-    responseText += "\n\n### Sources:\n";
-    const defaultBranch = await getRepoBranch(
-      repoData.owner,
-      repoData.repo,
-      env,
-    );
+    const filteredData = answer.data.filter((item) => {
+      return item.filename.startsWith(`${repoData.owner}/${repoData.repo}/`);
+    });
 
-    for (const item of answer.data) {
-      const rawGithubUrl = constructGithubUrl(
+    if (filteredData.length > 0) {
+      responseText += "\n\n### Sources:\n";
+      const defaultBranch = await getRepoBranch(
         repoData.owner,
         repoData.repo,
-        defaultBranch,
-        item.filename.replace(`${repoData.owner}/${repoData.repo}/`, ""),
+        env,
       );
-      responseText += `\n#### (${item.filename})[${rawGithubUrl}] (Score: ${item.score.toFixed(2)})\n`;
 
-      if (item.content && item.content.length > 0) {
-        for (const content of item.content) {
-          if (content.text) {
-            responseText += `- ${content.text}\n`;
+      for (const item of filteredData) {
+        const rawGithubUrl = constructGithubUrl(
+          repoData.owner,
+          repoData.repo,
+          defaultBranch,
+          item.filename.replace(`${repoData.owner}/${repoData.repo}/`, ""),
+        );
+        responseText += `\n#### (${item.filename})[${rawGithubUrl}] (Score: ${item.score.toFixed(2)})\n`;
+
+        if (item.content && item.content.length > 0) {
+          for (const content of item.content) {
+            if (content.text) {
+              responseText += `- ${content.text}\n`;
+            }
           }
         }
       }
+    } else {
+      responseText = `No results found for: "${query}"`;
     }
   } else {
     responseText = `No results found for: "${query}"`;
