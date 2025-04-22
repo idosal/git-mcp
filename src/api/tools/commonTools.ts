@@ -389,18 +389,22 @@ export async function searchRepositoryDocumentation({
     `${repoData.owner}/${repoData.repo}/llms.txt`,
   ));
   if (docsInR2) {
-    const autoragResult = await searchRepositoryDocumentationAutoRag({
-      repoData,
-      query,
-      env,
-      ctx,
-      autoragPipeline: "docs-rag",
-    });
-    if (
-      autoragResult?.content[0]?.text?.includes("No results found") === false
-    ) {
-      console.log("Found results in AutoRAG", autoragResult);
-      return autoragResult;
+    try {
+      const autoragResult = await searchRepositoryDocumentationAutoRag({
+        repoData,
+        query,
+        env,
+        ctx,
+        autoragPipeline: "docs-rag",
+      });
+      if (
+        autoragResult?.content[0]?.text?.includes("No results found") === false
+      ) {
+        console.log("Found results in AutoRAG", autoragResult);
+        return autoragResult;
+      }
+    } catch (error) {
+      console.error("Error in AutoRAG search", error);
     }
   }
 
