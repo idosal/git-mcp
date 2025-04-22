@@ -1060,7 +1060,7 @@ export function generateCodeSearchToolDescription({
   owner,
   repo,
 }: RepoData): string {
-  return `Search for code within the GitHub repository: "${owner}/${repo}" using the GitHub Search API (exaxct match). Returns matching files for you to query further if relevant.`;
+  return `Search for code within the GitHub repository: "${owner}/${repo}" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.`;
 }
 
 const readmeMdLocations: Record<string, `${string}/${string}`> = {
