@@ -37,8 +37,12 @@ class GenericRepoHandler implements RepoHandler {
               ],
             };
           }
-          const repoMapping = await fetchRepoMapping();
-          const repo = repoMapping[library?.toLowerCase()];
+          const nameMapping = mappingCaseInsensitive;
+          const repoMapping = mappingByRepoCaseInsensitive;
+
+          const repo =
+            nameMapping[library?.toLowerCase()] ??
+            repoMapping[library?.toLowerCase()];
           if (!repo) {
             return {
               content: [
@@ -53,8 +57,8 @@ class GenericRepoHandler implements RepoHandler {
           ctx.waitUntil(
             incrementRepoViewCount(
               env as CloudflareEnvironment,
-              repo.split("/")[0],
-              repo?.split("/")[1],
+              repo.owner,
+              repo.repo,
             ).catch((err) => {
               console.error("Error incrementing repo view count:", err);
             }),
@@ -66,8 +70,9 @@ class GenericRepoHandler implements RepoHandler {
                 type: "text",
                 text: JSON.stringify({
                   library,
-                  owner: repo.split("/")[0],
-                  repo: repo.split("/")[1],
+                  libraryTitle: repo.title,
+                  owner: repo.owner,
+                  repo: repo.repo,
                 }),
               },
             ],
@@ -191,9 +196,15 @@ export function getGenericRepoHandler(): GenericRepoHandler {
 }
 
 async function fetchRepoMapping(): Promise<
-  Record<string, `${string}/${string}`>
+  Record<string, (typeof mapping)[string]>
 > {
   return mappingCaseInsensitive;
+}
+
+async function fetchRepoMappingByRepoName(): Promise<
+  Record<string, (typeof mapping)[string]>
+> {
+  return mappingByRepoCaseInsensitive;
 }
 
 const mapping = rawMapping as unknown as {
@@ -202,11 +213,14 @@ const mapping = rawMapping as unknown as {
     repoName: `${string}/${string}`;
     githubUrl: string;
     description: string;
+    owner: string;
+    repo: string;
   };
 };
 const mappingCaseInsensitive = Object.fromEntries(
-  Object.entries(mapping).map(([key, value]) => [
-    key.toLowerCase(),
-    value.repoName,
-  ]),
-) as Record<string, `${string}/${string}`>;
+  Object.entries(mapping).map(([key, value]) => [key.toLowerCase(), value]),
+) as Record<string, (typeof mapping)[string]>;
+
+const mappingByRepoCaseInsensitive = Object.fromEntries(
+  Object.entries(mapping).map(([, value]) => [value.repo.toLowerCase(), value]),
+) as Record<string, (typeof mapping)[string]>;
