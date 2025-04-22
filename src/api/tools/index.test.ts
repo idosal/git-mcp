@@ -58,7 +58,7 @@ describe("Tools Module", () => {
           },
           search_myrepo_code: {
             description:
-              'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exaxct match). Returns matching files for you to query further if relevant.',
+              'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.',
           },
         },
       },
@@ -81,7 +81,7 @@ describe("Tools Module", () => {
           },
           search_myrepo_code: {
             description:
-              'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exaxct match). Returns matching files for you to query further if relevant.',
+              'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.',
           },
         },
       },
