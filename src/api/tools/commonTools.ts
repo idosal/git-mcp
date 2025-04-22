@@ -1009,20 +1009,14 @@ export function generateSearchToolDescription({
   repo,
 }: RepoData): string {
   try {
-    const fetchToolName = generateFetchToolName({
-      urlType,
-      owner,
-      repo,
-    });
-
     // Default description as fallback
     let description =
       "Semantically search within the fetched documentation for the current repository.";
 
     if (urlType == "subdomain") {
-      description = `Semantically search within the fetched documentation from the ${owner}/${repo} GitHub Pages. Useful for specific queries. Don't call if you already used ${fetchToolName}.`;
+      description = `Semantically search within the fetched documentation from the ${owner}/${repo} GitHub Pages. Useful for specific queries.`;
     } else if (urlType == "github") {
-      description = `Semantically search within the fetched documentation from GitHub repository: ${owner}/${repo}. Useful for specific queries. Don't call if you already used ${fetchToolName}.`;
+      description = `Semantically search within the fetched documentation from GitHub repository: ${owner}/${repo}. Useful for specific queries.`;
     }
 
     return description;
@@ -1048,9 +1042,9 @@ export function generateFetchToolDescription({
     let description = "Fetch entire documentation for the current repository.";
 
     if (urlType == "subdomain") {
-      description = `Fetch entire documentation file from the ${owner}/${repo} GitHub Pages. Useful for general questions.`;
+      description = `Fetch entire documentation file from the ${owner}/${repo} GitHub Pages. Useful for general questions. Always call this tool first if asked about ${owner}/${repo}.`;
     } else if (urlType == "github") {
-      description = `Fetch entire documentation file from GitHub repository: ${owner}/${repo}. Useful for general questions.`;
+      description = `Fetch entire documentation file from GitHub repository: ${owner}/${repo}. Useful for general questions. Always call this tool first if asked about ${owner}/${repo}.`;
     }
 
     return description;

@@ -46,11 +46,11 @@ describe("Tools Module", () => {
         expectedTools: {
           fetch_myrepo_documentation: {
             description:
-              "Fetch entire documentation file from GitHub repository: myorg/myrepo. Useful for general questions.",
+              "Fetch entire documentation file from GitHub repository: myorg/myrepo. Useful for general questions. Always call this tool first if asked about myorg/myrepo.",
           },
           search_myrepo_documentation: {
             description:
-              "Semantically search within the fetched documentation from GitHub repository: myorg/myrepo. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
+              "Semantically search within the fetched documentation from GitHub repository: myorg/myrepo. Useful for specific queries.",
           },
           fetch_generic_url_content: {
             description:
@@ -69,11 +69,11 @@ describe("Tools Module", () => {
         expectedTools: {
           fetch_myrepo_documentation: {
             description:
-              "Fetch entire documentation file from the myorg/myrepo GitHub Pages. Useful for general questions.",
+              "Fetch entire documentation file from the myorg/myrepo GitHub Pages. Useful for general questions. Always call this tool first if asked about myorg/myrepo.",
           },
           search_myrepo_documentation: {
             description:
-              "Semantically search within the fetched documentation from the myorg/myrepo GitHub Pages. Useful for specific queries. Don't call if you already used fetch_myrepo_documentation.",
+              "Semantically search within the fetched documentation from the myorg/myrepo GitHub Pages. Useful for specific queries.",
           },
           fetch_generic_url_content: {
             description:
@@ -108,7 +108,7 @@ describe("Tools Module", () => {
           },
           search_generic_documentation: {
             description:
-              "Semantically search in documentation for any GitHub repository by providing owner, project name, and search query. Useful for specific queries. Don't call if you already used fetch_generic_documentation on this owner and project name.",
+              "Semantically search in documentation for any GitHub repository by providing owner, project name, and search query. Useful for specific queries.",
           },
         },
       },

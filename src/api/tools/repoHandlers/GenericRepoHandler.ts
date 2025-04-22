@@ -96,7 +96,7 @@ class GenericRepoHandler implements RepoHandler {
       {
         name: "search_generic_documentation",
         description:
-          "Semantically search in documentation for any GitHub repository by providing owner, project name, and search query. Useful for specific queries. Don't call if you already used fetch_generic_documentation on this owner and project name.",
+          "Semantically search in documentation for any GitHub repository by providing owner, project name, and search query. Useful for specific queries.",
         paramsSchema: {
           owner: z
             .string()
