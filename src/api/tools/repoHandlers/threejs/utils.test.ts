@@ -8,6 +8,7 @@ import {
 describe("Threejs Utils", () => {
   it("should get the reference docs list as markdown", async () => {
     const result = await getReferenceDocsContent({
+      // @ts-ignore
       env: {},
       documents: [
         { documentName: "AudioContext" },

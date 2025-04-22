@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as toolsModule from "./index";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { ZodRawShape } from "zod";
+import { MockMcp } from "./repoHandlers/test/utils.js";
 // Mock the fetch function
 global.fetch = vi.fn();
 
@@ -161,36 +161,3 @@ describe("Tools Module", () => {
     });
   });
 });
-
-class MockMcp {
-  #tools: Record<
-    string,
-    {
-      description: string;
-      cb: (args: Record<string, any>) => Promise<any>;
-    }
-  > = {};
-
-  tool(
-    name: string,
-    description: string,
-    paramsSchema: ZodRawShape,
-    cb: (args: Record<string, any>) => Promise<any>,
-  ): void {
-    this.#tools[name] = { description, cb };
-  }
-
-  getTool(name: string) {
-    return this.#tools[name];
-  }
-
-  getTools() {
-    // filter out the cb from the tools
-    return Object.fromEntries(
-      Object.entries(this.#tools).map(([name, { description }]) => [
-        name,
-        { description },
-      ]),
-    );
-  }
-}
