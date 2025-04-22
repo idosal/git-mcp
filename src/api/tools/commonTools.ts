@@ -453,7 +453,7 @@ export async function searchRepositoryDocumentationAutoRag({
       }[];
       key?: string;
       value?: string;
-    }, // Initialize filters as an empty array with a basic type
+    },
   };
 
   // Add filters based on R2 listing result
