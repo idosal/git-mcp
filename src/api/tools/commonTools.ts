@@ -424,9 +424,19 @@ export async function searchRepositoryDocumentationAutoRag({
       score_threshold: 0.5,
     },
     filters: {
-      type: "gte",
-      key: "folder",
-      value: `${repoData.owner}/${repoData.repo}/`,
+      type: "and",
+      filters: [
+        {
+          type: "gte",
+          key: "folder",
+          value: `${repoData.owner}/${repoData.repo}/`,
+        },
+        {
+          type: "lt",
+          key: "folder",
+          value: `${repoData.owner}/${repoData.repo}/~`,
+        },
+      ],
     },
   });
 
