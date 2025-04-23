@@ -450,9 +450,9 @@ export async function searchRepositoryDocumentationAutoRag({
     const subfolders = await listAllSubfolders(env.DOCS_BUCKET, r2Prefix);
     // Combine root prefix with all found subfolders, ensuring uniqueness
     foldersToSearch = [...new Set([r2Prefix, ...subfolders])];
-    if (foldersToSearch.length > 50) {
-      console.warn(`Found ${foldersToSearch.length} folders, limiting to 50`);
-      foldersToSearch = foldersToSearch.slice(0, 50);
+    if (foldersToSearch.length > 49) {
+      console.warn(`Found ${foldersToSearch.length} folders, limiting to 49`);
+      foldersToSearch = foldersToSearch.slice(0, 49);
     }
 
     console.log(
