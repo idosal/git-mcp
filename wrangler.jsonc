@@ -62,7 +62,7 @@
     {
       "binding": "DOCS_BUCKET",
       "bucket_name": "docs-storage",
-      "preview_bucket_name": "docs-storage",
+      // "preview_bucket_name": "docs-storage-preview",
     },
   ],
   "queues": {
@@ -77,4 +77,22 @@
     "enabled": true,
   },
   "assets": { "directory": "./static/", "binding": "ASSETS" },
+
+  "env": {
+    "preview": {
+      "kv_namespaces": [
+        {
+          "binding": "CACHE_KV",
+          "id": "bfc078682a3a4e33a8b6dfcca09af94f",
+          "preview_id": "bfc078682a3a4e33a8b6dfcca09af94f"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "DOCS_BUCKET",
+          "bucket_name": "docs-storage",
+        }
+      ]
+    }
+  }
 }
