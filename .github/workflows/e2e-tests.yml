@@ -36,16 +36,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Deploy Cloudflare Worker Preview
-        id: deploy_preview # Give this step an ID to reference its output
+        id: deploy_preview
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # Deploy as a preview environment. Wrangler automatically creates a unique URL.
-          # Ensure your wrangler.jsonc is configured correctly if you use specific environments.
-          command: deploy --preview
-          # If you have a specific 'preview' environment in wrangler.jsonc:
-          # command: deploy --env preview
+          # Remove the --preview flag; the action handles preview deployments
+          command: deploy
 
       - name: Setup Playwright
         run: pnpm add -D playwright @playwright/test
