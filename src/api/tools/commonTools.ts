@@ -461,7 +461,7 @@ export async function searchRepositoryDocumentationAutoRag({
         {
           type: "lte",
           key: "folder",
-          value: `${repoPrefix}/~`,
+          value: `${repoPrefix}~`,
         },
       ],
     },
