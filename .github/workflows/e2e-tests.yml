@@ -36,8 +36,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build application
-        # Set NODE_ENV=preview for the build process
-        run: NODE_ENV=preview pnpm run build
+        # Run build in 'preview' mode
+        run: pnpm run build --mode preview
 
       - name: Deploy Cloudflare Worker Preview
         id: deploy_preview
