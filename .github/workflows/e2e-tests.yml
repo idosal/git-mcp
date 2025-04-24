@@ -23,9 +23,6 @@ jobs:
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
-        with:
-          version: 10.7.1 # Match version in your package.json lockfile comment
-          run_install: false
 
       - name: Get pnpm store directory
         shell: bash
