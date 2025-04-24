@@ -62,7 +62,7 @@
     {
       "binding": "DOCS_BUCKET",
       "bucket_name": "docs-storage",
-      "preview_bucket_name": "llms-store-preview",
+      "preview_bucket_name": "docs-storage",
     },
   ],
   "queues": {

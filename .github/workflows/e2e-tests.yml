@@ -1,0 +1,59 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    paths: # Only run if relevant files change
+      - 'src/**'
+      - 'tests/e2e/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'wrangler.jsonc'
+      - '.github/workflows/e2e-tests.yml'
+
+jobs:
+  e2e-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Grant permissions for wrangler preview deployment URLs
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Or your preferred Node.js version
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy Cloudflare Worker Preview
+        id: deploy_preview # Give this step an ID to reference its output
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Deploy as a preview environment. Wrangler automatically creates a unique URL.
+          # Ensure your wrangler.jsonc is configured correctly if you use specific environments.
+          command: deploy --preview
+          # If you have a specific 'preview' environment in wrangler.jsonc:
+          # command: deploy --env preview
+
+      - name: Setup Playwright
+        run: npm install -D playwright @playwright/test
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright Tests
+        run: npx playwright test tests/e2e/mcp-inspector.spec.ts
+        env:
+          # Pass the preview URL from the deployment step to the tests
+          # wrangler-action outputs the URL as 'preview_url'
+          PREVIEW_URL: ${{ steps.deploy_preview.outputs.preview_url }}
+          # You might need other env vars for your tests 
