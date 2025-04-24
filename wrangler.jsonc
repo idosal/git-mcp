@@ -77,4 +77,21 @@
     "enabled": true,
   },
   "assets": { "directory": "./static/", "binding": "ASSETS" },
+  "env": {
+    "preview": {
+      "workers_dev": true,
+      "durable_objects": {
+        "bindings": [
+          {
+            "class_name": "MyMCP",
+            "name": "MCP_OBJECT_PREVIEW",
+          },
+          {
+            "class_name": "ViewCounterDO",
+            "name": "VIEW_COUNTER_PREVIEW",
+          },
+        ],
+      },
+    }
+  }
 }

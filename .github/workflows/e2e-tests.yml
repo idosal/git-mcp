@@ -1,0 +1,88 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches: [main] # Adjust if your main branch has a different name
+
+jobs:
+  e2e_test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # Adjust timeout as needed
+    permissions:
+      contents: read
+      pull-requests: write # Required to post the preview URL comment back to the PR
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Match your project's Node.js version requirement
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.7.1 # Match version in your package.json lockfile comment
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build app
+        run: npm run build
+        
+      - name: Deploy Preview Worker
+        id: deploy_preview
+        uses: cloudflare/wrangler-action@v3
+        env:
+          CLOUDFLARE_ENV: preview
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: 'versions upload'
+
+      - name: Post Preview URL to PR
+        # Only run if the deployment step was successful and produced a URL
+        if: success() && steps.deploy_preview.outputs.deployment_url
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }} # GITHUB_TOKEN has permissions defined at job level
+          script: |
+            const previewUrl = `${{ steps.deploy_preview.outputs.deployment_url }}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Cloudflare Preview deployed at: ${previewUrl}`
+            });
+        # Continue workflow even if commenting fails
+        continue-on-error: true 
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        env:
+          # Pass the preview URL to your tests
+          PREVIEW_URL: ${{ steps.deploy_preview.outputs.deployment_url }}
+          # Define the target inspector URL if needed by tests
+          MCP_INSPECT_URL: https://inspect.mcp.garden/
+          # Add any other environment variables your tests might need
+        run: pnpm run test:e2e # Assumes 'test:e2e' script runs Playwright
+
+      # Preview deployments expire automatically, no explicit cleanup needed typically.
