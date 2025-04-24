@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build application
+        run: pnpm run build
+
       - name: Deploy Cloudflare Worker Preview
         id: deploy_preview
         uses: cloudflare/wrangler-action@v3
