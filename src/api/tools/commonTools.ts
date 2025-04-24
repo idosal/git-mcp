@@ -442,6 +442,7 @@ export async function searchRepositoryDocumentationAutoRag({
 
   // List all subdirectories recursively in R2 to build filter
   const repoPrefix = `${repoData.owner}/${repoData.repo}/`;
+  // Define the base search request structure (without filters initially)
   const searchRequest = {
     query: query,
     rewrite_query: true,
