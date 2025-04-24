@@ -1,6 +1,31 @@
 import { getRepoData } from "../../src/shared/repoData";
 import Content from "../components/content";
 import ChatPageServer from "../components/chatPage";
+import type { MetaFunction } from "react-router";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  if (!data) {
+    return [];
+  }
+  const { owner, repo, url } = data;
+  const repoDescription = repo ? `${owner}/${repo}` : "any GitHub repo";
+  if (isChatPage({ owner, repo, url })) {
+    return [
+      { title: "GitMCP Chat" },
+      {
+        name: "description",
+        content: `Chat with the documentation for ${repoDescription}`,
+      },
+    ];
+  }
+  return [
+    { title: `GitMCP` },
+    {
+      name: "description",
+      content: `Get the documentation for ${repoDescription}`,
+    },
+  ];
+};
 
 export const loader = async ({ request }: { request: Request }) => {
   const url = new URL(request.url);
@@ -43,7 +68,10 @@ function isChatPage({
   url: string;
 }) {
   // is a valid repo
-  const isValid = (owner && repo) || (!owner && repo == "docs");
+  const isValid = (owner && repo) || (!repo && owner == "docs");
+  if (!isValid) {
+    return false;
+  }
   // is a chat page
-  return isValid && owner != "chat" && repo != "chat" && url.endsWith("/chat");
+  return owner != "chat" && repo != "chat" && url.endsWith("/chat");
 }

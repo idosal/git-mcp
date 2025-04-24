@@ -13014,6 +13014,14 @@
     "owner": "nextauthjs",
     "repo": "next-auth"
   },
+  "NextAuth": {
+    "title": "NextAuth.js",
+    "repoName": "nextauthjs/next-auth",
+    "githubUrl": "https://github.com/nextauthjs/next-auth",
+    "description": "Authentication for the Web.",
+    "owner": "nextauthjs",
+    "repo": "next-auth"
+  },
   "Next.js": {
     "title": "Next.js",
     "repoName": "vercel/next.js",

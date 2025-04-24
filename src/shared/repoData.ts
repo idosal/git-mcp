@@ -71,7 +71,11 @@ export function getRepoData(requestData: RequestData): RepoData {
     // Extract owner/repo from path
     const splitPath = path.split("/");
     const owner = splitPath.at(0) ?? null;
-    const repo = splitPath.at(1) ?? null;
+    let repo = splitPath.at(1) ?? null;
+    // FIXME: this is a hack to support the chat page
+    if (owner == "docs" && repo == "chat") {
+      repo = null;
+    }
     logData.owner = owner;
     logData.repo = repo;
     logData.urlType = "github";
