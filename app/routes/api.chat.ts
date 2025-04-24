@@ -111,11 +111,11 @@ export async function action({
     });
   }
 
-  console.log("messages", messages);
-  console.log(
-    "parts",
-    messages.map((m) => m.parts.map((p) => p)),
-  );
+  // console.log("messages", messages);
+  // console.log(
+  //   "parts",
+  //   messages.map((m) => m.parts.map((p) => p)),
+  // );
 
   // If there was an error setting up MCP clients but we at least have composio tools, continue
   const result = streamText({
