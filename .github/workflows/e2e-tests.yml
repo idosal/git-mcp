@@ -36,7 +36,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build application
-        run: pnpm run build
+        # Set NODE_ENV=preview for the build process
+        run: NODE_ENV=preview pnpm run build
 
       - name: Deploy Cloudflare Worker Preview
         id: deploy_preview
@@ -44,8 +45,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # Deploy the specific 'preview' environment
-          command: deploy --env preview
+          # Remove --env flag, environment should be inferred by build or action
+          command: deploy
 
       - name: Setup Playwright
         run: pnpm add -D playwright @playwright/test
