@@ -6,7 +6,7 @@ on:
       - 'src/**'
       - 'tests/e2e/**'
       - 'package.json'
-      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
       - 'wrangler.jsonc'
       - '.github/workflows/e2e-tests.yml'
 
@@ -23,14 +23,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8 # Or your desired pnpm version
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20' # Or your preferred Node.js version
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Deploy Cloudflare Worker Preview
         id: deploy_preview # Give this step an ID to reference its output
@@ -45,13 +50,13 @@ jobs:
           # command: deploy --env preview
 
       - name: Setup Playwright
-        run: npm install -D playwright @playwright/test
+        run: pnpm add -D playwright @playwright/test
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
 
       - name: Run Playwright Tests
-        run: npx playwright test tests/e2e/mcp-inspector.spec.ts
+        run: pnpm exec playwright test tests/e2e/mcp-inspector.spec.ts
         env:
           # Pass the preview URL from the deployment step to the tests
           # wrangler-action outputs the URL as 'preview_url'
