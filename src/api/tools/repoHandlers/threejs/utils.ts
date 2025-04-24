@@ -209,12 +209,30 @@ export async function fetchThreeJsUrlsAsMarkdown(
       let urlToFetch: URL;
       if (url.startsWith("http")) {
         urlToFetch = new URL(url);
+      } else if (
+        url.endsWith(".html") &&
+        !url.includes("api") &&
+        !url.includes("manual") &&
+        !url.includes("docs") &&
+        !url.includes("examples")
+      ) {
+        urlToFetch = new URL(`/manual/en/${url}`, THREEJS_BASE_URL);
       } else {
         const urlObject = new URL(url, THREEJS_BASE_URL);
         const urlObjectPath = urlObject.pathname;
         // remove hashes
         const cleanUrl = urlObjectPath.replace(/#/g, "");
         urlToFetch = new URL(cleanUrl, THREEJS_BASE_URL);
+        if (
+          !urlToFetch.toString().includes(`${THREEJS_BASE_URL}/docs`) &&
+          !urlToFetch.toString().includes(`${THREEJS_BASE_URL}/manual`)
+        ) {
+          urlToFetch = new URL(
+            urlToFetch
+              .toString()
+              .replace(THREEJS_BASE_URL, `${THREEJS_BASE_URL}/docs`),
+          );
+        }
       }
       let documentNameToUse = documentName;
       if (!documentNameToUse) {
