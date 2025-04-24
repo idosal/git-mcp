@@ -54,7 +54,9 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: 'versions upload'
+
       - name: Echo preview URL
+        if: success()
         run: echo "Preview URL: ${{ steps.deploy_preview.outputs.deployment_url }}"
 
       - name: Post Preview URL to PR
