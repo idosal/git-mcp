@@ -1,4 +1,4 @@
-import { getRepoData, HOST_TEMP_URL } from "./repoData";
+import { getRepoData, getRepoDataFromUrl, HOST_TEMP_URL } from "./repoData";
 import type { RepoData } from "./repoData";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
@@ -117,6 +117,51 @@ describe("RepoData", () => {
           });
           expect(result).toEqual(testCase.expected);
         });
+      });
+    });
+  });
+});
+
+const flatTestCases = {
+  "microsoft/playwright-mcp": [
+    "https://github.com/microsoft/playwright-mcp",
+    "https://github.com/microsoft/playwright-mcp/blob/main/src/mcp-server.ts",
+    "https://microsoft.github.io/playwright-mcp",
+    "https://microsoft.github.io/playwright-mcp/blob/main/src/mcp-server.ts",
+    "https://gitmcp.io/microsoft/playwright-mcp",
+    "https://gitmcp.io/microsoft/playwright-mcp/blob/main/src/mcp-server.ts",
+    "https://microsoft.gitmcp.io/playwright-mcp",
+    "https://microsoft.gitmcp.io/playwright-mcp/blob/main/src/mcp-server.ts",
+    "github.com/microsoft/playwright-mcp",
+    "github.com/microsoft/playwright-mcp/blob/main/src/mcp-server.ts",
+    "microsoft.github.io/playwright-mcp",
+    "microsoft.github.io/playwright-mcp/blob/main/src/mcp-server.ts",
+    "gitmcp.io/microsoft/playwright-mcp",
+    "gitmcp.io/microsoft/playwright-mcp/blob/main/src/mcp-server.ts",
+    "microsoft.gitmcp.io/playwright-mcp",
+    "microsoft.gitmcp.io/playwright-mcp/blob/main/src/mcp-server.ts",
+    "microsoft/playwright-mcp",
+    "http://localhost:3000/microsoft/playwright-mcp",
+    "localhost:3000/microsoft/playwright-mcp/blob/main/src/mcp-server.ts",
+    `${HOST_TEMP_URL}/microsoft/playwright-mcp`,
+  ],
+  "null/null": [
+    "microsoft.gitrmcp.io/playwright-mcp/blob/main/src/mcp-server.ts",
+    "localhost:a/microsoft/playwright-mcp/blob/main/src/mcp-server.ts",
+  ],
+  "docs/null": [
+    "docs.gitmcp.io",
+    "docs.github.io",
+    "gitmcp.io/docs",
+    "localhost:3000/docs",
+  ],
+};
+describe("getRepoDataFromUrl", () => {
+  Object.entries(flatTestCases).forEach(([testCase, urls]) => {
+    it(`should return the correct repo data for ${testCase}`, () => {
+      urls.forEach((url) => {
+        const result = getRepoDataFromUrl(url);
+        expect(`${result.owner}/${result.repo ?? null}`).toEqual(testCase);
       });
     });
   });

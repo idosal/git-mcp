@@ -15,6 +15,10 @@ declare global {
   interface CloudflareEnvironment extends Env {
     CLOUDFLARE_ANALYTICS?: any;
     VIEW_COUNTER: DurableObjectNamespace;
+    GROQ_API_KEY?: string;
+    OPENAI_API_KEY?: string;
+    ANTHROPIC_API_KEY?: string;
+    XAI_API_KEY?: string;
   }
 }
 

@@ -1,7 +1,10 @@
 export type UrlType = "subdomain" | "github" | "unknown";
-export type RepoData = {
+export type MinimalRepoData = {
   owner: string | null;
   repo: string | null;
+};
+
+export type RepoData = MinimalRepoData & {
   host: string;
   urlType: UrlType;
 };
@@ -63,7 +66,6 @@ export function getRepoData(requestData: RequestData): RepoData {
   else if (
     requestHost === "gitmcp.io" ||
     requestHost === HOST_TEMP_URL ||
-    /^git-mcp-git-.*-git-mcp\.vercel\.app$/.test(requestHost) ||
     requestHost.includes("localhost")
   ) {
     // Extract owner/repo from path
@@ -106,3 +108,43 @@ function log(...args: any[]) {
 }
 
 export const HOST_TEMP_URL = "remote-mcp-server-cf.idosalomon.workers.dev";
+
+export function getRepoDataFromUrl(url: string): MinimalRepoData {
+  // Handle simple owner/repo format
+  if (!url.includes("/") && !url.includes(".")) {
+    return { owner: null, repo: null };
+  }
+
+  // Remove protocol if present
+  const urlWithoutProtocol = url.replace(/^https?:\/\//, "");
+
+  const urlReference = urlWithoutProtocol
+    .replace(".github.io", ".gitmcp.io")
+    .replace(/^github\.com/, "gitmcp.io")
+    .replace(HOST_TEMP_URL, "gitmcp.io")
+    .replace(/^localhost:?[0-9]+/, "gitmcp.io");
+
+  // Different URL patterns
+  const patterns = [
+    // gitmcp.io/owner/repo
+    /^(?:www\.)?gitmcp\.io\/([^\/]+)\/([^\/]+)/,
+    // owner.gitmcp.io/repo
+    /^(?:www\.)?([^\/]+)\.gitmcp\.io\/([^\/]+)/,
+    // owner.gitmcp.io
+    /^(?:www\.)?([^\/]+)\.gitmcp\.io/,
+    // gitmcp.io/docs
+    /^(?:www\.)?gitmcp\.io\/(docs)/,
+    // Simple owner/repo format
+    /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = urlReference.match(pattern);
+    if (match) {
+      return { owner: match[1], repo: match[2] };
+    }
+  }
+
+  // Default fallback
+  return { owner: null, repo: null };
+}
