@@ -44,8 +44,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # Remove the --preview flag; the action handles preview deployments
-          command: deploy
+          # Explicitly use the 'preview' command for the action
+          command: preview
 
       - name: Setup Playwright
         run: pnpm add -D playwright @playwright/test
