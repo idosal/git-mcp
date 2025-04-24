@@ -48,6 +48,9 @@ jobs:
           # Remove --env flag, environment should be inferred by build or action
           command: deploy
 
+      - name: Echo Deploy Outputs
+        run: echo "${{ toJSON(steps.deploy_preview.outputs) }}"
+
       - name: Setup Playwright
         run: pnpm add -D playwright @playwright/test
 
@@ -57,7 +60,6 @@ jobs:
       - name: Run Playwright Tests
         run: pnpm exec playwright test tests/e2e/mcp-inspector.spec.ts
         env:
-          # Pass the preview URL from the deployment step to the tests
-          # wrangler-action outputs the URL as 'preview_url'
-          PREVIEW_URL: ${{ steps.deploy_preview.outputs.deployment-url }}
+          # Try using 'alias-url' as the output name for the preview URL
+          PREVIEW_URL: ${{ steps.deploy_preview.outputs.alias-url }}
           # You might need other env vars for your tests 
