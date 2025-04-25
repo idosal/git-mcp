@@ -63,11 +63,11 @@ jobs:
 
       - name: Echo preview URL
         if: success()
-        run: echo "Preview URL: ${{ steps.deploy_preview.outputs }}"
+        run: echo ${{ steps.deploy_preview.outputs }}
 
       - name: Post Preview URL to PR
         # Only run if the deployment step was successful and produced a URL
-        if: success() && steps.deploy_preview.outputs.deployment_url
+        if: success() && $ {{ steps.deploy_preview.outputs.deployment_url }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }} # GITHUB_TOKEN has permissions defined at job level
