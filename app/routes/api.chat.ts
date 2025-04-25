@@ -1,13 +1,9 @@
 import { getModel } from "~/chat/ai/providers.server";
 import type { modelID } from "~/chat/ai/providers.shared";
-import { streamText, type UIMessage } from "ai";
+import { streamText, type ToolSet, type UIMessage } from "ai";
 
-import {
-  experimental_createMCPClient as createMCPClient,
-  type MCPTransport,
-} from "ai";
 import type { StorageKey } from "~/chat/ai/providers.shared";
-import { getTools } from "~/chat/chatAgent";
+import { MCPClientManager } from "agents/mcp/client";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 60;
@@ -113,7 +109,19 @@ export async function action({
   //   });
   // }
 
-  const tools = await getTools(mcpServers.map((mcpServer) => mcpServer.url));
+  let tools: ToolSet = {};
+  const mcp = new MCPClientManager("my-agent", "1.0.0");
+  for (const url of mcpServers.map((mcpServer) => mcpServer.url)) {
+    try {
+      const { id } = await mcp.connect(url);
+      if (mcp.mcpConnections[id]?.connectionState === "ready") {
+        const mcptools = await mcp.unstable_getAITools();
+        tools = { ...tools, ...mcptools };
+      }
+    } catch (error) {
+      console.error("Error getting tools for url", url, error);
+    }
+  }
 
   // console.log("messages", messages);
   // console.log(
