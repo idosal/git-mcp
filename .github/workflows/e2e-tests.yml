@@ -2,7 +2,7 @@ name: E2E Tests
 
 on:
   pull_request:
-    paths: # Only run if relevant files change
+    paths:
       - 'src/**'
       - 'tests/e2e/**'
       - 'package.json'
