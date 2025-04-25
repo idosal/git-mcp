@@ -3,12 +3,6 @@ name: E2E Tests
 on:
   pull_request:
     paths:
-      - 'src/**'
-      - 'tests/e2e/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'wrangler.jsonc'
-      - '.github/workflows/e2e-tests.yml'
 
 jobs:
   e2e_test:
