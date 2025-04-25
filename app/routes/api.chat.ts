@@ -114,6 +114,9 @@ export async function action({
   for (const url of mcpServers.map((mcpServer) => mcpServer.url)) {
     try {
       const response = await fetch(url);
+      if (!response.ok) {
+        console.error("Error fetching tools for url", url, response);
+      }
       console.log("response", response);
       const { id } = await mcp.connect(url);
       if (mcp.mcpConnections[id]?.connectionState === "ready") {
