@@ -66,6 +66,7 @@ export function getRepoData(requestData: RequestData): RepoData {
   else if (
     requestHost === "gitmcp.io" ||
     requestHost === HOST_TEMP_URL ||
+    requestHost === "git-mcp.idosalomon.workers.dev" ||
     requestHost.includes("localhost")
   ) {
     // Extract owner/repo from path
@@ -126,6 +127,7 @@ export function getRepoDataFromUrl(url: string): MinimalRepoData {
     .replace(".github.io", ".gitmcp.io")
     .replace(/^github\.com/, "gitmcp.io")
     .replace(HOST_TEMP_URL, "gitmcp.io")
+    .replace("git-mcp.idosalomon.workers.dev", "gitmcp.io")
     .replace(/^localhost:?[0-9]+/, "gitmcp.io");
 
   // Different URL patterns

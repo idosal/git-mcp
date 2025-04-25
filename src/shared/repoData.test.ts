@@ -8,6 +8,22 @@ const testCases: {
   expected: RepoData;
 }[] = [
   {
+    title: "git-mcp.idosalomon.workers.dev",
+    input: {
+      requestHost: "git-mcp.idosalomon.workers.dev",
+      requestUrls: [
+        "https://git-mcp.idosalomon.workers.dev/mrdoob/three.js",
+        "/mrdoob/three.js",
+      ],
+    },
+    expected: {
+      owner: "mrdoob",
+      repo: "three.js",
+      urlType: "github",
+      host: "git-mcp.idosalomon.workers.dev",
+    },
+  },
+  {
     title: "gitmcp.io",
     input: {
       requestHost: "gitmcp.io",
