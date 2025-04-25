@@ -11,6 +11,8 @@ import { useMCP } from "~/chat/lib/context/mcp-context";
 import { useCallback } from "react";
 import { useApiKeys } from "./api-keys-provider";
 
+const CHAT_API_URL = "https://chat-api-worker.idosalomon.workers.dev/api/chat";
+
 export default function Chat() {
   const [selectedModel, setSelectedModel] = useLocalStorage<modelID>(
     "selectedModel",
@@ -24,6 +26,7 @@ export default function Chat() {
 
   const { messages, input, handleInputChange, handleSubmit, status, stop } =
     useChat({
+      api: CHAT_API_URL,
       maxSteps: 20,
       body: {
         selectedModel,
