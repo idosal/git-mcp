@@ -7,6 +7,7 @@ import {
   type MCPTransport,
 } from "ai";
 import type { StorageKey } from "~/chat/ai/providers.shared";
+import { getTools } from "~/chat/chatAgent";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 60;
@@ -47,69 +48,72 @@ export async function action({
   const env = context.cloudflare.env as CloudflareEnvironment;
   const model = getModel(env, apiKeys);
 
-  // Initialize tools
-  let tools = {};
-  const mcpClients: any[] = [];
+  // // Initialize tools
+  // let tools = {};
+  // const mcpClients: any[] = [];
 
-  // Process each MCP server configuration
-  for (const mcpServer of mcpServers) {
-    try {
-      // Create appropriate transport based on type
-      let transport:
-        | MCPTransport
-        | { type: "sse"; url: string; headers?: Record<string, string> };
+  // // Process each MCP server configuration
+  // for (const mcpServer of mcpServers) {
+  //   try {
+  //     // Create appropriate transport based on type
+  //     let transport:
+  //       | MCPTransport
+  //       | { type: "sse"; url: string; headers?: Record<string, string> };
 
-      if (mcpServer.type === "sse") {
-        // Convert headers array to object for SSE transport
-        const headers: Record<string, string> = {};
-        if (mcpServer.headers && mcpServer.headers.length > 0) {
-          mcpServer.headers.forEach((header) => {
-            if (header.key) headers[header.key] = header.value || "";
-          });
-        }
+  //     if (mcpServer.type === "sse") {
+  //       // Convert headers array to object for SSE transport
+  //       const headers: Record<string, string> = {};
+  //       if (mcpServer.headers && mcpServer.headers.length > 0) {
+  //         mcpServer.headers.forEach((header) => {
+  //           if (header.key) headers[header.key] = header.value || "";
+  //         });
+  //       }
 
-        transport = {
-          type: "sse" as const,
-          url: mcpServer.url,
-          headers: Object.keys(headers).length > 0 ? headers : undefined,
-        };
-      } else {
-        console.warn(
-          `Skipping MCP server with unsupported transport type: ${mcpServer.type}`,
-        );
-        continue;
-      }
+  //       transport = {
+  //         type: "sse" as const,
+  //         url: mcpServer.url,
+  //         headers: Object.keys(headers).length > 0 ? headers : undefined,
+  //       };
+  //     } else {
+  //       console.warn(
+  //         `Skipping MCP server with unsupported transport type: ${mcpServer.type}`,
+  //       );
+  //       continue;
+  //     }
 
-      const mcpClient = await createMCPClient({ transport });
-      mcpClients.push(mcpClient);
+  //     const mcpClient = await createMCPClient({ transport });
+  //     mcpClients.push(mcpClient);
 
-      const mcptools = await mcpClient.tools();
+  //     const mcptools = await mcpClient.tools();
+  //     console.log("mcptools", mcptools);
 
-      console.log(
-        `MCP tools from ${mcpServer.type} transport:`,
-        Object.keys(mcptools),
-      );
+  //     console.log(
+  //       `MCP tools from ${mcpServer.type} transport:`,
+  //       Object.keys(mcptools),
+  //     );
 
-      // Add MCP tools to tools object
-      tools = { ...tools, ...mcptools };
-    } catch (error) {
-      console.error("Failed to initialize MCP client:", error);
-      // Continue with other servers instead of failing the entire request
-    }
-  }
+  //     // Add MCP tools to tools object
+  //     tools = { ...tools, ...mcptools };
+  //   } catch (error) {
+  //     console.error("Failed to initialize MCP client:", error);
+  //     // Continue with other servers instead of failing the entire request
+  //   }
+  // }
 
-  // Register cleanup for all clients
-  if (mcpClients.length > 0) {
-    request.signal.addEventListener("abort", async () => {
-      for (const client of mcpClients) {
-        try {
-          await client.close();
-        } catch (error) {
-          console.error("Error closing MCP client:", error);
-        }
-      }
-    });
-  }
+  // // Register cleanup for all clients
+  // if (mcpClients.length > 0) {
+  //   request.signal.addEventListener("abort", async () => {
+  //     for (const client of mcpClients) {
+  //       try {
+  //         await client.close();
+  //       } catch (error) {
+  //         console.error("Error closing MCP client:", error);
+  //       }
+  //     }
+  //   });
+  // }
+
+  const tools = await getTools(mcpServers.map((mcpServer) => mcpServer.url));
 
   // console.log("messages", messages);
   // console.log(

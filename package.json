@@ -59,7 +59,7 @@
     "@remix-run/cloudflare": "^2.16.5",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "agents": "^0.0.57",
+    "agents": "^0.0.66",
     "ai": "^4.3.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

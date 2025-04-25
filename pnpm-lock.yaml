@@ -81,8 +81,8 @@ importers:
         specifier: ^19.1.2
         version: 19.1.2(@types/react@19.1.2)
       agents:
-        specifier: ^0.0.57
-        version: 0.0.57(@cloudflare/workers-types@4.20250418.0)
+        specifier: ^0.0.66
+        version: 0.0.66(@cloudflare/workers-types@4.20250418.0)(react@19.1.0)
       ai:
         specifier: ^4.3.9
         version: 4.3.9(react@19.1.0)(zod@3.24.3)
@@ -983,6 +983,10 @@ packages:
     resolution: {integrity: sha512-wijOavYZfSOADbVM0LA7mrQ17N4IKNdFcfezknCCsZ1Y1KstVWlkDZ5ebcxuQJmqTTxsNjBHLc7it1SV0TBiPg==}
     engines: {node: '>=18'}
 
+  '@modelcontextprotocol/sdk@1.10.2':
+    resolution: {integrity: sha512-rb6AMp2DR4SN+kc6L1ta2NCpApyA9WYNx3CrTSZvGxq9wH71bRur+zRqPfg0vQ9mjywR7qZdX2RGHOPq3ss+tA==}
+    engines: {node: '>=18'}
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -1806,8 +1810,10 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  agents@0.0.57:
-    resolution: {integrity: sha512-TmqB9uT6qwsqP6ndmw4GaDKRlQZTESVS4lk7WHSX4safmHfK0hes6yS7N81K3phI+MOOaPeQS53LPapVWX5/Fg==}
+  agents@0.0.66:
+    resolution: {integrity: sha512-GFBuRi48oZ7hOA65dGNtVEVNZGH6MUGU2pIBKQYWagqwCd7rD5yXtZ1/YCaFR1wmKC9p9/YbZRBPw4LzjvsOwQ==}
+    peerDependencies:
+      react: '*'
 
   ai@4.3.9:
     resolution: {integrity: sha512-P2RpV65sWIPdUlA4f1pcJ11pB0N1YmqPVLEmC4j8WuBwKY0L3q9vGhYPh0Iv+spKHKyn0wUbMfas+7Z6nTfS0g==}
@@ -3051,8 +3057,8 @@ packages:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
 
-  partyserver@0.0.66:
-    resolution: {integrity: sha512-GyC1uy4dvC4zPkwdzHqCkQ1J1CMiI0swIJQ0qqsJh16WNkEo5QHuU3l3ikLO8t+Yq0cRr0qO8++xbr11h+107w==}
+  partyserver@0.0.67:
+    resolution: {integrity: sha512-GQ0fjJ7n5r5LrsFHFUkGR3Bd50YdBZaDNjvRTi8PowZgI5fvCFliT/XdDpRVuwfDDk0jb9es2cXcaAh1z5GsLA==}
     peerDependencies:
       '@cloudflare/workers-types': ^4.20240729.0
 
@@ -4605,6 +4611,21 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@modelcontextprotocol/sdk@1.10.2':
+    dependencies:
+      content-type: 1.0.5
+      cors: 2.8.5
+      cross-spawn: 7.0.6
+      eventsource: 3.0.6
+      express: 5.1.0
+      express-rate-limit: 7.5.0(express@5.1.0)
+      pkce-challenge: 5.0.0
+      raw-body: 3.0.0
+      zod: 3.24.3
+      zod-to-json-schema: 3.24.5(zod@3.24.3)
+    transitivePeerDependencies:
+      - supports-color
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -5425,13 +5446,16 @@ snapshots:
 
   acorn@8.14.1: {}
 
-  agents@0.0.57(@cloudflare/workers-types@4.20250418.0):
+  agents@0.0.66(@cloudflare/workers-types@4.20250418.0)(react@19.1.0):
     dependencies:
-      '@modelcontextprotocol/sdk': 1.10.0
+      '@modelcontextprotocol/sdk': 1.10.2
+      ai: 4.3.9(react@19.1.0)(zod@3.24.3)
       cron-schedule: 5.0.4
       nanoid: 5.1.5
-      partyserver: 0.0.66(@cloudflare/workers-types@4.20250418.0)
+      partyserver: 0.0.67(@cloudflare/workers-types@4.20250418.0)
       partysocket: 1.1.3
+      react: 19.1.0
+      zod: 3.24.3
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
       - supports-color
@@ -6872,7 +6896,7 @@ snapshots:
 
   parseurl@1.3.3: {}
 
-  partyserver@0.0.66(@cloudflare/workers-types@4.20250418.0):
+  partyserver@0.0.67(@cloudflare/workers-types@4.20250418.0):
     dependencies:
       '@cloudflare/workers-types': 4.20250418.0
       nanoid: 5.1.5
