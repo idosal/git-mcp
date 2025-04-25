@@ -8,6 +8,7 @@ import {
   withViewTracking,
 } from "./api/utils/badge";
 import { getRepoData } from "./shared/repoData";
+import { generateChatResponse } from "./api/utils/chatapi";
 
 export { ViewCounterDO } from "./api/utils/ViewCounterDO";
 
@@ -61,6 +62,11 @@ async function handleBadgeRequest(
   const count = await getRepoViewCount(env, owner, repo);
   return generateBadgeResponse(count, color);
 }
+
+async function handleChatRequest(request: Request, env: CloudflareEnvironment) {
+  return generateChatResponse(request, env);
+}
+
 export class MyMCP extends McpAgent {
   server = new McpServer({
     name: "GitMCP",
@@ -133,6 +139,11 @@ export default {
         const repo = parts[2];
         return handleBadgeRequest(request, env, owner, repo);
       }
+    }
+
+    // Handle chat requests
+    if (pathname == "/api/chat") {
+      return handleChatRequest(request, env);
     }
 
     const isSse =
