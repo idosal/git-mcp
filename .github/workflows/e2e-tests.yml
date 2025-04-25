@@ -63,7 +63,7 @@ jobs:
 
       - name: Echo preview URL
         if: success()
-        run: echo "Preview URL: ${{ steps.deploy_preview.outputs['deployment-url'] }}"
+        run: echo ${{ steps.deploy_preview.outputs['deployment-url'] }}
 
       - name: Post Preview URL to PR
         # Only run if the deployment step was successful and produced a URL
