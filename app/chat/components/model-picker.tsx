@@ -101,25 +101,25 @@ export const ModelPicker = ({
   const getCapabilityColor = (capability: string) => {
     switch (capability.toLowerCase()) {
       case "code":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 ocean:bg-blue-900/30 ocean:text-blue-300";
       case "reasoning":
       case "research":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 ocean:bg-purple-900/30 ocean:text-purple-300";
       case "vision":
-        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300";
+        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300 ocean:bg-indigo-900/30 ocean:text-indigo-300";
       case "fast":
       case "rapid":
-        return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
+        return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 ocean:bg-amber-900/30 ocean:text-amber-300";
       case "efficient":
       case "compact":
-        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300";
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 ocean:bg-emerald-900/30 ocean:text-emerald-300";
       case "creative":
       case "balance":
-        return "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300";
+        return "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300 ocean:bg-rose-900/30 ocean:text-rose-300";
       case "agentic":
-        return "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300";
+        return "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300 ocean:bg-cyan-900/30 ocean:text-cyan-300";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 ocean:bg-gray-800 ocean:text-gray-300";
     }
   };
 
@@ -142,10 +142,10 @@ export const ModelPicker = ({
         onValueChange={handleModelChange}
         defaultValue={validModelId}
       >
-        <SelectTrigger className="max-w-[200px] sm:max-w-fit sm:w-56 px-2 sm:px-3 h-8 sm:h-9 rounded-full group border-primary/20 bg-primary/5 hover:bg-primary/10 dark:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200 ring-offset-background focus:ring-2 focus:ring-primary/30 focus:ring-offset-2">
+        <SelectTrigger className="max-w-[200px] sm:max-w-fit sm:w-56 px-2 sm:px-3 h-8 sm:h-9 rounded-full group border-primary/20 bg-primary/5 hover:bg-primary/10 dark:bg-primary/10 dark:hover:bg-primary/20 ocean:bg-primary/10 ocean:hover:bg-primary/20 transition-all duration-200 ring-offset-background focus:ring-2 focus:ring-primary/30 focus:ring-offset-2">
           <SelectValue
             placeholder="Select model"
-            className="text-xs font-medium flex items-center gap-1 sm:gap-2 text-primary dark:text-primary-foreground"
+            className="text-xs font-medium flex items-center gap-1 sm:gap-2 text-primary dark:text-primary-foreground ocean:text-primary-foreground"
           >
             <div className="flex items-center gap-1 sm:gap-2">
               {getProviderIcon(modelDetails[validModelId].provider)}
@@ -157,7 +157,7 @@ export const ModelPicker = ({
         </SelectTrigger>
         <SelectContent
           align="start"
-          className="bg-background/95 dark:bg-muted/95 backdrop-blur-sm border-border/80 rounded-lg overflow-hidden p-0 w-[280px] sm:w-[350px] md:w-[515px]"
+          className="bg-background/95 dark:bg-muted/95 ocean:bg-muted/95 backdrop-blur-sm border-border/80 rounded-lg overflow-hidden p-0 w-[280px] sm:w-[350px] md:w-[515px]"
         >
           <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] md:grid-cols-[200px_1fr] items-start">
             {/* Model selector column */}

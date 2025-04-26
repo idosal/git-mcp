@@ -47,8 +47,8 @@ export function ReasoningMessagePart({
         <div
           className={cn(
             "flex items-center gap-2.5 rounded-full py-1.5 px-3",
-            "bg-indigo-50/50 dark:bg-indigo-900/10 text-indigo-700 dark:text-indigo-300",
-            "border border-indigo-200/50 dark:border-indigo-700/20 w-fit",
+            "bg-indigo-50/50 dark:bg-indigo-900/10 ocean:bg-indigo-900/10 text-indigo-700 dark:text-indigo-300 ocean:text-indigo-300",
+            "border border-indigo-200/50 dark:border-indigo-700/20 ocean:border-indigo-700/20 w-fit",
           )}
         >
           <div className="animate-spin h-3.5 w-3.5">
@@ -71,8 +71,8 @@ export function ReasoningMessagePart({
             <div
               className={cn(
                 "flex items-center justify-center w-6 h-6 rounded-full",
-                "bg-amber-50 dark:bg-amber-900/20",
-                "text-amber-600 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-700/30",
+                "bg-amber-50 dark:bg-amber-900/20 ocean:bg-amber-900/20",
+                "text-amber-600 dark:text-amber-400 ocean:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-700/30 ocean:ring-amber-700/30",
               )}
             >
               <LightbulbIcon className="h-3.5 w-3.5" />
@@ -109,7 +109,7 @@ export function ReasoningMessagePart({
             className={cn(
               "text-sm text-muted-foreground flex flex-col gap-2",
               "pl-3.5 ml-0.5 mt-1",
-              "border-l border-amber-200/50 dark:border-amber-700/30",
+              "border-l border-amber-200/50 dark:border-amber-700/30 ocean:border-amber-700/30",
             )}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}

@@ -7,7 +7,7 @@ import { cn } from "~/chat/lib/utils";
 const components: Partial<Components> = {
   pre: ({ children, ...props }) => (
     <pre
-      className="overflow-x-auto rounded-lg bg-zinc-100 dark:bg-zinc-800/50 black:bg-zinc-800/50 p-2.5 my-1.5 text-sm"
+      className="overflow-x-auto rounded-lg bg-zinc-100 dark:bg-zinc-800/50 black:bg-zinc-800/50 ocean:bg-zinc-800/50 p-2.5 my-1.5 text-sm"
       {...props}
     >
       {children}
@@ -24,7 +24,7 @@ const components: Partial<Components> = {
     if (isInline) {
       return (
         <code
-          className="px-1 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/50 black:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 black:text-zinc-300 text-[0.9em] font-mono"
+          className="px-1 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/50 black:bg-zinc-800/50 ocean:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 black:text-zinc-300 ocean:text-zinc-300 text-[0.9em] font-mono"
           {...props}
         >
           {children}
@@ -72,7 +72,7 @@ const components: Partial<Components> = {
   ),
   blockquote: ({ node, children, ...props }) => (
     <blockquote
-      className="border-l-2 border-zinc-200 dark:border-zinc-700 black:border-zinc-700 pl-3 my-1.5 italic text-zinc-600 dark:text-zinc-400 black:text-zinc-400"
+      className="border-l-2 border-zinc-200 dark:border-zinc-700 black:border-zinc-700 ocean:border-zinc-700 pl-3 my-1.5 italic text-zinc-600 dark:text-zinc-400 black:text-zinc-400 ocean:text-zinc-400"
       {...props}
     >
       {children}
@@ -80,7 +80,7 @@ const components: Partial<Components> = {
   ),
   a: ({ node, children, ...props }) => (
     <a
-      className="text-blue-500 hover:underline hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 black:text-blue-400 black:hover:text-blue-300 transition-colors"
+      className="text-blue-500 hover:underline hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 black:text-blue-400 black:hover:text-blue-300 ocean:text-blue-400 ocean:hover:text-blue-300 transition-colors"
       target="_blank"
       rel="noreferrer"
       {...props}
@@ -90,7 +90,7 @@ const components: Partial<Components> = {
   ),
   h1: ({ node, children, ...props }) => (
     <h1
-      className="text-2xl font-semibold mt-3 mb-1.5 text-zinc-800 dark:text-zinc-200 black:text-zinc-200"
+      className="text-2xl font-semibold mt-3 mb-1.5 text-zinc-800 dark:text-zinc-200 black:text-zinc-200 ocean:text-zinc-200"
       {...props}
     >
       {children}
@@ -98,7 +98,7 @@ const components: Partial<Components> = {
   ),
   h2: ({ node, children, ...props }) => (
     <h2
-      className="text-xl font-semibold mt-2.5 mb-1.5 text-zinc-800 dark:text-zinc-200 black:text-zinc-200"
+      className="text-xl font-semibold mt-2.5 mb-1.5 text-zinc-800 dark:text-zinc-200 black:text-zinc-200 ocean:text-zinc-200"
       {...props}
     >
       {children}
@@ -106,7 +106,7 @@ const components: Partial<Components> = {
   ),
   h3: ({ node, children, ...props }) => (
     <h3
-      className="text-lg font-semibold mt-2 mb-1 text-zinc-800 dark:text-zinc-200 black:text-zinc-200"
+      className="text-lg font-semibold mt-2 mb-1 text-zinc-800 dark:text-zinc-200 black:text-zinc-200 ocean:text-zinc-200"
       {...props}
     >
       {children}
@@ -114,7 +114,7 @@ const components: Partial<Components> = {
   ),
   h4: ({ node, children, ...props }) => (
     <h4
-      className="text-base font-semibold mt-2 mb-1 text-zinc-800 dark:text-zinc-200 black:text-zinc-200"
+      className="text-base font-semibold mt-2 mb-1 text-zinc-800 dark:text-zinc-200 black:text-zinc-200 ocean:text-zinc-200"
       {...props}
     >
       {children}
@@ -122,7 +122,7 @@ const components: Partial<Components> = {
   ),
   h5: ({ node, children, ...props }) => (
     <h5
-      className="text-sm font-semibold mt-2 mb-1 text-zinc-800 dark:text-zinc-200 black:text-zinc-200"
+      className="text-sm font-semibold mt-2 mb-1 text-zinc-800 dark:text-zinc-200 black:text-zinc-200 ocean:text-zinc-200"
       {...props}
     >
       {children}
@@ -130,7 +130,7 @@ const components: Partial<Components> = {
   ),
   h6: ({ node, children, ...props }) => (
     <h6
-      className="text-xs font-semibold mt-2 mb-0.5 text-zinc-800 dark:text-zinc-200 black:text-zinc-200"
+      className="text-xs font-semibold mt-2 mb-0.5 text-zinc-800 dark:text-zinc-200 black:text-zinc-200 ocean:text-zinc-200"
       {...props}
     >
       {children}
@@ -139,7 +139,7 @@ const components: Partial<Components> = {
   table: ({ node, children, ...props }) => (
     <div className="my-1.5 overflow-x-auto">
       <table
-        className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700 black:divide-zinc-700"
+        className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700 black:divide-zinc-700 ocean:divide-zinc-700"
         {...props}
       >
         {children}
@@ -148,7 +148,7 @@ const components: Partial<Components> = {
   ),
   thead: ({ node, children, ...props }) => (
     <thead
-      className="bg-zinc-50 dark:bg-zinc-800/50 black:bg-zinc-800/50"
+      className="bg-zinc-50 dark:bg-zinc-800/50 black:bg-zinc-800/50 ocean:bg-zinc-800/50"
       {...props}
     >
       {children}
@@ -156,7 +156,7 @@ const components: Partial<Components> = {
   ),
   tbody: ({ node, children, ...props }) => (
     <tbody
-      className="divide-y divide-zinc-200 dark:divide-zinc-700 black:divide-zinc-700 bg-white dark:bg-transparent black:bg-transparent"
+      className="divide-y divide-zinc-200 dark:divide-zinc-700 black:divide-zinc-700 ocean:divide-zinc-700 bg-white dark:bg-transparent black:bg-transparent ocean:bg-transparent"
       {...props}
     >
       {children}
@@ -164,7 +164,7 @@ const components: Partial<Components> = {
   ),
   tr: ({ node, children, ...props }) => (
     <tr
-      className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30 black:hover:bg-zinc-800/30"
+      className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30 black:hover:bg-zinc-800/30 ocean:hover:bg-zinc-800/30"
       {...props}
     >
       {children}
@@ -172,7 +172,7 @@ const components: Partial<Components> = {
   ),
   th: ({ node, children, ...props }) => (
     <th
-      className="px-3 py-1.5 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 black:text-zinc-400 uppercase tracking-wider"
+      className="px-3 py-1.5 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 black:text-zinc-400 ocean:text-zinc-400 uppercase tracking-wider"
       {...props}
     >
       {children}
@@ -185,7 +185,7 @@ const components: Partial<Components> = {
   ),
   hr: ({ node, ...props }) => (
     <hr
-      className="my-1.5 border-zinc-200 dark:border-zinc-700 black:border-zinc-700"
+      className="my-1.5 border-zinc-200 dark:border-zinc-700 black:border-zinc-700 ocean:border-zinc-700"
       {...props}
     />
   ),

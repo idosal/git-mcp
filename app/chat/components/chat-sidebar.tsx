@@ -49,7 +49,7 @@ export function ChatSidebar() {
 
   return (
     <Sidebar
-      className="shadow-sm bg-background/80 dark:bg-background/40 backdrop-blur-md"
+      className="shadow-sm bg-background/80 dark:bg-background/40 ocean:bg-background/40 backdrop-blur-md"
       collapsible="icon"
     >
       <SidebarHeader className="p-4 border-b border-border/40">

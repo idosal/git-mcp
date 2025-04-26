@@ -272,7 +272,9 @@ export const MCPServerManager = ({
           <div className="space-y-4 overflow-y-auto px-1 py-0.5 mb-14 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <div className="space-y-4">
               <div className="grid gap-1.5">
-                <Label htmlFor="url">Server or Repository URL</Label>
+                <Label htmlFor="url" className="pb-1">
+                  Server or Repository URL
+                </Label>
                 <Input
                   id="url"
                   value={newServer.url}
@@ -280,9 +282,9 @@ export const MCPServerManager = ({
                     setNewServer({ ...newServer, url: e.target.value })
                   }
                   placeholder="https://gitmcp.io/microsoft/playwright-mcp"
-                  className="relative z-0"
+                  className="relative z-0 placeholder:text-muted-foreground/60"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground/80">
                   A gitmcp.io server, a github.com repository, or a github.io
                   pages site
                 </p>
@@ -398,7 +400,7 @@ border ${
       {!server.isFixed && (
         <Button
           size="sm"
-          className="w-full gap-1.5 hover:text-black hover:dark:text-white rounded-lg"
+          className="w-full gap-1.5 hover:text-black hover:dark:text-white hover:ocean:text-white rounded-lg"
           variant={isActive ? "default" : "outline"}
           onClick={() => toggleServer(server.id)}
         >
