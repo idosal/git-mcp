@@ -10,6 +10,10 @@ export default function Home() {
     e.preventDefault();
     setError(null);
 
+    const action = (
+      (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement
+    ).value as "mcp" | "chat" | null;
+
     // Basic URL validation
     let processedUrl = url.trim();
     if (!processedUrl) {
@@ -36,7 +40,7 @@ export default function Home() {
           const owner = parts[0];
           const repo = parts[1];
           if (owner && repo) {
-            targetUrl = `https://gitmcp.io/${owner}/${repo}`;
+            targetUrl = `https://gitmcp.io/${owner}/${repo}${action === "chat" ? "/chat" : ""}`;
           }
         }
       }
@@ -46,7 +50,7 @@ export default function Home() {
         if (owner && pathname) {
           const repo = pathname.split("/")[0];
           if (repo) {
-            targetUrl = `https://${owner}.gitmcp.io/${repo}`;
+            targetUrl = `https://${owner}.gitmcp.io/${repo}${action === "chat" ? "/chat" : ""}`;
           }
         }
       }
@@ -176,9 +180,9 @@ export default function Home() {
               </div>
 
               <Divider text="or try the instant GitHub URL converter" />
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-2 sm:pt-2  mb-8">
-                <form onSubmit={handleSubmit} className="mb-3 mx-12">
-                  <div className="flex rounded-md shadow-sm">
+              <div className="bg-gray-800 border border-gray-700 rounded-lg p- sm:p-2 sm:pt-2  mb-8">
+                <form onSubmit={handleSubmit} className="m-3">
+                  <div className="flex rounded-md shadow-sm flex-col sm:flex-row gap-3 sm:gap-0">
                     <div className="relative flex-1">
                       <input
                         type="text"
@@ -197,12 +201,24 @@ export default function Home() {
                         Try Example
                       </button>
                     </div>
-                    <button
-                      type="submit"
-                      className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-base font-bold font-mono rounded-md shadow-sm text-gray-900 bg-emerald-400 hover:bg-emerald-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-                    >
-                      <span className="text-gray-800">To MCP!</span>
-                    </button>
+                    <div className="flex justify-center sm:justify-start">
+                      <button
+                        type="submit"
+                        name="action"
+                        value="mcp"
+                        className=" cursor-pointer ml-3 inline-flex items-center px-2 py-1 border border-transparent text-sm font-bold  rounded-md shadow-sm text-gray-900 bg-emerald-400 hover:bg-emerald-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+                      >
+                        <span className="text-gray-800">To MCP</span>
+                      </button>
+                      <button
+                        type="submit"
+                        name="action"
+                        value="chat"
+                        className=" cursor-pointer ml-3 inline-flex items-center px-2 py-1 border border-transparent text-sm font-bold  rounded-md shadow-sm text-gray-900 bg-blue-400 hover:bg-blue-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 relative"
+                      >
+                        <span className="text-gray-800">To Chat</span>
+                      </button>
+                    </div>
                   </div>
                   {error && (
                     <p
