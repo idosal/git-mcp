@@ -5,13 +5,7 @@ import {
   getRepoBranch,
   searchGitHubRepo,
 } from "../utils/github.js";
-import { formatSearchResults } from "../utils/helpers.js";
 import { fetchFileWithRobotsTxtCheck } from "../utils/robotsTxt.js";
-import {
-  searchDocumentation,
-  storeDocumentationVectors,
-} from "../utils/vectorStore.js";
-import { cacheIsIndexed, getIsIndexedFromCache } from "../utils/cache.js";
 import htmlToMd from "html-to-md";
 import { searchCode } from "../utils/githubClient.js";
 import { fetchFileFromR2 } from "../utils/r2.js";
@@ -254,20 +248,6 @@ export async function fetchDocumentation({
     if (!content) {
       console.error(`Failed to find documentation for ${owner}/${repo}`);
     }
-
-    if (content && owner && repo) {
-      ctx.waitUntil(
-        indexDocumentation(
-          owner,
-          repo,
-          content,
-          fileUsed,
-          docsPath,
-          docsBranch,
-          env,
-        ),
-      );
-    }
   }
 
   if (!content) {
@@ -295,75 +275,6 @@ export async function fetchDocumentation({
   }
 
   return result;
-}
-
-async function indexDocumentation(
-  owner: string,
-  repo: string,
-  content: string,
-  fileUsed: string,
-  docsPath: string,
-  docsBranch: string,
-  env: Env,
-) {
-  try {
-    if (env.MY_QUEUE) {
-      // Construct repo URL and llms URL if applicable
-      const repoUrl = `https://github.com/${owner}/${repo}`;
-
-      // Prepare and send message to queue
-      const message = {
-        owner,
-        repo,
-        repo_url: repoUrl,
-        file_url: docsPath,
-        content_length: content.length,
-        file_used: fileUsed,
-        docs_branch: docsBranch,
-      };
-
-      await env.MY_QUEUE.send(JSON.stringify(message));
-      console.log(
-        `Queued documentation processing for ${owner}/${repo}`,
-        message,
-      );
-    } else {
-      console.error("Queue 'MY_QUEUE' not available in environment");
-    }
-  } catch (error) {
-    console.warn(
-      `Failed to enqueue documentation request for ${owner}/${repo}`,
-      error,
-    );
-  }
-
-  try {
-    // First check if vectors exist in KV cache
-    let vectorsExist = await getIsIndexedFromCache(owner, repo, env);
-
-    // Only store vectors if they don't exist yet
-    if (!vectorsExist) {
-      // Pass the Vectorize binding from env
-      await storeDocumentationVectors(
-        owner,
-        repo,
-        content,
-        fileUsed,
-        env.VECTORIZE,
-      );
-
-      // Update the cache to indicate vectors now exist
-      await cacheIsIndexed(owner, repo, true, env);
-      console.log(`Stored documentation vectors for ${owner}/${repo}`);
-    } else {
-      console.log(
-        `Documentation vectors already exist for ${owner}/${repo}, skipping indexing`,
-      );
-    }
-  } catch (error) {
-    console.error(`Failed to store documentation vectors: ${error}`);
-    // Continue despite vector storage failure
-  }
 }
 
 export async function searchRepositoryDocumentation({
@@ -548,110 +459,23 @@ export async function searchRepositoryDocumentationNaive({
 
   console.log(`Searching ${owner}/${repo}`);
 
-  // First, check if this is the initial search for this repo/owner or if reindexing is forced
-  let isFirstSearch = false;
-
   try {
-    // Search for documentation using vector search - pass the Vectorize binding
-    let results = await searchDocumentation(
-      owner,
-      repo,
-      query,
-      5,
-      env.VECTORIZE,
+    // Fetch the documentation - pass env
+    const docResult = await fetchDocumentation({ repoData, env, ctx });
+    const content = docResult.content[0].text;
+    const fileUsed = docResult.fileUsed;
+
+    console.log(
+      `Fetched documentation from ${fileUsed} (${content.length} characters)`,
     );
 
-    console.log(`Initial search found ${results.length} results"`, results);
-
-    // If no results or forceReindex is true, we need to index the documentation
-    if (results.length === 0 || forceReindex) {
-      console.log(
-        `${
-          forceReindex ? "Force reindexing" : "No search results found"
-        } for in ${owner}/${repo}, fetching documentation first`,
-      );
-
-      isFirstSearch = true;
-
-      await cacheIsIndexed(owner, repo, false, env);
-
-      // Fetch the documentation - pass env
-      const docResult = await fetchDocumentation({ repoData, env, ctx });
-      const content = docResult.content[0].text;
-      const fileUsed = docResult.fileUsed;
-
-      console.log(
-        `Fetched documentation from ${fileUsed} (${content.length} characters)`,
-      );
-
-      // Only search if we found content
-      if (content && owner && repo && content !== "No documentation found.") {
-        try {
-          // Search again after indexing - pass the Vectorize binding
-          results = await searchDocumentation(
-            owner,
-            repo,
-            query,
-            5,
-            env.VECTORIZE,
-          );
-          console.log(
-            `Re-search after indexing found ${results.length} results`,
-          );
-
-          // If still no results on first search, send a message about indexing
-          if (results.length === 0 && isFirstSearch) {
-            return {
-              searchQuery: query,
-              content: [
-                {
-                  type: "text" as const,
-                  text:
-                    `### Search Results for: "${query}"\n\n` +
-                    // fallback to content
-                    docResult.content[0].text,
-                },
-              ],
-            };
-          }
-        } catch (error) {
-          console.error(`Error indexing documentation: ${error}`);
-
-          // If there was an indexing error on first search, inform the user
-          if (isFirstSearch) {
-            return {
-              searchQuery: query,
-              content: [
-                {
-                  type: "text" as const,
-                  text:
-                    `### Search Results for: "${query}"\n\n` +
-                    `We encountered an issue while indexing the documentation. ` +
-                    `Please try your search again in a moment.`,
-                },
-              ],
-            };
-          }
-        }
-      }
-    }
-
     // Format search results as text for MCP response, or provide a helpful message if none
-    let formattedText;
-    if (results.length > 0) {
-      formattedText = formatSearchResults(results, query);
-    } else {
-      // Provide more helpful guidance when no results are found
-      formattedText =
-        `### Search Results for: "${query}"\n\n` +
-        `No relevant documentation found for your query. The documentation for this repository has been indexed, ` +
-        `but no sections matched your specific search terms.\n\n` +
-        `Try:\n` +
-        `- Using different keywords\n` +
-        `- Being more specific about what you're looking for\n` +
-        `- Checking for basic information like "What is ${repo}?"\n` +
-        `- Using common terms like "installation", "tutorial", or "example"\n`;
-    }
+    const formattedText =
+      `### Search Results for: "${query}"\n\n` +
+      `No relevant documentation found for your query. It's either being indexed or the search query did not match any documentation.\n\n` +
+      `As a fallback, this is the documentation for ${owner}/${repo}:\n\n` +
+      `${content}\n\n` +
+      `If you'd like to retry the search, try changing the query to increase the likelihood of a match.`;
 
     // Return search results in proper MCP format
     return {
