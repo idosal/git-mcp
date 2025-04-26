@@ -40,11 +40,14 @@ test.describe("Dedicated repo servers", () => {
         await expect(page.getByText("fetch_generic_url_content")).toBeVisible({
           timeout: 10000,
         });
-        // Check if the fetch tool exists (dynamic or specific)
         if (path === 'mrdoob/three.js') {
-           await expect(page.getByText('fetch_threejs_documentation')).toBeVisible({ timeout: 5000 });
+          //  await expect(page.getByText('fetch_threejs_documentation')).toBeVisible({ timeout: 5000 });
+           // Check for the specific search tool for three.js
+           await expect(page.getByText('search_threejs_documentation')).toBeVisible({ timeout: 5000 });
         } else {
+           // Check for generic fetch and search tools
            await expect(page.getByRole('button', { name: /^fetch_.*_documentation$/ })).toBeVisible({ timeout: 5000 });
+           await expect(page.getByRole('button', { name: /^search_.*_documentation$/ })).toBeVisible({ timeout: 5000 });
         }
       });
 
@@ -71,7 +74,7 @@ test.describe("Dedicated repo servers", () => {
       // Test to verify running the specific fetch_X_documentation tool
       // Conditionally skip this test for mrdoob/three.js
       const shouldSkipFetchTest = path === 'mrdoob/three.js';
-      test.only(`should run fetch_X_documentation for ${path}`, async ({ page }) => {
+      test(`should run fetch_X_documentation for ${path}`, async ({ page }) => {
          test.skip(shouldSkipFetchTest, 'Skipping fetch_X_documentation test for mrdoob/three.js as it uses a different tool name.');
 
          await page.goto("/");
