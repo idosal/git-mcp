@@ -46,60 +46,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # - name: Build app
-      #   env:
-      #     CLOUDFLARE_ENV: preview
-      #   run: npm run build
-
-      # - name: Deploy Preview Worker
-      #   id: deploy_preview
-      #   uses: cloudflare/wrangler-action@v3.14.1
-      #   env:
-      #     CLOUDFLARE_ENV: preview
-      #   with:
-      #     apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      #     accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      #     command: 'versions upload'
-
-      # - name: Echo preview URL # Removed as Preview URLs are not generated for Workers with Durable Objects
-      #   if: success()
-      #   run: echo "Preview URL: ${{ steps.deploy_preview.outputs.deployment_url }}"
-
-      # - name: Post Preview URL to PR # Removed as the deployment_url output will be empty
-      #   # Only run if the deployment step was successful and produced a URL
-      #   if: success() && steps.deploy_preview.outputs.deployment_url
-      #   uses: actions/github-script@v7
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }} # GITHUB_TOKEN has permissions defined at job level
-      #     script: |
-      #       const previewUrl = `${{ steps.deploy_preview.outputs.deployment_url }}`;
-      #       github.rest.issues.createComment({
-      #         issue_number: context.issue.number,
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         body: `🚀 Cloudflare Preview deployed at: ${previewUrl}`
-      #       });
-      #   # Continue workflow even if commenting fails
-      #   continue-on-error: true 
-
       - name: Install Playwright Browsers
         run: npx playwright install chromium --with-deps
 
-      # - name: Start dev server in background # Removed: Handled by Playwright config webServer
-      # - name: Wait for server to start # Removed: Handled by Playwright config webServer
-
-      # - name: Start Inspector UI in background # Removed: Handled by Playwright config webServer
-      #   run: PORT=5174 npx @modelcontextprotocol/inspector &
-        
-      # - name: Wait for Inspector UI to start # Removed: Handled by Playwright config webServer
-      #   run: sleep 15 # Adjust sleep time if needed
-
       - name: Run Playwright tests
         env:
-          # PREVIEW_URL: http://localhost:3000 # Removed: Handled by Playwright config use.baseURL
-          # Define the target inspector URL if needed by tests
-          MCP_INSPECT_URL: https://inspect.mcp.garden/
-          # Add any other environment variables your tests might need
-        run: pnpm run test:e2e # Assumes 'test:e2e' script runs Playwright
-
-      # Preview deployments expire automatically, no explicit cleanup needed typically.
+          ENVIRONMENT: test
+        run: pnpm run test:e2e
