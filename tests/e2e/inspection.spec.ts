@@ -46,8 +46,8 @@ test.describe("Dedicated repo servers", () => {
            await expect(page.getByText('search_threejs_documentation')).toBeVisible({ timeout: 5000 });
         } else {
            // Check for generic fetch and search tools
-           await expect(page.getByRole('button', { name: /^fetch_.*_documentation$/ })).toBeVisible({ timeout: 5000 });
-           await expect(page.getByRole('button', { name: /^search_.*_documentation$/ })).toBeVisible({ timeout: 5000 });
+           await expect(page.getByText(/^fetch_.*_documentation$/)).toBeVisible({ timeout: 5000 });
+           await expect(page.getByText(/^search_.*_documentation$/)).toBeVisible({ timeout: 5000 });
         }
       });
 
