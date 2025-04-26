@@ -177,3 +177,9 @@ dist
 
 .dev.vars
 .wrangler/
+
+# playwright
+
+playwright-results/
+playwright-report/
+test-results/

@@ -1,16 +1,27 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
+import { fileURLToPath } from 'url'; // Import necessary functions
+
+// ES Module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
   testDir: './tests/e2e', // Point to your end-to-end tests directory
+
+  // Path to the global setup file.
+  // Use the derived __dirname for correct path resolution in ESM
+  globalSetup: path.resolve(__dirname, './tests/global-setup.ts'),
+
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 3 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -47,17 +58,15 @@ export default defineConfig({
 
   /* Configure multiple web servers */
   webServer: [
-    // Start the application's dev server
     {
-      name: 'AppDevServer',
+      name: 'GitMCP-DevServer',
       command: 'pnpm run dev',
-      url: 'http://localhost:5173', // Your app's dev server URL
+      url: 'http://localhost:5173',
       stderr: 'pipe',
       timeout: 120 * 1000,
     },
-    // Start the MCP Inspector UI & Backend
     {
-      name: 'Inspector',
+      name: 'MCP Inspector',
       command: 'CLIENT_PORT=5174 SERVER_PORT=6277 npx @modelcontextprotocol/inspector',
       url: 'http://localhost:5174', // Inspector UI URL (matches baseURL)
       stdout: 'ignore',

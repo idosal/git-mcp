@@ -8,6 +8,7 @@ import {
   withViewTracking,
 } from "./api/utils/badge";
 import { getRepoData } from "./shared/repoData";
+import { handleR2TestSetup } from "./api/test-setup";
 
 export { ViewCounterDO } from "./api/utils/ViewCounterDO";
 
@@ -41,7 +42,7 @@ const handleCorsPreflightRequest = (): Response => {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "*",
       "Access-Control-Allow-Credentials": "true",
       "Access-Control-Max-Age": "86400", // 24 hours
     },
@@ -86,23 +87,19 @@ export class MyMCP extends McpAgent {
     url.hash = "";
     const canonicalUrl = url.toString();
 
-    // Access env from this.env (Cloudflare worker environment is accessible here)
     const env = this.env as CloudflareEnvironment;
     const ctx = this.ctx;
 
-    // Get the repository data from the URL
     const repoData = getRepoData({
       requestHost: host,
       requestUrl: canonicalUrl,
     });
 
-    // Pass env to getMcpTools
     getMcpTools(env, host, canonicalUrl, ctx).forEach((tool) => {
       this.server.tool(
         tool.name,
         tool.description,
         tool.paramsSchema,
-        // Wrap the callback with view tracking
         withViewTracking(env, ctx, repoData, async (args: any) => {
           return tool.cb(args);
         }),
@@ -116,17 +113,24 @@ const mcpHandler = MyMCP.mount("/*");
 // Export a request handler that checks the transport header
 export default {
   async fetch(request: Request, env: any, ctx: any) {
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+
+    if (
+      env.ENVIRONMENT === "test" &&
+      request.method === "POST" &&
+      pathname === "/api/setup-r2-for-tests"
+    ) {
+      return await handleR2TestSetup(env as CloudflareEnvironment);
+    }
+
     // Handle CORS preflight requests
     if (request.method === "OPTIONS") {
       return handleCorsPreflightRequest();
     }
 
-    const url = new URL(request.url);
-    const pathname = url.pathname;
-
     // Handle badge requests
     if (pathname.startsWith("/badge/")) {
-      // Extract owner and repo from URL pattern: /badge/:owner/:repo
       const parts = pathname.split("/").filter(Boolean);
       if (parts.length >= 3 && parts[0] === "badge") {
         const owner = parts[1];
@@ -143,6 +147,7 @@ export default {
       request.method === "POST" &&
       url.pathname.includes("/message") &&
       url.pathname !== "/message";
+
     ctx.props.request = request;
 
     if (isMessage) {
@@ -154,12 +159,7 @@ export default {
       if (!newHeaders.has("accept")) {
         newHeaders.set("Content-Type", "text/event-stream");
       }
-
-      const modifiedRequest = new Request(request, {
-        headers: newHeaders,
-      });
-
-      // Handle SSE request with MCP handler
+      const modifiedRequest = new Request(request, { headers: newHeaders });
       return await mcpHandler.fetch(modifiedRequest, env, ctx);
     } else {
       // Default to serving the regular page
