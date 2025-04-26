@@ -28,7 +28,7 @@ export default function ChatPage({
       defaultTheme="system"
       enableSystem={true}
       disableTransitionOnChange
-      themes={["light", "dark", "sunset", "black"]}
+      themes={["light", "dark", "sunset", "black", "ocean"]}
     >
       <ApiKeysProvider>
         <SidebarProvider

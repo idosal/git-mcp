@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CircleDashed, Flame, Sun } from "lucide-react";
+import { CircleDashed, Flame, Sun, Moon, WavesIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "./ui/button";
 import {
@@ -35,7 +35,7 @@ export function ThemeToggle({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={() => setTheme("dark")}>
-          <Flame className="mr-2 h-4 w-4" />
+          <Moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => setTheme("light")}>
@@ -50,6 +50,10 @@ export function ThemeToggle({
         <DropdownMenuItem onSelect={() => setTheme("sunset")}>
           <Sun className="mr-2 h-4 w-4" />
           <span>Sunset</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setTheme("ocean")}>
+          <WavesIcon className="mr-2 h-4 w-4" />
+          <span>Ocean</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

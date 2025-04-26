@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 @custom-variant sunset (&:is(.sunset *));
 @custom-variant black (&:is(.black *));
-
+@custom-variant ocean (&:is(.ocean *));
 :root {
   --background: oklch(0.99 0.01 56.32);
   --foreground: oklch(0.34 0.01 2.77);
@@ -212,6 +212,63 @@
   --shadow-xl:
     0px 6px 12px -3px hsl(0 0% 0% / 0.09), 0px 8px 10px -4px hsl(0 0% 0% / 0.09);
   --shadow-2xl: 0px 6px 12px -3px hsl(0 0% 0% / 0.22);
+}
+
+.ocean {
+  --background: oklch(0.2 0.05 240);
+  --foreground: oklch(0.95 0.02 210);
+  --card: oklch(0.25 0.06 245);
+  --card-foreground: oklch(0.95 0.02 210);
+  --popover: oklch(0.25 0.06 245);
+  --popover-foreground: oklch(0.95 0.02 210);
+  --primary: oklch(0.55 0.15 220);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.3 0.06 250);
+  --secondary-foreground: oklch(0.95 0.02 210);
+  --muted: oklch(0.28 0.04 245);
+  --muted-foreground: oklch(0.86 0.02 210);
+  --accent: oklch(0.65 0.2 190);
+  --accent-foreground: oklch(0.2 0.05 240);
+  --destructive: oklch(0.5 0.18 20);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.3 0.08 240);
+  --input: oklch(0.3 0.08 240);
+  --ring: oklch(0.55 0.15 220);
+  --chart-1: oklch(0.55 0.15 220);
+  --chart-2: oklch(0.65 0.2 190);
+  --chart-3: oklch(0.7 0.18 200);
+  --chart-4: oklch(0.6 0.16 225);
+  --chart-5: oklch(0.5 0.12 235);
+  --sidebar: oklch(0.18 0.05 235);
+  --sidebar-foreground: oklch(0.95 0.02 210);
+  --sidebar-primary: oklch(0.5 0.12 220);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.6 0.18 190);
+  --sidebar-accent-foreground: oklch(0.18 0.05 235);
+  --sidebar-border: oklch(0.3 0.08 240);
+  --sidebar-ring: oklch(0.55 0.15 220);
+  --font-sans: Montserrat, sans-serif;
+  --font-serif: Merriweather, serif;
+  --font-mono: Ubuntu Mono, monospace;
+  --radius: 0.625rem;
+  --shadow-2xs: 0px 6px 12px -3px hsl(220 70% 5% / 0.04);
+  --shadow-xs: 0px 6px 12px -3px hsl(220 70% 5% / 0.04);
+  --shadow-sm:
+    0px 6px 12px -3px hsl(220 70% 5% / 0.09),
+    0px 1px 2px -4px hsl(220 70% 5% / 0.09);
+  --shadow:
+    0px 6px 12px -3px hsl(220 70% 5% / 0.09),
+    0px 1px 2px -4px hsl(220 70% 5% / 0.09);
+  --shadow-md:
+    0px 6px 12px -3px hsl(220 70% 5% / 0.09),
+    0px 2px 4px -4px hsl(220 70% 5% / 0.09);
+  --shadow-lg:
+    0px 6px 12px -3px hsl(220 70% 5% / 0.09),
+    0px 4px 6px -4px hsl(220 70% 5% / 0.09);
+  --shadow-xl:
+    0px 6px 12px -3px hsl(220 70% 5% / 0.09),
+    0px 8px 10px -4px hsl(220 70% 5% / 0.09);
+  --shadow-2xl: 0px 6px 12px -3px hsl(220 70% 5% / 0.22);
 }
 
 @theme inline {

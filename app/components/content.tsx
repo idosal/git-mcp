@@ -21,12 +21,12 @@ export default function Content({
       return (
         <div>
           <span> for the</span>{" "}
-          <strong className="text-emerald-500">
+          <strong className="text-blue-500">
             <a
               href={`https://github.com/${owner}/${repo}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-500 hover:underline"
+              className="text-blue-500 hover:underline"
             >
               {owner}/{repo}
             </a>
@@ -38,12 +38,12 @@ export default function Content({
       return (
         <div>
           <span> for the</span>{" "}
-          <strong className="text-emerald-500">
+          <strong className="text-blue-500">
             <a
               href={`https://github.com/${owner}/${repo}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-500 hover:underline"
+              className="text-blue-500 hover:underline"
             >
               {owner}/{repo}
             </a>
@@ -133,6 +133,45 @@ export default function Content({
               </svg>
             </div>
             <div className="h-0.5 w-12 bg-slate-300"></div>
+          </div>
+        </div>
+
+        {/* a button - NEW! Chat with `${owner}/${repo}` docs! */}
+        <div className="my-8 ">
+          <div className="flex justify-center">
+            <div className="relative group">
+              <div className="absolute rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-300 group-hover:duration-200"></div>
+              <button
+                className="cursor-pointer relative px-6 py-3 bg-gradient-to-br from-blue-600 to-purple-700 hover:from-blue-500 hover:to-purple-600 text-white font-bold text-lg rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center"
+                onClick={() =>
+                  window.open(
+                    owner === "docs" ? "/docs/chat" : `/${owner}/${repo}/chat`,
+                    "_blank",
+                  )
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span className="hidden sm:inline">
+                  New! Chat with{" "}
+                  {owner === "docs"
+                    ? "all GitHub docs"
+                    : `${owner}/${repo} docs`}{" "}
+                  online!
+                </span>
+                <span className="sm:hidden">Chat with docs</span>
+              </button>
+            </div>
           </div>
         </div>
 
