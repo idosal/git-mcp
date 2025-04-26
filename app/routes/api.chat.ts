@@ -1,6 +1,6 @@
-import { getModel } from "~/chat/ai/providers.server";
 import type { modelID } from "~/chat/ai/providers.shared";
 import { streamText, type ToolSet, type UIMessage } from "ai";
+import { createWorkersAI } from "workers-ai-provider";
 
 import type { StorageKey } from "~/chat/ai/providers.shared";
 import { MCPClientManager } from "agents/mcp/client";
@@ -41,73 +41,11 @@ export async function action({
     apiKeys: Record<StorageKey, string>;
   } = await request.json();
 
-  const env = context.cloudflare.env as CloudflareEnvironment;
-  const model = getModel(env, apiKeys);
+  const env = context.cloudflare.env as CloudflareEnvironment & { AI: any };
 
-  // // Initialize tools
-  // let tools = {};
-  // const mcpClients: any[] = [];
+  const workersai = createWorkersAI({ binding: env.AI });
 
-  // // Process each MCP server configuration
-  // for (const mcpServer of mcpServers) {
-  //   try {
-  //     // Create appropriate transport based on type
-  //     let transport:
-  //       | MCPTransport
-  //       | { type: "sse"; url: string; headers?: Record<string, string> };
-
-  //     if (mcpServer.type === "sse") {
-  //       // Convert headers array to object for SSE transport
-  //       const headers: Record<string, string> = {};
-  //       if (mcpServer.headers && mcpServer.headers.length > 0) {
-  //         mcpServer.headers.forEach((header) => {
-  //           if (header.key) headers[header.key] = header.value || "";
-  //         });
-  //       }
-
-  //       transport = {
-  //         type: "sse" as const,
-  //         url: mcpServer.url,
-  //         headers: Object.keys(headers).length > 0 ? headers : undefined,
-  //       };
-  //     } else {
-  //       console.warn(
-  //         `Skipping MCP server with unsupported transport type: ${mcpServer.type}`,
-  //       );
-  //       continue;
-  //     }
-
-  //     const mcpClient = await createMCPClient({ transport });
-  //     mcpClients.push(mcpClient);
-
-  //     const mcptools = await mcpClient.tools();
-  //     console.log("mcptools", mcptools);
-
-  //     console.log(
-  //       `MCP tools from ${mcpServer.type} transport:`,
-  //       Object.keys(mcptools),
-  //     );
-
-  //     // Add MCP tools to tools object
-  //     tools = { ...tools, ...mcptools };
-  //   } catch (error) {
-  //     console.error("Failed to initialize MCP client:", error);
-  //     // Continue with other servers instead of failing the entire request
-  //   }
-  // }
-
-  // // Register cleanup for all clients
-  // if (mcpClients.length > 0) {
-  //   request.signal.addEventListener("abort", async () => {
-  //     for (const client of mcpClients) {
-  //       try {
-  //         await client.close();
-  //       } catch (error) {
-  //         console.error("Error closing MCP client:", error);
-  //       }
-  //     }
-  //   });
-  // }
+  const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b", {});
 
   let tools: ToolSet = {};
   const mcp = new MCPClientManager("my-agent", "1.0.0");
@@ -127,15 +65,9 @@ export async function action({
     }
   }
 
-  // console.log("messages", messages);
-  // console.log(
-  //   "parts",
-  //   messages.map((m) => m.parts.map((p) => p)),
-  // );
-
   // If there was an error setting up MCP clients but we at least have composio tools, continue
   const result = streamText({
-    model: model.languageModel(selectedModel),
+    model: model,
     system: `You are a helpful assistant with access to a variety of tools.
 
     Today's date is ${new Date().toISOString().split("T")[0]}.
@@ -161,19 +93,6 @@ export async function action({
     messages,
     tools,
     maxSteps: 20,
-    providerOptions: {
-      google: {
-        thinkingConfig: {
-          thinkingBudget: 2048,
-        },
-      },
-      anthropic: {
-        thinking: {
-          type: "enabled",
-          budgetTokens: 12000,
-        },
-      },
-    },
     onError: (error) => {
       console.error(JSON.stringify(error, null, 2));
     },
