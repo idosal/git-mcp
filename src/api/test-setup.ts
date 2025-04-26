@@ -10,12 +10,12 @@ const dummyFilesToUpload = [
       "# React Router Dummy Test File\n\nThis is hardcoded content for E2E testing R2 population.",
   },
   {
-    bicketPath: "answerdotai/fasthtml/llms.txt",
+    bucketPath: "answerdotai/fasthtml/llms.txt",
     content:
       "# FastHTML Dummy Test File\n\nThis is hardcoded content for E2E testing R2 population.",
   },
   {
-    bicketPath: "mrdoob/three.js/llms.txt",
+    bucketPath: "mrdoob/three.js/llms.txt",
     content:
       "# Three.js Dummy Test File\n\nThis is hardcoded content for E2E testing R2 population.",
   },
