@@ -440,79 +440,30 @@ export async function searchRepositoryDocumentationAutoRag({
     };
   }
 
-  // List all subdirectories recursively in R2 to build filter
-  const r2Prefix = `${repoData.owner}/${repoData.repo}/`;
-  let foldersToSearch: string[] = [];
-
-  try {
-    console.log(`Recursively listing folders in R2 with prefix: ${r2Prefix}`);
-    // Fetch all subfolders recursively
-    const subfolders = await listAllSubfolders(env.DOCS_BUCKET, r2Prefix);
-    // Combine root prefix with all found subfolders, ensuring uniqueness
-    foldersToSearch = [...new Set([r2Prefix, ...subfolders])];
-    if (foldersToSearch.length > 48) {
-      console.warn(`Found ${foldersToSearch.length} folders, limiting to 48`);
-      foldersToSearch = foldersToSearch.slice(0, 48);
-    }
-
-    console.log(
-      `Found ${foldersToSearch.length} total folders (incl. root & subfolders) for AutoRAG search:`,
-      foldersToSearch,
-    );
-  } catch (error) {
-    console.error(
-      `Error listing R2 folders recursively for ${r2Prefix}, falling back to gte filter: ${error}`,
-    );
-  }
-
-  // Define the base search request structure (without filters initially)
+  const repoPrefix = `${repoData.owner}/${repoData.repo}/`;
   const searchRequest = {
     query: query,
     rewrite_query: true,
-    max_num_results: 30,
+    max_num_results: 12,
     ranking_options: {
-      score_threshold: 0.5,
+      score_threshold: 0.4,
     },
-    filters: {} as {
-      type: string;
-      filters?: {
-        type: string;
-        key: string;
-        value: string;
-      }[];
-      key?: string;
-      value?: string;
+    filters: {
+      type: "and",
+      filters: [
+        {
+          type: "gte",
+          key: "folder",
+          value: `${repoPrefix}`,
+        },
+        {
+          type: "lte",
+          key: "folder",
+          value: `${repoPrefix}~`,
+        },
+      ],
     },
   };
-
-  // Add filters based on R2 listing result
-  if (foldersToSearch.length > 1) {
-    // Success: Apply an array of 'eq' filters for each found folder
-    searchRequest.filters = {
-      type: "or",
-      filters: foldersToSearch.map((folderPath) => ({
-        type: "eq",
-        key: "folder",
-        value: folderPath,
-      })),
-    };
-
-    searchRequest.ranking_options = {
-      score_threshold: 0.4,
-    };
-
-    console.log(
-      `Applying ${searchRequest.filters?.filters?.length} 'eq' filters with listed R2 folders.`,
-    );
-  } else {
-    // Fallback: Apply a single 'gte' filter for the base prefix
-    searchRequest.filters = {
-      type: "gte",
-      key: "folder",
-      value: r2Prefix,
-    };
-    console.log("Applying fallback 'gte' filter due to R2 list error.");
-  }
 
   const answer = await env.AI.autorag(autoragPipeline).search(searchRequest);
 
