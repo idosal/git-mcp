@@ -21,7 +21,7 @@ export default defineConfig({
     baseURL: 'http://localhost:5174', // Point to the local Inspector UI
 
     /* Run tests in headed mode */
-    headless: false,
+    headless: process.env.CI ? true : false,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
