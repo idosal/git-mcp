@@ -52,8 +52,6 @@ export default defineConfig({
       name: 'AppDevServer',
       command: 'pnpm run dev',
       url: 'http://localhost:5173', // Your app's dev server URL
-    //   reuseExistingServer: !process.env.CI,
-    //   stdout: 'ignore',
       stderr: 'pipe',
       timeout: 120 * 1000,
     },
@@ -62,7 +60,6 @@ export default defineConfig({
       name: 'Inspector',
       command: 'CLIENT_PORT=5174 SERVER_PORT=6277 npx @modelcontextprotocol/inspector',
       url: 'http://localhost:5174', // Inspector UI URL (matches baseURL)
-    //   reuseExistingServer: !process.env.CI,
       stdout: 'ignore',
       stderr: 'pipe',
       timeout: 120 * 1000, // Give inspector time to start
