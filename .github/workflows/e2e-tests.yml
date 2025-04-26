@@ -49,7 +49,8 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install chromium --with-deps
 
+      - name: Create .dev.vars with test environment
+        run: echo "ENVIRONMENT=test" > .dev.vars
+
       - name: Run Playwright tests
-        env:
-          ENVIRONMENT: test
         run: pnpm run test:e2e
