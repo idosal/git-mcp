@@ -180,7 +180,7 @@ export default function Home() {
               </div>
 
               <Divider text="or try the instant GitHub URL converter" />
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p- sm:p-2 sm:pt-2  mb-8">
+              <div className="bg-gray-800 border border-gray-700 rounded-lg sm:p-2 sm:pt-2  mb-8">
                 <form onSubmit={handleSubmit} className="m-3">
                   <div className="flex rounded-md shadow-sm flex-col sm:flex-row gap-3 sm:gap-0">
                     <div className="relative flex-1">
