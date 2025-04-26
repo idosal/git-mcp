@@ -7,7 +7,7 @@
   "name": "git-mcp",
   "main": "src/index.ts",
   "compatibility_flags": ["nodejs_compat"],
-  "compatibility_date": "2025-04-17",
+  "compatibility_date": "2025-04-26",
   "routes": [
     {
       "pattern": "gitmcp.io",
