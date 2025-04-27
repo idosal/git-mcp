@@ -248,9 +248,31 @@ export async function fetchDocumentation({
     }
   }
 
+  if (owner && repo) {
+    ctx.waitUntil(
+      enqueueDocumentationProcessing(
+        owner,
+        repo,
+        content,
+        fileUsed,
+        docsPath,
+        docsBranch,
+        env,
+      ),
+    );
+  }
+
   if (!content) {
     content = "No documentation found.";
-    fileUsed = "generated";
+    return {
+      fileUsed,
+      content: [
+        {
+          type: "text" as const,
+          text: content,
+        },
+      ],
+    };
   }
 
   const result: FetchDocumentationResult = {
@@ -263,8 +285,7 @@ export async function fetchDocumentation({
     ],
   };
 
-  // Cache the final result before returning
-  if (owner && repo && !!result?.content) {
+  if (owner && repo) {
     ctx.waitUntil(
       cacheFetchDocResult(owner, repo, result, cacheTTL, env).catch((error) => {
         console.warn(`Failed to cache fetch documentation result: ${error}`);
@@ -273,6 +294,47 @@ export async function fetchDocumentation({
   }
 
   return result;
+}
+
+async function enqueueDocumentationProcessing(
+  owner: string,
+  repo: string,
+  content: string | null,
+  fileUsed: string,
+  docsPath: string,
+  docsBranch: string,
+  env: Env,
+) {
+  try {
+    if (env.MY_QUEUE) {
+      console.log("Enqueuing documentation processing", owner, repo);
+      const repoUrl = `https://github.com/${owner}/${repo}`;
+
+      // Prepare and send message to queue
+      const message = {
+        owner,
+        repo,
+        repo_url: repoUrl,
+        file_url: docsPath,
+        content_length: content?.length,
+        file_used: fileUsed,
+        docs_branch: docsBranch,
+      };
+
+      await env.MY_QUEUE.send(JSON.stringify(message));
+      console.log(
+        `Queued documentation processing for ${owner}/${repo}`,
+        message,
+      );
+    } else {
+      console.error("Queue 'MY_QUEUE' not available in environment");
+    }
+  } catch (error) {
+    console.error(
+      `Failed to enqueue documentation request for ${owner}/${repo}`,
+      error,
+    );
+  }
 }
 
 export async function searchRepositoryDocumentation({
