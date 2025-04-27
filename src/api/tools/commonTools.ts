@@ -32,18 +32,17 @@ export async function fetchDocumentation({
   ctx: any;
 }): Promise<FetchDocumentationResult> {
   const { owner, repo, urlType } = repoData;
-  const cacheTTL = 15 * 60; // 15 minutes in seconds
+  const cacheTTL = 30 * 60; // 30 minutes in seconds
 
   // Try fetching from cache first
   if (owner && repo) {
     const cachedResult = await getCachedFetchDocResult(owner, repo, env);
-    // if (cachedResult) {
-    //   console.log(
-    //     `Returning cached fetchDocumentation result for ${owner}/${repo}`,
-    //   );
-    //   // Optional: Extend cache TTL if needed, or just return
-    //   return cachedResult;
-    // }
+    if (cachedResult) {
+      console.log(
+        `Returning cached fetchDocumentation result for ${owner}/${repo}`,
+      );
+      return cachedResult;
+    }
   }
 
   // Initialize fileUsed to prevent "used before assigned" error
