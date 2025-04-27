@@ -120,13 +120,19 @@ export async function getRepoBranch(
     if (response && response.ok) {
       const data = (await response.json()) as { default_branch?: string };
       if (data && data.default_branch) {
+        console.log("Default branch found", data.default_branch);
         return data.default_branch;
       }
     }
 
+    console.error(
+      "No default branch found, falling back to main/master check",
+      response,
+    );
+
     // Fall back to the main/master check if API request fails
     // Try 'main' branch
-    const mainUrl = constructGithubUrl(owner, repo, "main", "");
+    const mainUrl = constructGithubUrl(owner, repo, "main", "README.md");
     const mainResponse = await githubApiRequest(
       mainUrl,
       { method: "HEAD" },
@@ -138,7 +144,7 @@ export async function getRepoBranch(
     }
 
     // If 'main' branch doesn't exist, try 'master'
-    const masterUrl = constructGithubUrl(owner, repo, "master", "");
+    const masterUrl = constructGithubUrl(owner, repo, "master", "README.md");
     const masterResponse = await githubApiRequest(
       masterUrl,
       { method: "HEAD" },
