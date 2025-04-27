@@ -280,7 +280,7 @@ export async function searchFileByName(
   repo: string,
   env: Env,
 ): Promise<any> {
-  const searchUrl = `https://api.github.com/search/code?q=filename:${encodeURIComponent(filename)}+repo:${owner}/${repo}`;
+  const searchUrl = `https://api.github.com/search/code?q=filename:${filename}+repo:${owner}/${repo}`;
   const response = await githubApiRequest(searchUrl, {}, env);
 
   if (!response || !response.ok) {
