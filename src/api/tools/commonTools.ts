@@ -264,7 +264,7 @@ export async function fetchDocumentation({
   };
 
   // Cache the final result before returning
-  if (owner && repo) {
+  if (owner && repo && !!result?.content) {
     ctx.waitUntil(
       cacheFetchDocResult(owner, repo, result, cacheTTL, env).catch((error) => {
         console.warn(`Failed to cache fetch documentation result: ${error}`);
