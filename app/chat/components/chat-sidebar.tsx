@@ -166,7 +166,7 @@ export function ChatSidebar() {
         <div className="flex flex-col gap-4 items-center">
           {!isCollapsed && (
             <p className="text-xs text-muted-foreground">
-              Powered by{" "}
+              Built with{" "}
               <a
                 target="_blank"
                 rel="noopener noreferrer"
