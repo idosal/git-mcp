@@ -16,8 +16,8 @@
 <div align="center">
 
 [![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/idosal/git-mcp)](https://gitmcp.io/idosal/git-mcp)
-[![Twitter Follow](https://img.shields.io/twitter/follow/idosal1?style=social)](https://twitter.com/idosal1)
-[![Twitter Follow](https://img.shields.io/twitter/follow/liadyosef?style=social)](https://twitter.com/liadyosef)
+<!-- [![Twitter Follow](https://img.shields.io/twitter/follow/idosal1?style=social)](https://twitter.com/idosal1)
+[![Twitter Follow](https://img.shields.io/twitter/follow/liadyosef?style=social)](https://twitter.com/liadyosef) -->
 </div>
 
 <div align="center">
@@ -252,7 +252,7 @@ GitMCP has a badge to your repository's README. It allows users to quickly acces
 Add the following to your `README.md`:
 
 ```markdown
-[![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/OWNER/REPO)](https://gitmcp.io/badge/OWNER/REPO)
+[![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/OWNER/REPO)](https://gitmcp.io/OWNER/REPO)
 ```
 
 Replace `OWNER` with your GitHub username or organization, and `REPO` with your repository name.
