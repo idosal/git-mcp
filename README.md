@@ -1,6 +1,8 @@
 # GitMCP
 
-<img width="1092" alt="image" src="https://github.com/user-attachments/assets/087883c3-99e9-4c47-af49-07d02769bddd" />
+<p align="center">
+  <img width="884" alt="image" src="https://github.com/user-attachments/assets/2bf3e3df-556c-49c6-ab7b-36c279d53bba" />
+</p>
 
 <p align="center">
   <a href="#-what-is-gitmcp">What is GitMCP</a> •
@@ -24,7 +26,6 @@
 <div align="center">
   <a href="https://www.pulsemcp.com/servers/idosal-git-mcp"><img src="https://www.pulsemcp.com/badge/top-pick/idosal-git-mcp" width="400" alt="Pulse MCP Badge"></a>
 </div>
-
 
 ## 🤔 What is GitMCP?
 **Stop vibe-hallucinating and start vibe-coding!**
@@ -226,7 +227,7 @@ This tool gets the primary documentation from a GitHub repository. It works by r
 
 ### `search_<repo-name>_documentation`
 
-This tool lets the AI search through a repository's documentation by providing a specific search query. Instead of loading all documentation (which could be very large), it uses smart search to find just the relevant parts.
+This tool lets the AI search through a repository's documentation by providing a specific search query. Instead of loading all the documentation (which could be very large), it uses intelligent search to find just the relevant parts.
 
 **When it's useful:** For specific questions about particular features, functions, or concepts within a project
 
