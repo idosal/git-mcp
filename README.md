@@ -7,6 +7,7 @@
   <a href="#-features">Features</a> •
   <a href="#-getting-started">Getting Started</a> •
   <a href="#-how-it-works">How It Works</a> •
+  <a href="#-badge">Badge</a> •
   <a href="#-examples">Examples</a> •
   <a href="#-faq">FAQ</a> •
   <a href="#-privacy">Privacy</a> •
@@ -243,7 +244,7 @@ This tool searches through the actual code in the repository using GitHub's code
 
 > **Note:** When using the dynamic endpoint (`gitmcp.io/docs`), these tools are named slightly differently (`fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`) and need additional information about which repository to access.
 
-## 📊 GitMCP Badge
+## 📊 Badge
 
 GitMCP has a badge to your repository's README. It allows users to quickly access your documentation through their IDE or browser (using the embedded chat). It also showcases how many times your documentation has been accessed through GitMCP.
 
