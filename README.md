@@ -50,6 +50,7 @@ https://github.com/user-attachments/assets/fbf1b4a7-f9f0-4c0e-831c-4d64faae2c45
 - 😎 **Latest Documentation on ANY GitHub Project**: Grant your AI assistant seamless access to the GitHub project's documentation and code. The built-in smart search capabilities help find exactly what the AI needs without using too many tokens!
 - 🧠 **No More Hallucinations**: With GitMCP, your AI assistant can provide accurate and relevant answers to your questions.
 - ☁️ **Zero Setup**: GitMCP runs in the cloud. Simply add the chosen GitMCP URL as an MCP server in your IDE — no downloads, installations, signups, or changes are required.
+- 💬 **Embedded Chat**: Start quickly by chatting directly with the repository's documentation through out in-browser chat!
 - ✅ **Open, Free, and Private**: GitMCP is open-source and completely free to use. It doesn't collect personal information or store queries. You can even self-host it!
 
 <video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video>
@@ -240,6 +241,35 @@ This tool searches through the actual code in the repository using GitHub's code
 **When it's useful:** When you want examples of how something is implemented or need technical details not covered in documentation
 
 > **Note:** When using the dynamic endpoint (`gitmcp.io/docs`), these tools are named slightly differently (`fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`) and need additional information about which repository to access.
+
+## 📊 GitMCP Badge
+
+GitMCP has a badge to your repository's README. It allows users to quickly access your documentation through their IDE or browser (using the embedded chat). It also showcases how many times your documentation has been accessed through GitMCP.
+
+### Adding the Badge to Your Repository
+
+Add the following to your `README.md`:
+
+```markdown
+[![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/OWNER/REPO)](https://gitmcp.io/badge/OWNER/REPO)
+```
+
+Replace `OWNER` with your GitHub username or organization, and `REPO` with your repository name.
+
+### How We Count Views
+
+Increment for each tool call on the specific repository.
+
+### Customizing the Badge
+
+You can customize the badge's appearance with parameters:
+
+| Parameter | Description | Default | Example |
+|-----------|-------------|---------|---------|
+| `color` | Color for the badge value | `aquamarine` | `?color=green` |
+| `label` | Badge label | `GitMCP` | `Documentation` 
+
+Please reach out!
 
 ## ❓ FAQ
 

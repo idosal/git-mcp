@@ -202,7 +202,7 @@ export default function Content({
 
         <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 my-8 border border-slate-200">
           <h2 className="text-lg sm:text-xl font-semibold text-blue-800 mb-4">
-            Integration Examples
+            Connect your AI assistant
           </h2>
 
           {/* Tabs for different integrations */}
