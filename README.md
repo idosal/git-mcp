@@ -247,6 +247,8 @@ This tool searches through the actual code in the repository using GitHub's code
 
 GitMCP has a badge to your repository's README. It allows users to quickly access your documentation through their IDE or browser (using the embedded chat). It also showcases how many times your documentation has been accessed through GitMCP.
 
+Example (idosal/git-mcp): [![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/idosal/git-mcp)](https://gitmcp.io/idosal/git-mcp)
+
 ### Adding the Badge to Your Repository
 
 Add the following to your `README.md`:
