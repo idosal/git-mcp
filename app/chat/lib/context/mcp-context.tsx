@@ -47,6 +47,7 @@ interface MCPContextType {
   mcpServersForApi: MCPServerApi[];
   owner: string;
   repo: string | null;
+  serverNameText: string;
 }
 
 const MCPContext = createContext<MCPContextType | undefined>(undefined);
@@ -71,12 +72,27 @@ export function MCPProvider(props: {
   const [selectedMcpServersFromState, setSelectedMcpServersFromState] =
     useState<string[]>([]);
 
-  const gitMcpServer = useMemo<MCPServer>(() => {
+  const { serverNameText, serverUrl, serverName } = useMemo(() => {
     const repoName = repo || "";
+    if (owner == "cloudflare" && repoName == "docs") {
+      return {
+        serverNameText: "Cloudflare docs",
+        serverUrl: "https://docs.mcp.cloudflare.com/sse",
+        serverName: "Cloudflare Docs",
+      };
+    }
+    return {
+      serverNameText: repoName ? `${repoName} docs` : "Github docs",
+      serverUrl: ["https://gitmcp.io", owner, repo].filter(Boolean).join("/"),
+      serverName: repoName ? `${repoName} Docs` : "MCP Docs",
+    };
+  }, [owner, repo]);
+
+  const gitMcpServer = useMemo<MCPServer>(() => {
     return {
       id: ["gitMcp", owner, repo].filter(Boolean).join("-"),
-      name: repoName ? `${repoName} Docs` : "MCP Docs",
-      url: ["https://gitmcp.io", owner, repo].filter(Boolean).join("/"),
+      name: serverName,
+      url: serverUrl,
       type: "sse",
       isFixed: true,
     };
@@ -167,6 +183,7 @@ export function MCPProvider(props: {
         mcpServersForApi,
         owner,
         repo,
+        serverNameText,
       }}
     >
       {children}
