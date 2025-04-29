@@ -18,11 +18,13 @@ export default function Content({
 
   let documentationServerPrefix = "GitMCP";
   let docsText = owner === "docs" ? "all GitHub docs" : `${owner}/${repo} docs`;
+  let serverName = generateServerName(repo);
 
   if (owner == "cloudflare" && repo == "docs") {
     url = "https://docs.mcp.cloudflare.com/sse";
     documentationServerPrefix = "MCP";
     docsText = "Cloudflare docs";
+    serverName = "Cloudflare Docs";
   }
 
   const description: React.ReactNode = (() => {
@@ -81,8 +83,6 @@ export default function Content({
     }
     return <div>Documentation MCP</div>;
   })();
-
-  const serverName = generateServerName(repo);
 
   const [copied, setCopied] = useState(false);
 
