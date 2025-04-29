@@ -165,7 +165,7 @@ For more details on adding custom MCP servers to HighlightAI, refer to [the docu
 
 > **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.
 
-## ⚙️ How It Works
+## ⚙ How It Works
 
 GitMCP connects your AI assistant to GitHub repositories using the Model Context Protocol (MCP), a standard that lets AI tools request additional information from external sources.
 
