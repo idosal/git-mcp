@@ -11,6 +11,12 @@ import rawMapping from "./generic/static-mapping.json";
 
 class GenericRepoHandler implements RepoHandler {
   name = "generic";
+  fetchOverride(
+    repoData: RepoData,
+    request: Request,
+  ): Promise<Response> | null {
+    return null;
+  }
   getTools(_: RepoData, env: any, ctx: any): Array<Tool> {
     console.debug("Creating tools for docs page");
 

@@ -16,6 +16,12 @@ import type { RepoHandler, Tool } from "./RepoHandler.js";
 
 class DefaultRepoHandler implements RepoHandler {
   name = "default";
+  fetchOverride(
+    repoData: RepoData,
+    request: Request,
+  ): Promise<Response> | null {
+    return null;
+  }
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
     // Generate a dynamic description based on the URL
     const fetchToolName = generateFetchToolName(repoData);

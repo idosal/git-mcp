@@ -9,6 +9,9 @@ export interface Tool {
 
 export interface RepoHandler {
   name: string;
+
+  fetchOverride(repoData: RepoData, request: Request): Promise<Response> | null;
+
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool>;
 
   // For the generic MCP to call

@@ -11,6 +11,12 @@ import { z } from "zod";
 
 class ReactRouterRepoHandler implements RepoHandler {
   name = "react-router";
+  fetchOverride(
+    repoData: RepoData,
+    request: Request,
+  ): Promise<Response> | null {
+    return null;
+  }
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
     // Get all default tools, including the search tool which uses Cloudflare Vectorize
     const defaultTools = getDefaultRepoHandler().getTools(repoData, env, ctx);

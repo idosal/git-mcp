@@ -13,6 +13,12 @@ const GET_SPECIFIC_DOCS_CONTENT_TOOL_NAME = "get_threejs_specific_docs_content";
 
 class ThreejsRepoHandler implements RepoHandler {
   name = "threejs";
+  fetchOverride(
+    repoData: RepoData,
+    request: Request,
+  ): Promise<Response> | null {
+    return null;
+  }
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
     const { owner, repo } = repoData;
 

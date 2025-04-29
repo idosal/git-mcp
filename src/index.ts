@@ -9,6 +9,7 @@ import {
 } from "./api/utils/badge";
 import { getRepoData } from "./shared/repoData";
 import { handleR2TestSetup } from "./api/test-setup";
+import { getHandlerByRepoData } from "./api/tools/repoHandlers/handlers";
 
 export { ViewCounterDO } from "./api/utils/ViewCounterDO";
 
@@ -70,22 +71,7 @@ export class MyMCP extends McpAgent {
 
   async init() {
     const request: Request = this.props.request as Request;
-    const url = new URL(request.url);
-    const host = url.host;
-
-    if (!url || !host) {
-      throw new Error("Invalid request: Missing host or URL");
-    }
-
-    // clean search params
-    url.searchParams.forEach((_, key) => {
-      if (key !== "sessionId") {
-        url.searchParams.delete(key);
-      }
-    });
-    // clean hash
-    url.hash = "";
-    const canonicalUrl = url.toString();
+    const { host, canonicalUrl } = getRequestInfo(request);
 
     const env = this.env as CloudflareEnvironment;
     const ctx = this.ctx;
@@ -160,7 +146,11 @@ export default {
         newHeaders.set("Content-Type", "text/event-stream");
       }
       const modifiedRequest = new Request(request, { headers: newHeaders });
-      return await mcpHandler.fetch(modifiedRequest, env, ctx);
+      const overrideResponse = await getOverrideResponse(modifiedRequest);
+      if (overrideResponse) {
+        return overrideResponse;
+      }
+      return mcpHandler.fetch(modifiedRequest, env, ctx);
     } else {
       // Default to serving the regular page
       return requestHandler(request, {
@@ -169,3 +159,33 @@ export default {
     }
   },
 };
+
+function getRequestInfo(request: Request) {
+  const url = new URL(request.url);
+  const host = url.host;
+
+  if (!url || !host) {
+    throw new Error("Invalid request: Missing host or URL");
+  }
+
+  // clean search params
+  url.searchParams.forEach((_, key) => {
+    if (key !== "sessionId") {
+      url.searchParams.delete(key);
+    }
+  });
+  // clean hash
+  url.hash = "";
+  const canonicalUrl = url.toString();
+  return { host, canonicalUrl };
+}
+
+function getOverrideResponse(request: Request): Promise<Response> | null {
+  const { host, canonicalUrl } = getRequestInfo(request);
+  const repoData = getRepoData({
+    requestHost: host,
+    requestUrl: canonicalUrl,
+  });
+  const handler = getHandlerByRepoData(repoData);
+  return handler.fetchOverride(repoData, request);
+}
