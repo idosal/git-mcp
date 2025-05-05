@@ -84,17 +84,15 @@ class DefaultRepoHandler implements RepoHandler {
         },
       },
       {
-        name: "fetchFunctionCode",
+        name: "fetchFunctionPaths",
         description:
-          "Fetch a function and related functions from the graph database",
+          "Fetch up to 10 functions (name + file path) proximate to a given node",
         paramsSchema: {
-          functionName: z
-            .string()
-            .describe("The name of the function to retrieve"),
-          limit: z.number().optional(),
-          functionLimit: z.number().optional(),
+          graphName: z.string().describe("Name of the graph to query"),
+          functionName: z.string().describe("Name of the node to inspect"),
+          limit: z.number().optional().default(10),
         },
-        cb: async ({ functionName, limit = 200, functionLimit = 0 }) => {
+        cb: async ({ graphName, functionName, limit = 10 }) => {
           const client = await FalkorDB.connect({
             socket: {
               host: "localhost",
@@ -104,26 +102,32 @@ class DefaultRepoHandler implements RepoHandler {
             },
           });
           try {
-            const graph = client.selectGraph("GraphRAG-SDK");
+            const graph = client.selectGraph(graphName);
             const result = await fetchNode({
               repoData,
               ctx: { graph },
               env,
               nodeName: functionName,
-              limit,
-              functionLimit,
+              functionLimit: limit,
             });
-            const connectedFunctions = Array.isArray(result.connected)
-              ? result.connected
-              : [];
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: `Function: ${result.nodeName}\n\nCode:\n${result.code}\n\nRelated:\n${connectedFunctions.map((fn) => `- ${fn.name} (${fn.type})`).join("\n")}`,
-                },
-              ],
-            };
+
+            const items = result.connectedPaths;
+            if (!items.length) {
+              return {
+                content: [
+                  {
+                    type: "text",
+                    text: `No connected functions found for "${functionName}".`,
+                  },
+                ],
+              };
+            }
+
+            const text =
+              `Connected functions to "${functionName}" (max ${limit}):\n` +
+              items.map((c, i) => `${i + 1}. ${c.name} — ${c.path}`).join("\n");
+
+            return { content: [{ type: "text", text }] };
           } finally {
             await client.close();
           }
