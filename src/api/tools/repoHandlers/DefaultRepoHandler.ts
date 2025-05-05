@@ -13,11 +13,13 @@ import {
 import { z } from "zod";
 import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
-import { fetchNode } from "./graphTools.js"
+import { fetchNode } from "./graphTools.js";
 import { FalkorDB, Graph } from "falkordb";
 import net from "net";
 if (typeof net.Socket.prototype.setNoDelay !== "function") {
-  net.Socket.prototype.setNoDelay = function () { return this; };
+  net.Socket.prototype.setNoDelay = function () {
+    return this;
+  };
 }
 class DefaultRepoHandler implements RepoHandler {
   name = "default";
@@ -82,20 +84,28 @@ class DefaultRepoHandler implements RepoHandler {
         },
       },
       {
-        name: 'fetchFunctionCode',
-        description: 'Fetch a function and related functions from the graph database',
+        name: "fetchFunctionCode",
+        description:
+          "Fetch a function and related functions from the graph database",
         paramsSchema: {
-          functionName: z.string().describe('The name of the function to retrieve'),
+          functionName: z
+            .string()
+            .describe("The name of the function to retrieve"),
           limit: z.number().optional(),
           functionLimit: z.number().optional(),
         },
         cb: async ({ functionName, limit = 200, functionLimit = 0 }) => {
           const client = await FalkorDB.connect({
-            socket: { host: 'localhost', port: 6379, noDelay: false, keepAlive: false, },
+            socket: {
+              host: "localhost",
+              port: 6379,
+              noDelay: false,
+              keepAlive: false,
+            },
           });
           try {
-            const graph = client.selectGraph('GraphRAG-SDK');
-            return await fetchNode({
+            const graph = client.selectGraph("GraphRAG-SDK");
+            const result = await fetchNode({
               repoData,
               ctx: { graph },
               env,
@@ -103,11 +113,22 @@ class DefaultRepoHandler implements RepoHandler {
               limit,
               functionLimit,
             });
+            const connectedFunctions = Array.isArray(result.connected)
+              ? result.connected
+              : [];
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Function: ${result.nodeName}\n\nCode:\n${result.code}\n\nRelated:\n${connectedFunctions.map((fn) => `- ${fn.name} (${fn.type})`).join("\n")}`,
+                },
+              ],
+            };
           } finally {
             await client.close();
           }
         },
-      }
+      },
     ];
   }
 
@@ -156,4 +177,3 @@ export function getDefaultRepoHandler(): DefaultRepoHandler {
   }
   return defaultRepoHandler;
 }
-
