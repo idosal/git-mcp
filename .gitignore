@@ -183,3 +183,6 @@ dist
 playwright-results/
 playwright-report/
 test-results/
+src/.DS_Store
+src/api/.DS_Store
+.DS_Store

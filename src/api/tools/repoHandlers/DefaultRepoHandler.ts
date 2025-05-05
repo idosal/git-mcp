@@ -13,7 +13,12 @@ import {
 import { z } from "zod";
 import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
-
+import { fetchNode } from "./graphTools.js"
+import { FalkorDB, Graph } from "falkordb";
+import net from "net";
+if (typeof net.Socket.prototype.setNoDelay !== "function") {
+  net.Socket.prototype.setNoDelay = function () { return this; };
+}
 class DefaultRepoHandler implements RepoHandler {
   name = "default";
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
@@ -76,6 +81,33 @@ class DefaultRepoHandler implements RepoHandler {
           });
         },
       },
+      {
+        name: 'fetchFunctionCode',
+        description: 'Fetch a function and related functions from the graph database',
+        paramsSchema: {
+          functionName: z.string().describe('The name of the function to retrieve'),
+          limit: z.number().optional(),
+          functionLimit: z.number().optional(),
+        },
+        cb: async ({ functionName, limit = 200, functionLimit = 0 }) => {
+          const client = await FalkorDB.connect({
+            socket: { host: 'localhost', port: 6379, noDelay: false, keepAlive: false, },
+          });
+          try {
+            const graph = client.selectGraph('GraphRAG-SDK');
+            return await fetchNode({
+              repoData,
+              ctx: { graph },
+              env,
+              nodeName: functionName,
+              limit,
+              functionLimit,
+            });
+          } finally {
+            await client.close();
+          }
+        },
+      }
     ];
   }
 
@@ -124,3 +156,4 @@ export function getDefaultRepoHandler(): DefaultRepoHandler {
   }
   return defaultRepoHandler;
 }
+
