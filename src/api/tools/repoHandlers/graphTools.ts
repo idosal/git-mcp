@@ -1,8 +1,7 @@
 import type { RepoData } from "../../../shared/repoData.js";
 import { promises as fs } from "fs";
-import path from "path";
 
-export async function fetchNode({
+export async function getFunctionInfo({
   repoData,
   ctx: { graph },
   env,
@@ -16,46 +15,54 @@ export async function fetchNode({
   functionLimit?: number;
 }): Promise<{
   nodeName: string;
-  nodeType: string;
-  path: string;
-  connectedPaths: { name: string; path: string }[];
+  connectedFunctions: { name: string; path: string; code: string }[];
 }> {
-  const raw = await graph.query(`MATCH (n {name: '${nodeName}'}) RETURN n`);
-  if (!raw?.data?.length) {
-    return { nodeName, nodeType: "", path: "", connectedPaths: [] };
-  }
+  const result = await graph.query(`
+    MATCH (n:Function {name: '${nodeName}'})
+    MATCH (caller:Function)-[:CALLS]->(n)
+    RETURN
+      n.name AS nodeName,
+      collect({
+        name: caller.name,
+        path: caller.path,
+        src_start: caller.src_start,
+        src_end: caller.src_end
+      })[0..${functionLimit}] AS connectedFunctions
+  `);
 
-  const node = raw.data[0].n;
-  const props = node.properties;
-  const pathStr = typeof props.path === "string" ? props.path : "";
-  const start = typeof props.src_start === "number" ? props.src_start : NaN;
+  const row = result?.data?.[0] ?? {};
+  const callers = Array.isArray(row.connectedFunctions)
+    ? row.connectedFunctions
+    : [];
 
-  let connectedPaths: { name: string; path: string }[] = [];
-  if (pathStr && !isNaN(start)) {
-    const rangeStart = start - 50;
-    const rangeEnd = start + 50;
-    const connectedRaw = await graph.query(`
-      MATCH (m:Function)
-        WHERE m.path = '${pathStr}'
-          AND m.name <> '${nodeName}'
-          AND m.src_start >= ${rangeStart}
-          AND m.src_start <= ${rangeEnd}
-      RETURN m.name AS name, m.path AS path
-      LIMIT ${functionLimit}
-    `);
+  const connectedFunctions = await Promise.all(
+    callers.map(
+      async (caller: {
+        name: string;
+        path: string;
+        src_start: number;
+        src_end: number;
+      }) => {
+        const { name, path, src_start, src_end } = caller;
 
-    if (Array.isArray(connectedRaw.data)) {
-      connectedPaths = connectedRaw.data.map((r: any) => ({
-        name: r.name,
-        path: r.path,
-      }));
-    }
-  }
+        let code = "// Code not available";
+
+        try {
+          const fileContent = await fs.readFile(path, "utf-8");
+          const lines = fileContent.split("\n");
+          const extracted = lines.slice(src_start, src_end).join("\n");
+          code = extracted.trim() || code;
+        } catch {
+          //error message
+        }
+
+        return { name, path, code };
+      },
+    ),
+  );
 
   return {
-    nodeName: props.name ?? nodeName,
-    nodeType: node.labels?.[0] ?? "",
-    path: pathStr,
-    connectedPaths,
+    nodeName: row.nodeName ?? nodeName,
+    connectedFunctions,
   };
 }

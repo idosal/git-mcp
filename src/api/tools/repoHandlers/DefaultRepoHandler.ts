@@ -13,14 +13,9 @@ import {
 import { z } from "zod";
 import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
-import { fetchNode } from "./graphTools.js";
-import { FalkorDB, Graph } from "falkordb";
-import net from "net";
-if (typeof net.Socket.prototype.setNoDelay !== "function") {
-  net.Socket.prototype.setNoDelay = function () {
-    return this;
-  };
-}
+import { getFunctionInfo } from "./graphTools.js";
+import { FalkorDB } from "falkordb";
+
 class DefaultRepoHandler implements RepoHandler {
   name = "default";
   getTools(repoData: RepoData, env: any, ctx: any): Array<Tool> {
@@ -83,14 +78,22 @@ class DefaultRepoHandler implements RepoHandler {
           });
         },
       },
+      //Search for code within the GitHub repository: "${owner}/${repo}" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.
+      // Extract code examples that uses ${functionName} function, use it whenever you need to find code examples. Returns code snippets that use this function.
       {
-        name: "fetchFunctionPaths",
+        name: "fetchFunctionCallers",
         description:
-          "Fetch up to 10 functions (name + file path) proximate to a given node",
+          "Extract code examples that uses given function, use it whenever you need to find code examples. Returns code snippets that use this function.",
         paramsSchema: {
-          graphName: z.string().describe("Name of the graph to query"),
-          functionName: z.string().describe("Name of the node to inspect"),
-          limit: z.number().optional().default(10),
+          graphName: z.string().describe("Name of the graph to query'"),
+          functionName: z
+            .string()
+            .describe("Name of the function to find who calls it"),
+          limit: z
+            .number()
+            .optional()
+            .default(10)
+            .describe("Max number of calling functions to return"),
         },
         cb: async ({ graphName, functionName, limit = 10 }) => {
           const client = await FalkorDB.connect({
@@ -101,9 +104,10 @@ class DefaultRepoHandler implements RepoHandler {
               keepAlive: false,
             },
           });
+
           try {
             const graph = client.selectGraph(graphName);
-            const result = await fetchNode({
+            const result = await getFunctionInfo({
               repoData,
               ctx: { graph },
               env,
@@ -111,23 +115,39 @@ class DefaultRepoHandler implements RepoHandler {
               functionLimit: limit,
             });
 
-            const items = result.connectedPaths;
-            if (!items.length) {
+            let callers = result.connectedFunctions;
+
+            if (!callers.length) {
               return {
                 content: [
                   {
                     type: "text",
-                    text: `No connected functions found for "${functionName}".`,
+                    text: `No calling functions found for "${functionName}".`,
                   },
                 ],
               };
             }
 
-            const text =
-              `Connected functions to "${functionName}" (max ${limit}):\n` +
-              items.map((c, i) => `${i + 1}. ${c.name} — ${c.path}`).join("\n");
+            const summary = callers
+              .map(
+                (c, i) =>
+                  `${i + 1}. ${c.name} — ${c.path}\n\`\`\`js\n${c.code}\n\`\`\``,
+              )
+              .join("\n\n");
 
-            return { content: [{ type: "text", text }] };
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: [
+                    `I found ${callers.length} function(s) that call "${functionName}":`,
+                    "",
+                    summary,
+                  ].join("\n"),
+                },
+              ],
+              raw: { callers },
+            };
           } finally {
             await client.close();
           }
