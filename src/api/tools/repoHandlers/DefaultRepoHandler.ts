@@ -30,7 +30,7 @@ class DefaultRepoHandler implements RepoHandler {
       {
         name: fetchToolName,
         description: fetchToolDescription,
-        paramsSchema: undefined,
+        paramsSchema: {},
         cb: async () => {
           return fetchDocumentation({ repoData, env, ctx });
         },
