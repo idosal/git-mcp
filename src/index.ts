@@ -69,7 +69,6 @@ export class MyMCP extends McpAgent {
   });
 
   async init() {
-    console.log(this.props);
     const requestUrl = this.props.requestUrl as string;
     const url = new URL(requestUrl);
     const host = url.host;
