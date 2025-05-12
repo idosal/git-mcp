@@ -69,8 +69,9 @@ export class MyMCP extends McpAgent {
   });
 
   async init() {
-    const request: Request = this.props.request as Request;
-    const url = new URL(request.url);
+    console.log(this.props);
+    const requestUrl = this.props.requestUrl as string;
+    const url = new URL(requestUrl);
     const host = url.host;
 
     if (!url || !host) {
@@ -146,7 +147,7 @@ export default {
       url.pathname.includes("/message") &&
       url.pathname !== "/message";
 
-    ctx.props.request = request;
+    ctx.props.requestUrl = request.url;
 
     if (isMessage) {
       return await MyMCP.serveSSE("/*").fetch(request, env, ctx);
