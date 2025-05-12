@@ -153,15 +153,12 @@ export default {
     }
 
     if (isStreamMethod) {
-      const newHeaders = new Headers(request.headers);
-      if (!newHeaders.has("accept")) {
-        newHeaders.set("Content-Type", "text/event-stream");
-      }
-      const modifiedRequest = new Request(request, { headers: newHeaders });
       const isSse = request.method === "GET";
-      return isSse
-        ? await MyMCP.serveSSE("/*").fetch(modifiedRequest, env, ctx)
-        : await MyMCP.serve("/*").fetch(modifiedRequest, env, ctx);
+      if (isSse) {
+        return await MyMCP.serveSSE("/*").fetch(request, env, ctx);
+      } else {
+        return await MyMCP.serve("/*").fetch(request, env, ctx);
+      }
     } else {
       // Default to serving the regular page
       return requestHandler(request, {
