@@ -108,8 +108,6 @@ export class MyMCP extends McpAgent {
   }
 }
 
-const mcpHandler = MyMCP.mount("/*");
-
 // Export a request handler that checks the transport header
 export default {
   async fetch(request: Request, env: any, ctx: any) {
@@ -139,7 +137,7 @@ export default {
       }
     }
 
-    const isSse =
+    const isStreamMethod =
       request.headers.get("accept")?.includes("text/event-stream") &&
       !!url.pathname &&
       url.pathname !== "/";
@@ -151,16 +149,19 @@ export default {
     ctx.props.request = request;
 
     if (isMessage) {
-      return await mcpHandler.fetch(request, env, ctx);
+      return await MyMCP.serveSSE("/*").fetch(request, env, ctx);
     }
 
-    if (isSse) {
+    if (isStreamMethod) {
       const newHeaders = new Headers(request.headers);
       if (!newHeaders.has("accept")) {
         newHeaders.set("Content-Type", "text/event-stream");
       }
       const modifiedRequest = new Request(request, { headers: newHeaders });
-      return await mcpHandler.fetch(modifiedRequest, env, ctx);
+      const isSse = request.method === "GET";
+      return isSse
+        ? await MyMCP.serveSSE("/*").fetch(modifiedRequest, env, ctx)
+        : await MyMCP.serve("/*").fetch(modifiedRequest, env, ctx);
     } else {
       // Default to serving the regular page
       return requestHandler(request, {
