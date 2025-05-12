@@ -86,7 +86,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^0.1.21",
-    "@cloudflare/workers-types": "^4.20250426.0",
+    "@cloudflare/workers-types": "^4.20250505.0",
     "@playwright/test": "^1.52.0",
     "@react-router/dev": "^7.5.2",
     "@tailwindcss/postcss": "^4.1.4",
@@ -106,6 +106,6 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^1.6.1",
     "workers-mcp": "0.1.0-3",
-    "wrangler": "^4.13.2"
+    "wrangler": "^4.14.1"
   }
 }
