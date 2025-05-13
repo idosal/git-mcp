@@ -65,7 +65,7 @@ async function handleBadgeRequest(
 export class MyMCP extends McpAgent {
   server = new McpServer({
     name: "GitMCP",
-    version: "1.0.0",
+    version: "1.1.0",
   });
 
   async init() {
