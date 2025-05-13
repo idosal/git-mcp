@@ -78,22 +78,16 @@ class DefaultRepoHandler implements RepoHandler {
           });
         },
       },
-      //Search for code within the GitHub repository: "${owner}/${repo}" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.
-      // Extract code examples that uses ${functionName} function, use it whenever you need to find code examples. Returns code snippets that use this function.
       {
-        name: "fetchFunctionCallers",
+        name: "fetchUsageCodeExamples",
         description:
-          "Extract code examples that uses given function, use it whenever you need to find code examples. Returns code snippets that use this function.",
+          "Fetch code examples that use the given function. Use it when the user asks about code example or how to use his function. Returns code snippets that demonstrate how to calls this function.",
         paramsSchema: {
-          graphName: z.string().describe("Name of the graph to query'"),
+          // graphName: z.string().describe("Name of the graph to query'"),
           functionName: z
             .string()
             .describe("Name of the function to find who calls it"),
-          limit: z
-            .number()
-            .optional()
-            .default(10)
-            .describe("Max number of calling functions to return"),
+          // limit: z.number().optional().default(10).describe("Max number of calling functions to return")
         },
         cb: async ({ graphName, functionName, limit = 10 }) => {
           const client = await FalkorDB.connect({
@@ -106,7 +100,7 @@ class DefaultRepoHandler implements RepoHandler {
           });
 
           try {
-            const graph = client.selectGraph(graphName);
+            const graph = client.selectGraph("GraphRAG-SDK");
             const result = await getFunctionInfo({
               repoData,
               ctx: { graph },
@@ -129,24 +123,18 @@ class DefaultRepoHandler implements RepoHandler {
             }
 
             const summary = callers
-              .map(
-                (c, i) =>
-                  `${i + 1}. ${c.name} — ${c.path}\n\`\`\`js\n${c.code}\n\`\`\``,
-              )
+              .map((c, i) => `#Code example ${i + 1}:\n${c.code}`)
               .join("\n\n");
 
             return {
               content: [
                 {
                   type: "text",
-                  text: [
-                    `I found ${callers.length} function(s) that call "${functionName}":`,
-                    "",
+                  text:
+                    "Code Example Results for the asked function: \n\n" +
                     summary,
-                  ].join("\n"),
                 },
               ],
-              raw: { callers },
             };
           } finally {
             await client.close();

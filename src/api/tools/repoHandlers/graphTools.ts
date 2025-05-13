@@ -1,5 +1,5 @@
 import type { RepoData } from "../../../shared/repoData.js";
-import { promises as fs } from "fs";
+import { readFile } from "fs/promises";
 
 export async function getFunctionInfo({
   repoData,
@@ -19,16 +19,17 @@ export async function getFunctionInfo({
 }> {
   const result = await graph.query(`
     MATCH (n:Function {name: '${nodeName}'})
-    MATCH (caller:Function)-[:CALLS]->(n)
+    MATCH (caller:Function)-[r:CALLS]->(n)
     RETURN
       n.name AS nodeName,
       collect({
         name: caller.name,
         path: caller.path,
-        src_start: caller.src_start,
-        src_end: caller.src_end
+        line: r.line
       })[0..${functionLimit}] AS connectedFunctions
   `);
+
+  console.log("repoData: ", repoData);
 
   const row = result?.data?.[0] ?? {};
   const callers = Array.isArray(row.connectedFunctions)
@@ -42,18 +43,28 @@ export async function getFunctionInfo({
         path: string;
         src_start: number;
         src_end: number;
+        line: number;
       }) => {
-        const { name, path, src_start, src_end } = caller;
-
-        let code = "// Code not available";
-
+        const { name, path, src_start, src_end, line } = caller;
+        let code;
         try {
-          const fileContent = await fs.readFile(path, "utf-8");
+          const rel = path.replace(/^.*\/GraphRAG-SDK\//, ""); // gives: graphrag_sdk/agents/kg_agent.py
+          const url = `https://raw.githubusercontent.com/FalkorDB/GraphRAG-SDK/main/${rel}`;
+          console.log("Fetching from:", url);
+
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const fileContent = await res.text();
           const lines = fileContent.split("\n");
-          const extracted = lines.slice(src_start, src_end).join("\n");
-          code = extracted.trim() || code;
-        } catch {
-          //error message
+          const center = line + 1;
+          const contextStart = Math.max(0, center - 5);
+          const contextEnd = center + 6;
+
+          const extracted = lines.slice(contextStart, contextEnd).join("\n");
+          code = extracted.trim();
+        } catch (e) {
+          code = "// Code not available: " + e;
         }
 
         return { name, path, code };

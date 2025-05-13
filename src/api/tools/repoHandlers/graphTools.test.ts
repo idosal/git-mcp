@@ -6,34 +6,34 @@ let client: FalkorDB;
 let graph: any;
 
 const testCases = [
-  // {
-  //   inputNode: "_create_graph_with_sources",
-  //   expectedCallerCount: 1,
-  //   expectedCallers: [
-  //     {
-  //       name: "process_sources",
-  //       path: "/Users/naseemali/Desktop/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/kg.py",
-  //       contains: "def process_sources",
-  //     },
-  //   ],
-  // },
+  {
+    inputNode: "_create_graph_with_sources",
+    expectedCallerCount: 1,
+    expectedCallers: [
+      {
+        name: "process_sources",
+        path: "/Users/naseemali/Documents/GitHub/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/kg.py",
+        contains: "def process_sources",
+      },
+    ],
+  },
   {
     inputNode: "chat_session",
     expectedCallerCount: 3,
     expectedCallers: [
       {
         name: "test_movie_actor_queries",
-        path: "/Users/naseemali/Desktop/code-graph-backend/repositories/GraphRAG-SDK/tests/test_rag.py",
+        path: "/Users/naseemali/Documents/GitHub/code-graph-backend/repositories/GraphRAG-SDK/tests/test_rag.py",
         contains: "def test_movie_actor_queries",
       },
       {
         name: "test_streaming",
-        path: "/Users/naseemali/Desktop/code-graph-backend/repositories/GraphRAG-SDK/tests/test_streaming_response.py",
+        path: "/Users/naseemali/Documents/GitHub/code-graph-backend/repositories/GraphRAG-SDK/tests/test_streaming_response.py",
         contains: "def test_streaming",
       },
       {
         name: "__init__",
-        path: "/Users/naseemali/Desktop/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/agents/kg_agent.py",
+        path: "/Users/naseemali/Documents/GitHub/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/agents/kg_agent.py",
         contains: "def __init__",
       },
     ],
@@ -44,7 +44,7 @@ const testCases = [
     expectedCallers: [
       {
         name: "__init__",
-        path: "/Users/naseemali/Desktop/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/kg.py",
+        path: "/Users/naseemali/Documents/GitHub/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/kg.py",
         contains: "def __init__",
       },
     ],
@@ -55,17 +55,17 @@ const testCases = [
     expectedCallers: [
       {
         name: "_validate_relation",
-        path: "/Users/naseemali/Desktop/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/kg.py",
+        path: "/Users/naseemali/Documents/GitHub/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/kg.py",
         contains: "def _validate_relation",
       },
       {
         name: "validate_cypher_relation_directions",
-        path: "/Users/naseemali/Desktop/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/helpers.py",
+        path: "/Users/naseemali/Documents/GitHub/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/helpers.py",
         contains: "def validate_cypher_relation_directions",
       },
       {
         name: "_create_relation",
-        path: "/Users/naseemali/Desktop/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/steps/extract_data_step.py",
+        path: "/Users/naseemali/Documents/GitHub/code-graph-backend/repositories/GraphRAG-SDK/graphrag_sdk/steps/extract_data_step.py",
         contains:
           "def _create_relation(self, graph: Graph, args: dict, ontology: Ontology) -> None:",
       },
@@ -107,12 +107,11 @@ describe("getFunctionInfo (parameterized with code)", () => {
         expect(actual).toBeDefined();
         expect(actual.name).toBe(expected.name);
         expect(actual.path).toBe(expected.path);
-
         expect(actual.code.length).toBeGreaterThan(10);
 
         // check that code includes a key line or signature
         if (expected.contains) {
-          expect(actual.code).toContain(expected.contains);
+          expect(actual.code).toContain(inputNode);
         }
       });
     });
