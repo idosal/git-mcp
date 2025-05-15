@@ -83,13 +83,13 @@ class DefaultRepoHandler implements RepoHandler {
         description:
           "Fetch code examples that use the given function. Use it when the user asks about code example or how to use his function. Returns code snippets that demonstrate how to calls this function.",
         paramsSchema: {
-          // graphName: z.string().describe("Name of the graph to query'"),
           functionName: z
             .string()
             .describe("Name of the function to find who calls it"),
           // limit: z.number().optional().default(10).describe("Max number of calling functions to return")
         },
-        cb: async ({ graphName, functionName, limit = 10 }) => {
+        cb: async ({ functionName, limit = 10 }) => {
+          const graphName = repoData.repo!;
           const client = await FalkorDB.connect({
             socket: {
               host: "localhost",
@@ -100,7 +100,7 @@ class DefaultRepoHandler implements RepoHandler {
           });
 
           try {
-            const graph = client.selectGraph("GraphRAG-SDK");
+            const graph = client.selectGraph(graphName);
             const result = await getFunctionInfo({
               repoData,
               ctx: { graph },

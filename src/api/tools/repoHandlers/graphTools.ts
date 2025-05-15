@@ -1,5 +1,4 @@
 import type { RepoData } from "../../../shared/repoData.js";
-import { readFile } from "fs/promises";
 
 export async function getFunctionInfo({
   repoData,
@@ -29,8 +28,6 @@ export async function getFunctionInfo({
       })[0..${functionLimit}] AS connectedFunctions
   `);
 
-  console.log("repoData: ", repoData);
-
   const row = result?.data?.[0] ?? {};
   const callers = Array.isArray(row.connectedFunctions)
     ? row.connectedFunctions
@@ -38,18 +35,12 @@ export async function getFunctionInfo({
 
   const connectedFunctions = await Promise.all(
     callers.map(
-      async (caller: {
-        name: string;
-        path: string;
-        src_start: number;
-        src_end: number;
-        line: number;
-      }) => {
-        const { name, path, src_start, src_end, line } = caller;
+      async (caller: { name: string; path: string; line: number }) => {
+        const { name, path, line } = caller;
         let code;
         try {
-          const rel = path.replace(/^.*\/GraphRAG-SDK\//, ""); // gives: graphrag_sdk/agents/kg_agent.py
-          const url = `https://raw.githubusercontent.com/FalkorDB/GraphRAG-SDK/main/${rel}`;
+          const rel = path.replace(new RegExp(`^.*\/${repoData.repo}\/`), "");
+          const url = `https://raw.githubusercontent.com/${repoData.owner}/${repoData.repo}/main/${rel}`;
           console.log("Fetching from:", url);
 
           const res = await fetch(url);
