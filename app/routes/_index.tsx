@@ -541,7 +541,7 @@ export default function Home() {
               >
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl shadow-lg flex items-center justify-center mb-3 group-hover:from-gray-650 group-hover:to-gray-750 transition-all">
                   <img
-                    src="https://augmentcode.com/favicon.ico"
+                    src="https://cdn.prod.website-files.com/66d76c2202b335e39ad2b5e8/66f302d663108ca67c19ddbc_Favicon.png"
                     alt="Augment Code"
                     className="h-8 w-8 sm:h-10 sm:w-10"
                   />
