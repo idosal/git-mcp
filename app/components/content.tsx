@@ -107,6 +107,8 @@ export default function Content({
         return "https://cline.bot/assets/icons/favicon-256x256.png";
       case "Highlight AI":
         return "https://highlightai.com/favicon.ico";
+      case "Augment Code":
+        return "https://cdn.prod.website-files.com/66d76c2202b335e39ad2b5e8/66f302d663108ca67c19ddbc_Favicon.png";
       default:
         return "https://codeium.com/favicon.ico";
     }
@@ -238,6 +240,7 @@ export default function Content({
                 "VSCode",
                 "Cline",
                 "Highlight AI",
+                "Augment Code",
               ].map((tab, index) => (
                 <button
                   key={tab}
@@ -474,6 +477,46 @@ export default function Content({
                 </div>
               </div>
             </div>
+
+            <div id="tab-augment-code" className="tab-content hidden">
+              <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
+                <div className="p-4">
+                  <ul className="text-sm text-slate-700 mb-4 list-disc pl-5 space-y-2">
+                    <li>Open Augment Code settings</li>
+                    <li>Navigate to the MCP section</li>
+                    <li>Add a new MCP server with the following details</li>
+                  </ul>
+
+                  <p className="text-sm text-slate-700 mb-4">
+                    Enter this as your server name:{" "}
+                    <code className="bg-slate-200 px-2 py-1 rounded text-blue-700 break-words block my-3">
+                      {serverName}
+                    </code>
+                  </p>
+
+                  <p className="text-sm text-slate-700 mb-4">
+                    Enter this as the server URL:{" "}
+                    <code className="bg-slate-200 px-2 py-1 rounded text-blue-700 break-words block my-3">
+                      {url}
+                    </code>
+                  </p>
+
+                  <p className="text-sm text-slate-700 mt-4">
+                    For more details on configuring MCP servers in Augment Code,
+                    visit{" "}
+                    <a
+                      href="https://augmentcode.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      the Augment Code website
+                    </a>
+                    .
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -555,6 +598,19 @@ export default function Content({
               className="h-6 w-6 mr-2"
             />
             Highlight AI
+          </a>
+          <a
+            href="https://augmentcode.com"
+            className="text-blue-600 hover:text-blue-800 flex items-center transition-colors"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src={getToolFaviconUrl("Augment Code")}
+              alt="Augment Code"
+              className="h-6 w-6 mr-2"
+            />
+            Augment Code
           </a>
         </div>
       </div>
