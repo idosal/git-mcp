@@ -169,10 +169,29 @@ For more details on adding custom MCP servers to HighlightAI, refer to [the docu
 2. Navigate to the MCP section
 3. Add a new MCP server with the following details:
 
-Server name: `gitmcp`
-URL: `https://gitmcp.io/{owner}/{repo}`
+Name the MCP server: `git-mcp Docs`
 
-For more details on configuring MCP servers in Augment Code, visit [the Augment Code website](https://augmentcode.com/).
+Use this command:
+```bash
+npx mcp-remote https://gitmcp.io/{owner}/{repo}
+```
+
+Or use the following configuration:
+```json
+{
+  "mcpServers": {
+    "git-mcp Docs": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://gitmcp.io/{owner}/{repo}"
+      ]
+    }
+  }
+}
+```
+
+For more details on configuring MCP servers in Augment Code, visit [the Augment Code documentation](https://docs.augmentcode.com/setup-augment/mcp).
 
 > **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.
 
