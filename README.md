@@ -145,7 +145,8 @@ Update your Cline configuration file at `~/Library/Application Support/Code/User
        "gitmcp": {
          "url": "https://gitmcp.io/{owner}/{repo}",
          "disabled": false,
-         "autoApprove": []
+         "autoApprove": [],
+         "transportType": "sse"
        }
      }
    }

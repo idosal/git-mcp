@@ -402,7 +402,8 @@ export default function Content({
     "${serverName}": {
       "url": "${url}",
       "disabled": false,
-      "autoApprove": []
+      "autoApprove": [],
+      "transportType": "sse"
     }
   }
 }`}
