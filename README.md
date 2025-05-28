@@ -366,6 +366,30 @@ We welcome contributions, feedback, and ideas! Please review our [contribution](
    - Enter your GitMCP URL (e.g., `http://localhost:5173/docs`)
    - Click "Connect"
 
+## Resources 
+
+<details>
+<summary><b>Open MCP Marketplace API Support</b></summary>
+
+![MCP Marketplace User Review Rating Badge](http://www.deepnlp.org/api/marketplace/svg?idosal/git-mcp)|[Reviews](http://www.deepnlp.org/store/ai-agent/mcp-server/pub-idosal/git-mcp)|[GitHub](https://github.com/AI-Agent-Hub/mcp-marketplace)|[Doc](http://www.deepnlp.org/doc/mcp_marketplace)|[MCP Marketplace](http://www.deepnlp.org/store/ai-agent/mcp-server)
+
+Allow AI/Agent/LLM to find this MCP Server via common python/typescript API, search and explore relevant servers and tools
+
+***Example: Search Server and Tools***
+```python
+import anthropic
+import mcp_marketplace as mcpm
+
+result_q = mcpm.search(query="git mcp", mode="list", page_id=0, count_per_page=100, config_name="deepnlp") # search server by category choose various endpoint
+result_id = mcpm.search(id="idosal/git-mcp", mode="list", page_id=0, count_per_page=100, config_name="deepnlp")      # search server by id choose various endpoint 
+tools = mcpm.list_tools(id="idosal/git-mcp", config_name="deepnlp_tool")
+# Call Claude to Choose Tools Function Calls 
+# client = anthropic.Anthropic()
+# response = client.messages.create(model="claude-opus-4-20250514", max_tokens=1024, tools=tools, messages=[])
+```
+
+</details>
+
 ## 📄 License
 
 This project is licensed under the [Apache License 2.0](LICENSE).
