@@ -60,6 +60,10 @@ describe("Tools Module", () => {
             description:
               'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.',
           },
+          fetchUsageCodeExamples: {
+            description:
+              "Fetch code examples that use the given function. Use it when the user asks about code example or how to use his function. Returns code snippets that demonstrate how to calls this function.",
+          },
         },
       },
       // default handler - subdomain
@@ -82,6 +86,10 @@ describe("Tools Module", () => {
           search_myrepo_code: {
             description:
               'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.',
+          },
+          fetchUsageCodeExamples: {
+            description:
+              "Fetch code examples that use the given function. Use it when the user asks about code example or how to use his function. Returns code snippets that demonstrate how to calls this function.",
           },
         },
       },
