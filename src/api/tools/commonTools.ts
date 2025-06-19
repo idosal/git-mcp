@@ -460,13 +460,18 @@ export async function searchRepositoryDocumentationAutoRag({
       );
 
       for (const item of filteredData) {
-        const rawGithubUrl = constructGithubUrl(
+        let rawUrl = constructGithubUrl(
           repoData.owner,
           repoData.repo,
           defaultBranch,
           item.filename.replace(`${repoData.owner}/${repoData.repo}/`, ""),
         );
-        responseText += `\n#### (${item.filename})[${rawGithubUrl}] (Score: ${item.score.toFixed(2)})\n`;
+
+        if (item.filename.endsWith(".ipynb.txt")) {
+          rawUrl = `https://pub-39b02ce1b5a441b2a4658c1fc71dbb9c.r2.dev/${repoData.owner}/${repoData.repo}/${item.filename}`;
+        }
+
+        responseText += `\n#### (${item.filename})[${rawUrl}] (Score: ${item.score.toFixed(2)})\n`;
 
         if (item.content && item.content.length > 0) {
           for (const content of item.content) {

@@ -40,7 +40,7 @@ class DefaultRepoHandler implements RepoHandler {
       {
         name: fetchToolName,
         description: fetchToolDescription,
-        paramsSchema: undefined,
+        paramsSchema: z.union([z.object({}), z.null()]),
         cb: async () => {
           return fetchDocumentation({ repoData, env, ctx });
         },

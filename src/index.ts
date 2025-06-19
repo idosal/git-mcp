@@ -65,12 +65,12 @@ async function handleBadgeRequest(
 export class MyMCP extends McpAgent {
   server = new McpServer({
     name: "GitMCP",
-    version: "1.0.0",
+    version: "1.1.0",
   });
 
   async init() {
-    const request: Request = this.props.request as Request;
-    const url = new URL(request.url);
+    const requestUrl = this.props.requestUrl as string;
+    const url = new URL(requestUrl);
     const host = url.host;
 
     if (!url || !host) {
@@ -108,8 +108,6 @@ export class MyMCP extends McpAgent {
   }
 }
 
-const mcpHandler = MyMCP.mount("/*");
-
 // Export a request handler that checks the transport header
 export default {
   async fetch(request: Request, env: any, ctx: any) {
@@ -139,7 +137,7 @@ export default {
       }
     }
 
-    const isSse =
+    const isStreamMethod =
       request.headers.get("accept")?.includes("text/event-stream") &&
       !!url.pathname &&
       url.pathname !== "/";
@@ -148,19 +146,19 @@ export default {
       url.pathname.includes("/message") &&
       url.pathname !== "/message";
 
-    ctx.props.request = request;
+    ctx.props.requestUrl = request.url;
 
     if (isMessage) {
-      return await mcpHandler.fetch(request, env, ctx);
+      return await MyMCP.serveSSE("/*").fetch(request, env, ctx);
     }
 
-    if (isSse) {
-      const newHeaders = new Headers(request.headers);
-      if (!newHeaders.has("accept")) {
-        newHeaders.set("Content-Type", "text/event-stream");
+    if (isStreamMethod) {
+      const isSse = request.method === "GET";
+      if (isSse) {
+        return await MyMCP.serveSSE("/*").fetch(request, env, ctx);
+      } else {
+        return await MyMCP.serve("/*").fetch(request, env, ctx);
       }
-      const modifiedRequest = new Request(request, { headers: newHeaders });
-      return await mcpHandler.fetch(modifiedRequest, env, ctx);
     } else {
       // Default to serving the regular page
       return requestHandler(request, {

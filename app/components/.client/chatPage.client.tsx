@@ -25,7 +25,7 @@ export default function ChatPage({
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
+      defaultTheme="ocean"
       enableSystem={true}
       disableTransitionOnChange
       themes={["light", "dark", "sunset", "black", "ocean"]}

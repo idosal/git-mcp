@@ -44,7 +44,7 @@
     "@ai-sdk/react": "^1.2.9",
     "@ai-sdk/xai": "^1.2.15",
     "@cloudflare/workers-oauth-provider": "^0.0.2",
-    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@modelcontextprotocol/sdk": "^1.11.2",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-avatar": "^1.1.7",
     "@radix-ui/react-dialog": "^1.1.11",
@@ -60,7 +60,7 @@
     "@remix-run/cloudflare": "^2.16.5",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "agents": "^0.0.66",
+    "agents": "^0.0.84",
     "ai": "^4.3.10",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -87,7 +87,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^0.1.21",
-    "@cloudflare/workers-types": "^4.20250426.0",
+    "@cloudflare/workers-types": "^4.20250505.0",
     "@playwright/test": "^1.52.0",
     "@react-router/dev": "^7.5.2",
     "@tailwindcss/postcss": "^4.1.4",
@@ -107,6 +107,6 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^1.6.1",
     "workers-mcp": "0.1.0-3",
-    "wrangler": "^4.13.2"
+    "wrangler": "^4.14.1"
   }
 }

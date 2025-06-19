@@ -66,7 +66,7 @@ Using GitMCP is easy! Simply follow these steps:
 
 Choose one of these URL formats depending on what you want to connect to:
 
-- For GitHub repositories: `gitmcp.io/{owner}/{repo}` 
+- For GitHub repositories: `gitmcp.io/{owner}/{repo}`
 - For GitHub Pages sites: `{owner}.gitmcp.io/{repo}`
 - For a generic tool that supports any repository (dynamic): `gitmcp.io/docs`
 
@@ -162,6 +162,36 @@ Plugin name: `gitmcp`
 SSE URL: `https://gitmcp.io/{owner}/{repo}`
 
 For more details on adding custom MCP servers to HighlightAI, refer to [the documentation](https://docs.highlightai.com/learn/developers/plugins/custom-plugins-setup).
+
+#### Connecting Augment Code
+
+1. Open Augment Code settings
+2. Navigate to the MCP section
+3. Add a new MCP server with the following details:
+
+Name the MCP server: `git-mcp Docs`
+
+Use this command:
+```bash
+npx mcp-remote https://gitmcp.io/{owner}/{repo}
+```
+
+Or use the following configuration:
+```json
+{
+  "mcpServers": {
+    "git-mcp Docs": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://gitmcp.io/{owner}/{repo}"
+      ]
+    }
+  }
+}
+```
+
+For more details on configuring MCP servers in Augment Code, visit [the Augment Code documentation](https://docs.augmentcode.com/setup-augment/mcp).
 
 > **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.
 
@@ -272,7 +302,7 @@ You can customize the badge's appearance with parameters:
 | Parameter | Description | Default | Example |
 |-----------|-------------|---------|---------|
 | `color` | Color for the badge value | `aquamarine` | `?color=green` |
-| `label` | Badge label | `GitMCP` | `Documentation` 
+| `label` | Badge label | `GitMCP` | `Documentation`
 
 Please reach out!
 
