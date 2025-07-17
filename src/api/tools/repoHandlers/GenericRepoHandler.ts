@@ -54,15 +54,15 @@ class GenericRepoHandler implements RepoHandler {
             };
           }
 
-          ctx.waitUntil(
-            incrementRepoViewCount(
-              env as CloudflareEnvironment,
-              repo.owner,
-              repo.repo,
-            ).catch((err) => {
-              console.error("Error incrementing repo view count:", err);
-            }),
-          );
+          // ctx.waitUntil(
+          //   incrementRepoViewCount(
+          //     env as CloudflareEnvironment,
+          //     repo.owner,
+          //     repo.repo,
+          //   ).catch((err) => {
+          //     console.error("Error incrementing repo view count:", err);
+          //   }),
+          // );
 
           return {
             content: [
