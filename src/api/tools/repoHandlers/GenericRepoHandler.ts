@@ -9,7 +9,7 @@ import {
 import { incrementRepoViewCount } from "../../utils/badge.js";
 import rawMapping from "./generic/static-mapping.json";
 
-const badgeCountAllowedRepos = ["mcp-ui"];
+const badgeCountAllowedRepos = ["mcp-ui", "git-mcp"];
 
 class GenericRepoHandler implements RepoHandler {
   name = "generic";
