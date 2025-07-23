@@ -55,7 +55,7 @@ export const getModel = (
     "gpt-4.1-mini": openaiClient("gpt-4.1-mini"),
     "claude-3-7-sonnet": anthropicClient("claude-3-7-sonnet-20250219"),
     "qwen-qwq": wrapLanguageModel({
-      model: groqClient("qwen-qwq-32b"),
+      model: groqClient("qwen/qwen3-32b"),
       middleware,
     }),
     "grok-3-mini": xaiClient("grok-3-mini-latest"),
