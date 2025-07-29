@@ -104,7 +104,7 @@ export default function Content({
       case "VSCode":
         return "https://code.visualstudio.com/assets/favicon.ico";
       case "Cline":
-        return "https://cline.bot/assets/icons/favicon-256x256.png";
+        return "https://cline.bot/assets/branding/favicons/favicon-32x32.png";
       case "Highlight AI":
         return "https://highlightai.com/favicon.ico";
       case "Augment Code":

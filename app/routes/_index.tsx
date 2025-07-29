@@ -501,7 +501,7 @@ export default function Home() {
               >
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl shadow-lg flex items-center justify-center mb-3 group-hover:from-gray-650 group-hover:to-gray-750 transition-all">
                   <img
-                    src="https://cline.bot/assets/icons/favicon-256x256.png"
+                    src="https://cline.bot/assets/branding/favicons/favicon-256x256.png"
                     alt="Cline"
                     className="h-8 w-8 sm:h-10 sm:w-10"
                   />
