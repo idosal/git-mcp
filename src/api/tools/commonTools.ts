@@ -7,7 +7,7 @@ import {
 } from "../utils/github.js";
 import { fetchFileWithRobotsTxtCheck } from "../utils/robotsTxt.js";
 import htmlToMd from "html-to-md";
-import { searchCode } from "../utils/githubClient.js";
+import { searchCode, searchIssues } from "../utils/githubClient.js";
 import { fetchFileFromR2 } from "../utils/r2.js";
 import { generateServerName } from "../../shared/nameUtils.js";
 import {
@@ -708,6 +708,135 @@ export async function searchRepositoryCode({
   }
 }
 
+/**
+ * Search for issues in a GitHub repository
+ * Supports filtering by issue state and pagination
+ */
+export async function searchRepositoryIssues({
+  repoData,
+  query,
+  state = "all",
+  page = 1,
+  env,
+  ctx,
+}: {
+  repoData: RepoData;
+  query: string;
+  state?: "open" | "closed" | "all";
+  page?: number;
+  env: Env;
+  ctx: any;
+}): Promise<{
+  searchQuery: string;
+  content: { type: "text"; text: string }[];
+  pagination?: {
+    totalCount: number;
+    currentPage: number;
+    perPage: number;
+    hasMorePages: boolean;
+  };
+}> {
+  try {
+    const owner = repoData.owner;
+    const repo = repoData.repo;
+
+    if (!owner || !repo) {
+      return {
+        searchQuery: query,
+        content: [
+          {
+            type: "text" as const,
+            text: `### Issue Search Results for: "${query}"\n\nCannot perform issue search without repository information.`,
+          },
+        ],
+      };
+    }
+
+    const currentPage = Math.max(1, page);
+    const resultsPerPage = 30;
+
+    const data = await searchIssues(
+      query,
+      owner,
+      repo,
+      env,
+      currentPage,
+      resultsPerPage,
+      state,
+    );
+
+    if (!data) {
+      return {
+        searchQuery: query,
+        content: [
+          {
+            type: "text" as const,
+            text: `### Issue Search Results for: "${query}"\n\nFailed to search issues in ${owner}/${repo}. GitHub API request failed.`,
+          },
+        ],
+      };
+    }
+
+    if (data.total_count === 0 || !data.items || data.items.length === 0) {
+      return {
+        searchQuery: query,
+        content: [
+          {
+            type: "text" as const,
+            text: `### Issue Search Results for: "${query}"\n\nNo issues found in ${owner}/${repo}.`,
+          },
+        ],
+      };
+    }
+
+    const totalCount = data.total_count;
+    const hasMorePages = currentPage * resultsPerPage < totalCount;
+    const totalPages = Math.ceil(totalCount / resultsPerPage);
+
+    let formattedResults = `### Issue Search Results for: "${query}"\n\n`;
+    formattedResults += `Found ${totalCount} issues in ${owner}/${repo}.\n`;
+    formattedResults += `Page ${currentPage} of ${totalPages}.\n\n`;
+
+    for (const item of data.items) {
+      formattedResults += `#### #${item.number}: ${item.title}\n`;
+      formattedResults += `- **State**: ${item.state}\n`;
+      formattedResults += `- **URL**: ${item.html_url}\n`;
+      formattedResults += `- **Score**: ${item.score}\n\n`;
+    }
+
+    if (hasMorePages) {
+      formattedResults += `_Showing ${data.items.length} of ${totalCount} results. Use pagination to see more results._\n\n`;
+    }
+
+    return {
+      searchQuery: query,
+      content: [
+        {
+          type: "text" as const,
+          text: formattedResults,
+        },
+      ],
+      pagination: {
+        totalCount,
+        currentPage,
+        perPage: resultsPerPage,
+        hasMorePages,
+      },
+    };
+  } catch (error) {
+    console.error(`Error in searchRepositoryIssues: ${error}`);
+    return {
+      searchQuery: query,
+      content: [
+        {
+          type: "text" as const,
+          text: `### Issue Search Results for: "${query}"\n\nAn error occurred while searching issues: ${error}`,
+        },
+      ],
+    };
+  }
+}
+
 export async function fetchUrlContent({ url, env }: { url: string; env: Env }) {
   try {
     // Use the robotsTxt checking function to respect robots.txt rules
@@ -990,6 +1119,35 @@ export function generateCodeSearchToolDescription({
   repo,
 }: RepoData): string {
   return `Search for code within the GitHub repository: "${owner}/${repo}" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.`;
+}
+
+/**
+ * Generate a dynamic tool name for the issue search tool based on the URL
+ */
+export function generateIssueSearchToolName({
+  urlType,
+  repo,
+}: RepoData): string {
+  try {
+    let toolName = "search_issues";
+    if (urlType == "subdomain" || urlType == "github") {
+      return enforceToolNameLengthLimit("search_", repo, "_issues");
+    }
+    return toolName.replace(/[^a-zA-Z0-9]/g, "_");
+  } catch (error) {
+    console.error("Error generating issue search tool name:", error);
+    return "search_issues";
+  }
+}
+
+/**
+ * Generate a dynamic description for the issue search tool based on the URL
+ */
+export function generateIssueSearchToolDescription({
+  owner,
+  repo,
+}: RepoData): string {
+  return `Search open or closed issues within the GitHub repository: "${owner}/${repo}".`;
 }
 
 /**
