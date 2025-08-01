@@ -191,6 +191,25 @@ Or use the following configuration:
 }
 ```
 
+#### Connecting Msty AI
+1. Open Msty Studio
+2. Go to Tools > Import Tools from JSON Clipboard
+3. Paste the following configuration:
+
+```json
+{
+  "mcpServers": {
+    "git-mcp Docs": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://gitmcp.io/{owner}/{repo}"
+      ]
+    }
+  }
+}
+```
+
 For more details on configuring MCP servers in Augment Code, visit [the Augment Code documentation](https://docs.augmentcode.com/setup-augment/mcp).
 
 > **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.

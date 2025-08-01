@@ -109,6 +109,8 @@ export default function Content({
         return "https://highlightai.com/favicon.ico";
       case "Augment Code":
         return "https://cdn.prod.website-files.com/66d76c2202b335e39ad2b5e8/66f302d663108ca67c19ddbc_Favicon.png";
+      case "Msty AI":
+        return "https://msty.studio/favicon.ico";
       default:
         return "https://codeium.com/favicon.ico";
     }
@@ -241,6 +243,7 @@ export default function Content({
                 "Cline",
                 "Highlight AI",
                 "Augment Code",
+                "Msty AI",
               ].map((tab, index) => (
                 <button
                   key={tab}
@@ -537,9 +540,49 @@ export default function Content({
                 </div>
               </div>
             </div>
+
+            <div id="tab-msty-ai" className="tab-content hidden">
+              <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
+                <ul className="text-sm text-slate-700 mb-4 list-disc pl-5 space-y-2">
+                  <li>Copy the following JSON configuration: </li>
+                  <CodeExample
+                    code={`{
+                      "mcpServers": {
+                        "${serverName}": {
+                          "command": "npx",
+                          "args": [
+                            "mcp-remote",
+                            "${url}"
+                          ]
+                        }
+                      }
+                    }`}
+                    id="msty-ai"
+                    name="Msty AI"
+                  />
+                  <li>
+                    Go to Msty Studio &gt; Tools &gt; 'Import Tools from JSON
+                    Clipboard'
+                  </li>
+                </ul>
+                <p className="text-sm text-slate-700 mb-4">
+                  For more details on using Msty AI, refer to{" "}
+                  <a
+                    href="https://docs.msty.ai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    the documentation
+                  </a>
+                  .
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
+        {/* Footer with tool links */}
         <div className="mt-8 flex flex-col items-center justify-center">
           <div className="flex justify-center space-x-8 mb-6">
             <a
@@ -634,6 +677,19 @@ export default function Content({
                 className="h-6 w-6 mr-2"
               />
               Augment Code
+            </a>
+            <a
+              href="https://msty.ai"
+              className="text-blue-600 hover:text-blue-800 flex items-center transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src={getToolFaviconUrl("Msty AI")}
+                alt="Msty AI"
+                className="h-6 w-6 mr-2"
+              />
+              Msty AI
             </a>
           </div>
         </div>
