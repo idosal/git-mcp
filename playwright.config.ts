@@ -67,7 +67,7 @@ export default defineConfig({
     },
     {
       name: 'MCP Inspector',
-      command: 'CLIENT_PORT=5174 SERVER_PORT=6277 npx @modelcontextprotocol/inspector',
+      command: 'CLIENT_PORT=5174 SERVER_PORT=6277 npx @modelcontextprotocol/inspector@0.8.2',
       url: 'http://localhost:5174', // Inspector UI URL (matches baseURL)
       stdout: 'ignore',
       stderr: 'pipe',
