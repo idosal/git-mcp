@@ -9,6 +9,8 @@ import {
 import { incrementRepoViewCount } from "../../utils/badge.js";
 import rawMapping from "./generic/static-mapping.json";
 
+const badgeCountAllowedRepos = ["mcp-ui", "git-mcp"];
+
 class GenericRepoHandler implements RepoHandler {
   name = "generic";
   getTools(_: RepoData, env: any, ctx: any): Array<Tool> {
@@ -54,15 +56,17 @@ class GenericRepoHandler implements RepoHandler {
             };
           }
 
-          ctx.waitUntil(
-            incrementRepoViewCount(
-              env as CloudflareEnvironment,
-              repo.owner,
-              repo.repo,
-            ).catch((err) => {
-              console.error("Error incrementing repo view count:", err);
-            }),
-          );
+          if (badgeCountAllowedRepos.includes(repo.repo)) {
+            ctx.waitUntil(
+              incrementRepoViewCount(
+                env as CloudflareEnvironment,
+                repo.owner,
+                repo.repo,
+              ).catch((err) => {
+                console.error("Error incrementing repo view count:", err);
+              }),
+            );
+          }
 
           return {
             content: [
