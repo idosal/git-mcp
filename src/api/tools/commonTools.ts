@@ -122,6 +122,7 @@ export async function fetchDocumentation({
 
     console.log(`Checking static paths for llms.txt in ${owner}/${repo}`);
     const possibleLocations = [
+      "docs/content/docs/llms.txt", // New directory
       "docs/docs/llms.txt", // Current default
       "llms.txt", // Root directory
       "docs/llms.txt", // Common docs folder
@@ -422,15 +423,15 @@ export async function searchRepositoryDocumentationAutoRag({
       score_threshold: 0.4,
     },
     filters: {
-      type: "and",
+      type: "and" as const,
       filters: [
         {
-          type: "gte",
+          type: "gte" as const,
           key: "folder",
           value: `${repoPrefix}`,
         },
         {
-          type: "lte",
+          type: "lte" as const,
           key: "folder",
           value: `${repoPrefix}~`,
         },
