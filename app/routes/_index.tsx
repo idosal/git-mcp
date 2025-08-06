@@ -554,7 +554,7 @@ export default function Home() {
 
             <div className="flex flex-col items-center">
               <a
-                href="https://msty.studio"
+                href="https://msty.ai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group hover:opacity-90 transition-opacity flex flex-col items-center"
