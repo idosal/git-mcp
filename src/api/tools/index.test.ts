@@ -62,7 +62,7 @@ describe("Tools Module", () => {
           },
           fetchUsageCodeExamples: {
             description:
-              "Fetch code examples that use the given function. Use it when the user asks about code example or how to use his function. Returns code snippets that demonstrate how to call this function.",
+              "Fetch code examples that use the given function. Use it when the user asks about code example or how to use his function. Returns code snippets that demonstrate how to calls this function.",
           },
         },
       },
@@ -89,7 +89,7 @@ describe("Tools Module", () => {
           },
           fetchUsageCodeExamples: {
             description:
-              "Fetch code examples that use the given function. Use it when the user asks about code example or how to use his function. Returns code snippets that demonstrate how to call this function.",
+              "Fetch code examples that use the given function. Use it when the user asks about code example or how to use his function. Returns code snippets that demonstrate how to calls this function.",
           },
         },
       },

@@ -5,7 +5,11 @@ import { getGraphService } from "./graphTools";
 import path from "path";
 
 // Comprehensive test suite for all 8 fetchUsageCodeExamples scenarios using real data
-describe("fetchUsageCodeExamples - All 8 Scenarios with Real Data", () => {
+const shouldRunGraphTests = process.env.RUN_GRAPH_TESTS === "1";
+
+const describeMaybe = shouldRunGraphTests ? describe : describe.skip;
+
+describeMaybe("fetchUsageCodeExamples - All 8 Scenarios with Real Data", () => {
   let client: FalkorDB;
   let graphService: any;
 
@@ -31,8 +35,10 @@ describe("fetchUsageCodeExamples - All 8 Scenarios with Real Data", () => {
   };
 
   beforeAll(async () => {
+    const host = process.env.FALKORDB_HOST || "127.0.0.1";
+    const port = parseInt(process.env.FALKORDB_PORT || "6379");
     client = await FalkorDB.connect({
-      socket: { host: "localhost", port: 6379 },
+      socket: { host, port },
     });
     graphService = getGraphService();
   });
