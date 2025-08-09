@@ -292,12 +292,15 @@ export default function Content({
             <div id="tab-cursor" className="tab-content">
               <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
                 <p className="text-sm text-slate-700 mb-2">
-                  To add this MCP to Cursor, update your{" "}
-                  <code className="bg-slate-200 px-1.5 py-0.5 rounded text-blue-700 break-words">
-                    ~/.cursor/mcp.json
-                  </code>
-                  :
+                  To add this MCP to Cursor, update your config file at:
                 </p>
+                <OSPaths
+                  paths={[
+                    { os: "macOS", path: "~/.cursor/mcp.json" },
+                    { os: "Windows", path: "%USERPROFILE%\\.cursor\\mcp.json" },
+                    { os: "Linux", path: "~/.cursor/mcp.json" },
+                  ]}
+                />
                 <CodeExample
                   code={`{
   "mcpServers": {
@@ -344,12 +347,24 @@ export default function Content({
             <div id="tab-windsurf" className="tab-content hidden">
               <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
                 <p className="text-sm text-slate-700 mb-2">
-                  To add this MCP to Windsurf, update your{" "}
-                  <code className="bg-slate-200 px-1.5 py-0.5 rounded text-blue-700 break-words">
-                    ~/.codeium/windsurf/mcp_config.json
-                  </code>
-                  :
+                  To add this MCP to Windsurf, update your config file at:
                 </p>
+                <OSPaths
+                  paths={[
+                    {
+                      os: "macOS",
+                      path: "~/.codeium/windsurf/mcp_config.json",
+                    },
+                    {
+                      os: "Windows",
+                      path: "%APPDATA%\\Codeium\\windsurf\\mcp_config.json",
+                    },
+                    {
+                      os: "Linux",
+                      path: "~/.codeium/windsurf/mcp_config.json",
+                    },
+                  ]}
+                />
                 <CodeExample
                   code={`{
   "mcpServers": {
@@ -392,13 +407,24 @@ export default function Content({
             <div id="tab-cline" className="tab-content hidden">
               <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
                 <p className="text-sm text-slate-700 mb-2">
-                  To add this MCP to Cline, update your{" "}
-                  <code className="bg-slate-200 px-1.5 py-0.5 rounded text-blue-700 break-words">
-                    ~/Library/Application
-                    Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json
-                  </code>
-                  :
+                  To add this MCP to Cline, update your config file at:
                 </p>
+                <OSPaths
+                  paths={[
+                    {
+                      os: "macOS",
+                      path: "~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json",
+                    },
+                    {
+                      os: "Windows",
+                      path: "%APPDATA%\\Code\\User\\globalStorage\\saoudrizwan.claude-dev\\settings\\cline_mcp_settings.json",
+                    },
+                    {
+                      os: "Linux",
+                      path: "~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json",
+                    },
+                  ]}
+                />
                 <CodeExample
                   code={`{
   "mcpServers": {
@@ -770,6 +796,23 @@ function CodeExample({
       <pre className="bg-slate-800 text-slate-100 rounded-md text-sm overflow-x-auto relative">
         {code}
       </pre>
+    </div>
+  );
+}
+
+function OSPaths({ paths }: { paths: Array<{ os: string; path: string }> }) {
+  return (
+    <div className="mb-3">
+      <ul className="text-sm text-slate-700 list-disc pl-5 space-y-1">
+        {paths.map(({ os, path }) => (
+          <li key={os}>
+            <span className="font-medium">{os}:</span>{" "}
+            <code className="bg-slate-200 px-1.5 py-0.5 rounded text-blue-700 break-words">
+              {path}
+            </code>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
