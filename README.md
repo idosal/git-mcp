@@ -210,7 +210,7 @@ Or use the following configuration:
 }
 ```
 
-For more details on configuring MCP servers in Augment Code, visit [the Augment Code documentation](https://docs.augmentcode.com/setup-augment/mcp).
+For more details on configuring MCP servers in Msty AI, visit [the Msty AI documentation](https://docs.msty.studio/features/toolbox/tools).
 
 > **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.
 

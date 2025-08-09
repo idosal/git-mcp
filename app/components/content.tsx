@@ -547,16 +547,16 @@ export default function Content({
                   <li>Copy the following JSON configuration: </li>
                   <CodeExample
                     code={`{
-                      "mcpServers": {
-                        "${serverName}": {
-                          "command": "npx",
-                          "args": [
-                            "mcp-remote",
-                            "${url}"
-                          ]
-                        }
-                      }
-                    }`}
+  "mcpServers": {
+    "${serverName}": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "${url}"
+      ]
+    }
+  }
+}`}
                     id="msty-ai"
                     name="Msty AI"
                   />
