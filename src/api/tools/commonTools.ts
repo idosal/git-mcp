@@ -422,15 +422,15 @@ export async function searchRepositoryDocumentationAutoRag({
       score_threshold: 0.4,
     },
     filters: {
-      type: "and",
+      type: "and" as const,
       filters: [
         {
-          type: "gte",
+          type: "gte" as const,
           key: "folder",
           value: `${repoPrefix}`,
         },
         {
-          type: "lte",
+          type: "lte" as const,
           key: "folder",
           value: `${repoPrefix}~`,
         },

@@ -78,10 +78,12 @@ export { getGlobalCreationRegistry };
  * Create a new FalkorDB connection with standard configuration
  */
 export async function createFalkorDBConnection(): Promise<FalkorDB> {
+  const host = process.env.FALKORDB_HOST || "127.0.0.1";
+  const port = parseInt(process.env.FALKORDB_PORT || "6379");
   return await FalkorDB.connect({
     socket: {
-      host: "localhost",
-      port: 6379,
+      host,
+      port,
       noDelay: false,
       keepAlive: false,
     },

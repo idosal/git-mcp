@@ -4,6 +4,7 @@ build
 .nx
 .idea
 .vscode
+.cursor
 .zed
 # Logs
 
