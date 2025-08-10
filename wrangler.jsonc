@@ -4,29 +4,29 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "git-mcp",
+  "name": "my-git-mcp",
   "main": "src/index.ts",
   "compatibility_flags": ["nodejs_compat"],
   "compatibility_date": "2025-04-26",
   "routes": [
     {
-      "pattern": "gitmcp.io",
+      "pattern": "my-git-mcp.adamd-a81.workers.dev",
       "custom_domain": true,
     },
   ],
-  "analytics_engine_datasets": [
-    {
-      "binding": "MY_METRICS",
-      "dataset": "my_metrics_dataset",
-    },
-  ],
+  // "analytics_engine_datasets": [
+  //   {
+  //     "binding": "MY_METRICS",
+  //     "dataset": "my_metrics_dataset",
+  //   },
+  // ],
   "migrations": [
     {
       "new_sqlite_classes": ["MyMCP"],
       "tag": "v1",
     },
     {
-      "new_classes": ["ViewCounterDO"],
+      "new_sqlite_classes": ["ViewCounterDO"],
       "tag": "v2",
     },
   ],
@@ -42,37 +42,37 @@
       },
     ],
   },
-  "vectorize": [
-    {
-      "binding": "VECTORIZE",
-      "index_name": "gitmcp-github-docs-idx",
-    },
-  ],
-  "kv_namespaces": [
-    {
-      "binding": "CACHE_KV",
-      "id": "c5dd8e05242a471b9d7bf12f0ddcee3a",
-      "preview_id": "bfc078682a3a4e33a8b6dfcca09af94f",
-    },
-  ],
+  // "vectorize": [
+  //   {
+  //     "binding": "VECTORIZE",
+  //     "index_name": "gitmcp-github-docs-idx",
+  //   },
+  // ],
+  // "kv_namespaces": [
+  //   {
+  //     "binding": "CACHE_KV",
+  //     "id": "c5dd8e05242a471b9d7bf12f0ddcee3a",
+  //     "preview_id": "bfc078682a3a4e33a8b6dfcca09af94f",
+  //   },
+  // ],
   "ai": {
     "binding": "AI",
   },
-  "r2_buckets": [
-    {
-      "binding": "DOCS_BUCKET",
-      "bucket_name": "docs-storage",
-      "preview_bucket_name": "llms-store-preview",
-    },
-  ],
-  "queues": {
-    "producers": [
-      {
-        "binding": "MY_QUEUE",
-        "queue": "my-queue",
-      },
-    ],
-  },
+  // "r2_buckets": [
+  //   {
+  //     "binding": "DOCS_BUCKET",
+  //     "bucket_name": "docs-storage",
+  //     "preview_bucket_name": "llms-store-preview",
+  //   },
+  // ],
+  // "queues": {
+  //   "producers": [
+  //     {
+  //       "binding": "MY_QUEUE",
+  //       "queue": "my-queue",
+  //     },
+  //   ],
+  // },
   "observability": {
     "enabled": true,
   },

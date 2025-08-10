@@ -67,6 +67,7 @@ export function getRepoData(requestData: RequestData): RepoData {
     requestHost === "gitmcp.io" ||
     requestHost === HOST_TEMP_URL ||
     requestHost === "git-mcp.idosalomon.workers.dev" ||
+    requestHost === "my-git-mcp.adamd-a81.workers.dev" ||
     requestHost.includes("localhost")
   ) {
     // Extract owner/repo from path
