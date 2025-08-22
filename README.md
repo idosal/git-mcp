@@ -16,6 +16,19 @@
   <a href="#-contributing">Contributing</a> •
   <a href="#-license">License</a>
 </p>
+
+<p align="center">
+  <!-- Keep these links. Translations will automatically update with the README. -->
+  <a href="https://readme-i18n.com/de/idosal/git-mcp">Deutsch</a> | 
+  <a href="https://readme-i18n.com/es/idosal/git-mcp">Español</a> | 
+  <a href="https://readme-i18n.com/fr/idosal/git-mcp">français</a> | 
+  <a href="https://readme-i18n.com/ja/idosal/git-mcp">日本語</a> | 
+  <a href="https://readme-i18n.com/ko/idosal/git-mcp">한국어</a> | 
+  <a href="https://readme-i18n.com/pt/idosal/git-mcp">Português</a> | 
+  <a href="https://readme-i18n.com/ru/idosal/git-mcp">Русский</a> | 
+  <a href="https://readme-i18n.com/zh/idosal/git-mcp">中文</a>
+</p>
+
 <div align="center">
 
 [![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/idosal/git-mcp)](https://gitmcp.io/idosal/git-mcp)
