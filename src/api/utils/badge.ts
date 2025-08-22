@@ -2,6 +2,8 @@
  * Badge utilities for GitMCP documentation tracking
  */
 
+const badgeCountAllowedRepos = ["mcp-ui", "git-mcp"];
+
 /**
  * Gets a Durable Object stub for the view counter
  * @param env Cloudflare environment
@@ -163,7 +165,12 @@ export function withViewTracking<T, R>(
 ): (args: T) => Promise<R> {
   return async (args: T) => {
     // Only track if we have both owner and repo and counter binding available
-    if (repoData.owner && repoData.repo && env?.VIEW_COUNTER) {
+    if (
+      repoData.owner &&
+      repoData.repo &&
+      badgeCountAllowedRepos.includes(repoData.repo) &&
+      env?.VIEW_COUNTER
+    ) {
       // Handle the view count tracking
       try {
         const incrementPromise = incrementRepoViewCount(
