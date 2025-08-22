@@ -119,7 +119,7 @@ describe("Badge utilities", () => {
       const originalCallback = vi.fn().mockResolvedValue("result");
 
       // Create the wrapped callback
-      const repoData = { owner: "owner", repo: "repo" };
+      const repoData = { owner: "idosal", repo: "git-mcp" };
       const wrappedCallback = withViewTracking(
         mockEnv,
         mockCtx,
@@ -171,7 +171,7 @@ describe("Badge utilities", () => {
       const originalCallback = vi.fn().mockResolvedValue("result");
 
       // Create the wrapped callback
-      const repoData = { owner: "owner", repo: "repo" };
+      const repoData = { owner: "idosal", repo: "git-mcp" };
       const wrappedCallback = withViewTracking(
         mockEnv,
         {},
