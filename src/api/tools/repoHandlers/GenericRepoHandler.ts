@@ -5,6 +5,7 @@ import {
   fetchDocumentation,
   searchRepositoryDocumentation,
   searchRepositoryCode,
+  searchRepositoryIssues,
 } from "../commonTools.js";
 import { incrementRepoViewCount } from "../../utils/badge.js";
 import rawMapping from "./generic/static-mapping.json";
@@ -153,6 +154,48 @@ class GenericRepoHandler implements RepoHandler {
             host: "gitmcp.io",
           };
           return searchRepositoryCode({ repoData, query, page, env, ctx });
+        },
+      },
+      {
+        name: "search_generic_issues",
+        description:
+          "Search issues in any GitHub repository by providing owner, project name, and search query. Supports filtering by state and pagination with 30 results per page.",
+        paramsSchema: {
+          owner: z
+            .string()
+            .describe("The GitHub repository owner (username or organization)"),
+          repo: z.string().describe("The GitHub repository name"),
+          query: z
+            .string()
+            .describe("The search query to find relevant issues"),
+          state: z
+            .enum(["open", "closed", "all"])
+            .optional()
+            .describe(
+              "Filter issues by state. Defaults to all if not specified.",
+            ),
+          page: z
+            .number()
+            .optional()
+            .describe(
+              "Page number to retrieve (starting from 1). Each page contains 30 results.",
+            ),
+        },
+        cb: async ({ owner, repo, query, state, page }) => {
+          const repoData: RepoData = {
+            owner,
+            repo,
+            urlType: "github",
+            host: "gitmcp.io",
+          };
+          return searchRepositoryIssues({
+            repoData,
+            query,
+            state,
+            page,
+            env,
+            ctx,
+          });
         },
       },
     ];
