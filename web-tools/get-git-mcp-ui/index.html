@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>getGitMCP - Paste GitHub URLs, get MCP Endpoints via GitMCP</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <h1>getGitMCP</h1>
+      </div>
+      <nav>
+        <a href="https://gitmcp.io/docs" target="_blank">Docs</a>
+        <a href="https://github.com/idosal/git-mcp" target="_blank">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="hero">
+        <h2>Paste GitHub URLs, get MCP Endpoints</h2>
+        <h4> powered by GitMCP</h4>
+        <br>
+        <p>GitMCP converts any GitHub project into a remote Model Context Protocol endpoint for your AI assistants to use.</p>
+      </div>
+
+      <div class="converter-box">
+        <div class="input-container">
+          <input 
+            type="text" 
+            id="github-url" 
+            placeholder="Enter GitHub URL (repo, pages, or user/org)"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button id="convert-btn">Convert</button>
+        </div>
+        <div class="examples">
+          <span>Examples:</span>
+          <code>github.com/username/repo</code>
+          <code>username.github.io/repo</code>
+          <code>github.com/username</code>
+        </div>
+        <div id="loading" class="loading hidden">
+          <div class="spinner"></div>
+          <span>Fetching repositories...</span>
+        </div>
+        <div id="error-message" class="error-message hidden"></div>
+        <div id="result" class="result hidden">
+          <h3>Converted URL:</h3>
+          <a id="result-link" href="#" target="_blank"></a>
+        </div>
+        <div id="repos-list" class="repos-list hidden">
+          <h3>Repositories:</h3>
+          <ul id="repos-container"></ul>
+        </div>
+      </div>
+      <div class="conversion-examples">
+        <div class="example-card">
+          <h3>GitHub Repository</h3>
+          <div class="example-conversion">
+            <code>github.com/username/repo</code>
+            <span class="arrow">→</span>
+            <code>gitmcp.io/username/repo</code>
+          </div>
+        </div>
+        <div class="example-card">
+          <h3>GitHub Pages</h3>
+          <div class="example-conversion">
+            <code>username.github.io/repo</code>
+            <span class="arrow">→</span>
+            <code>username.gitmcp.io/repo</code>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <p>getGitMCP is a quick tool to retrive GitMCP configuration from Github links</p>.GitMCP is a free, open-source service. <a href="https://github.com/idosal/git-mcp"  target="_blank">Contribute on GitHub</a></p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
