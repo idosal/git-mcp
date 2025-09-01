@@ -260,7 +260,7 @@ Cursor will pull the relevant documentation and code from GitMCP to correctly im
 You don't have to pick specific repositories. The generic `gitmcp.io/docs` endpoint allows AI to pick the GitHub project on the fly!
 
 **Prompt to any AI assistant:**
-> "I want to learn about the OpenAI Whisper speech recognition model. Explain how it works.
+> "I want to learn about the OpenAI Whisper speech recognition model. Explain how it works."
 
 Claude will pull the data from GitMCP and answer the question.
 
@@ -296,7 +296,7 @@ This tool searches through the actual code in the repository using GitHub's code
 
 ## 📊 Badge
 
-GitMCP has a badge to your repository's README. It allows users to quickly access your documentation through their IDE or browser (using the embedded chat). It also showcases how many times your documentation has been accessed through GitMCP.
+GitMCP has a badge for your repository's README. It allows users to quickly access your documentation through their IDE or browser (using the embedded chat). It also showcases how many times your documentation has been accessed through GitMCP.
 
 Example (`idosal/git-mcp`): [![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/idosal/git-mcp)](https://gitmcp.io/idosal/git-mcp)
 
@@ -323,7 +323,7 @@ You can customize the badge's appearance with parameters:
 | `color` | Color for the badge value | `aquamarine` | `?color=green` |
 | `label` | Badge label | `GitMCP` | `Documentation`
 
-Please reach out!
+Please reach out if you need help!
 
 ## ❓ FAQ
 
