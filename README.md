@@ -161,7 +161,7 @@ Update your Cline configuration file at `~/Library/Application Support/Code/User
 Plugin name: `gitmcp`
 SSE URL: `https://gitmcp.io/{owner}/{repo}`
 
-For more details on adding custom MCP servers to HighlightAI, refer to [the documentation](https://docs.highlightai.com/learn/developers/plugins/custom-plugins-setup).
+For more details on adding custom MCP servers to HighlightAI, refer to [the documentation](https://docs.highlightai.com/plugins/custom).
 
 #### Connecting Augment Code
 
