@@ -8,4 +8,5 @@ export const STORAGE_KEYS = {
   SELECTED_MCP_SERVERS: "selected-mcp-servers",
   SIDEBAR_STATE: "sidebar-state",
   API_KEYS: "api-keys",
+  CUSTOM_MODELS: "custom-models",
 };

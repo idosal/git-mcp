@@ -6,6 +6,17 @@ export interface ModelInfo {
   capabilities: string[];
 }
 
+export interface CustomModelConfig {
+  id: string; // unique identifier
+  label: string; // custom display name
+  baseURL: string; // API base URL
+  apiKey: string; // API key for this model
+  modelName: string; // the actual model name to use in API calls
+  provider?: string; // optional provider name for display
+  description?: string; // optional description
+  capabilities?: string[]; // optional capabilities
+}
+
 export type StorageKey =
   | "OPENAI_API_KEY"
   | "ANTHROPIC_API_KEY"
@@ -56,3 +67,34 @@ export const modelDetails: Record<modelID, ModelInfo> = {
 export const MODELS = Object.keys(modelDetails);
 
 export const defaultModel: modelID = "qwen-qwq";
+
+// Helper functions for custom models
+export function getCustomModels(): CustomModelConfig[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem("custom-models");
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function getAllModels(): { id: string; info: ModelInfo }[] {
+  const builtInModels = MODELS.map((id) => ({
+    id,
+    info: modelDetails[id as modelID],
+  }));
+
+  const customModels = getCustomModels().map((config) => ({
+    id: config.id,
+    info: {
+      provider: config.provider || "Custom",
+      name: config.label,
+      description: config.description || `Custom model: ${config.modelName}`,
+      apiVersion: config.modelName,
+      capabilities: config.capabilities || ["Custom"],
+    },
+  }));
+
+  return [...builtInModels, ...customModels];
+}

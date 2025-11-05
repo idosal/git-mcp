@@ -1,6 +1,10 @@
 "use client";
 
-import { defaultModel, type modelID } from "~/chat/ai/providers.shared";
+import {
+  defaultModel,
+  type modelID,
+  type CustomModelConfig,
+} from "~/chat/ai/providers.shared";
 import { useChat } from "@ai-sdk/react";
 import { Textarea } from "./textarea";
 import { ProjectOverview } from "./project-overview";
@@ -8,18 +12,44 @@ import { Messages } from "./messages";
 import { toast } from "sonner";
 import { useLocalStorage } from "~/chat/lib/hooks/use-local-storage";
 import { useMCP } from "~/chat/lib/context/mcp-context";
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useApiKeys } from "./api-keys-provider";
+import { STORAGE_KEYS } from "~/chat/lib/constants";
 
 const CHAT_API_URL = "https://chat-api-worker.idosalomon.workers.dev/api/chat";
 
 export default function Chat() {
-  const [selectedModel, setSelectedModel] = useLocalStorage<modelID>(
+  const [selectedModel, setSelectedModel] = useLocalStorage<modelID | string>(
     "selectedModel",
     defaultModel,
   );
 
   const { apiKeys } = useApiKeys();
+
+  // Load custom models from localStorage
+  const [customModels, setCustomModels] = useState<CustomModelConfig[]>([]);
+
+  useEffect(() => {
+    const loadCustomModels = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEYS.CUSTOM_MODELS);
+        setCustomModels(stored ? JSON.parse(stored) : []);
+      } catch (error) {
+        console.error("Error loading custom models:", error);
+        setCustomModels([]);
+      }
+    };
+
+    loadCustomModels();
+
+    // Listen for storage events to update when models change
+    const handleStorageChange = () => {
+      loadCustomModels();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   // Get MCP server data from context
   const { mcpServersForApi } = useMCP();
@@ -32,6 +62,7 @@ export default function Chat() {
         selectedModel,
         mcpServers: mcpServersForApi,
         apiKeys,
+        customModels,
       },
       experimental_throttle: 500,
       onError: (error) => {

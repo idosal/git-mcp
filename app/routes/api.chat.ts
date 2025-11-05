@@ -1,5 +1,5 @@
 import { getModel } from "~/chat/ai/providers.server";
-import type { modelID } from "~/chat/ai/providers.shared";
+import type { modelID, CustomModelConfig } from "~/chat/ai/providers.shared";
 import { streamText, type ToolSet, type UIMessage } from "ai";
 
 import type { StorageKey } from "~/chat/ai/providers.shared";
@@ -34,15 +34,17 @@ export async function action({
     selectedModel,
     mcpServers = [],
     apiKeys,
+    customModels = [],
   }: {
     messages: UIMessage[];
-    selectedModel: modelID;
+    selectedModel: modelID | string;
     mcpServers?: MCPServerConfig[];
     apiKeys: Record<StorageKey, string>;
+    customModels?: CustomModelConfig[];
   } = await request.json();
 
   const env = context.cloudflare.env as CloudflareEnvironment;
-  const model = getModel(env, apiKeys);
+  const model = getModel(env, apiKeys, customModels);
 
   // // Initialize tools
   // let tools = {};

@@ -4,6 +4,8 @@ import {
   modelDetails,
   type modelID,
   defaultModel,
+  type CustomModelConfig,
+  getAllModels,
 } from "~/chat/ai/providers.shared";
 import {
   Select,
@@ -28,29 +30,79 @@ import {
   Bot,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { STORAGE_KEYS } from "~/chat/lib/constants";
 
 interface ModelPickerProps {
-  selectedModel: modelID;
-  setSelectedModel: (model: modelID) => void;
+  selectedModel: modelID | string;
+  setSelectedModel: (model: modelID | string) => void;
 }
 
 export const ModelPicker = ({
   selectedModel,
   setSelectedModel,
 }: ModelPickerProps) => {
-  const [hoveredModel, setHoveredModel] = useState<modelID | null>(null);
+  const [hoveredModel, setHoveredModel] = useState<string | null>(null);
+  const [customModels, setCustomModels] = useState<CustomModelConfig[]>([]);
+  const [allModels, setAllModels] = useState<{ id: string; info: any }[]>([]);
+
+  // Load custom models from localStorage
+  useEffect(() => {
+    const loadModels = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEYS.CUSTOM_MODELS);
+        const customModelsList: CustomModelConfig[] = stored
+          ? JSON.parse(stored)
+          : [];
+        setCustomModels(customModelsList);
+
+        // Combine built-in and custom models
+        const builtInModels = MODELS.map((id) => ({
+          id,
+          info: modelDetails[id as modelID],
+        }));
+
+        const customModelsInfo = customModelsList.map((config) => ({
+          id: config.id,
+          info: {
+            provider: config.provider || "Custom",
+            name: config.label,
+            description:
+              config.description || `Custom model: ${config.modelName}`,
+            apiVersion: config.modelName,
+            capabilities: config.capabilities || ["Custom"],
+          },
+        }));
+
+        setAllModels([...builtInModels, ...customModelsInfo]);
+      } catch (error) {
+        console.error("Error loading custom models:", error);
+        setAllModels(
+          MODELS.map((id) => ({ id, info: modelDetails[id as modelID] })),
+        );
+      }
+    };
+
+    loadModels();
+
+    // Listen for storage events
+    const handleStorageChange = () => {
+      loadModels();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   // Ensure we always have a valid model ID
-  const validModelId = MODELS.includes(selectedModel)
-    ? selectedModel
-    : defaultModel;
+  const validModelId =
+    allModels.find((m) => m.id === selectedModel)?.id || defaultModel;
 
   // If the selected model is invalid, update it to the default
   useEffect(() => {
-    if (selectedModel !== validModelId) {
-      setSelectedModel(validModelId as modelID);
+    if (selectedModel !== validModelId && allModels.length > 0) {
+      setSelectedModel(validModelId);
     }
-  }, [selectedModel, validModelId, setSelectedModel]);
+  }, [selectedModel, validModelId, setSelectedModel, allModels]);
 
   // Function to get the appropriate icon for each provider
   const getProviderIcon = (provider: string) => {
@@ -125,13 +177,13 @@ export const ModelPicker = ({
 
   // Get current model details to display
   const displayModelId = hoveredModel || validModelId;
-  const currentModelDetails = modelDetails[displayModelId];
+  const currentModel = allModels.find((m) => m.id === displayModelId);
+  const currentModelDetails = currentModel?.info || modelDetails[defaultModel];
 
   // Handle model change
   const handleModelChange = (modelId: string) => {
-    if (MODELS.includes(modelId)) {
-      const typedModelId = modelId as modelID;
-      setSelectedModel(typedModelId);
+    if (allModels.find((m) => m.id === modelId)) {
+      setSelectedModel(modelId);
     }
   };
 
@@ -148,9 +200,9 @@ export const ModelPicker = ({
             className="text-xs font-medium flex items-center gap-1 sm:gap-2 text-primary dark:text-primary-foreground ocean:text-primary-foreground"
           >
             <div className="flex items-center gap-1 sm:gap-2">
-              {getProviderIcon(modelDetails[validModelId].provider)}
+              {getProviderIcon(currentModelDetails.provider)}
               <span className="font-medium truncate">
-                {modelDetails[validModelId].name}
+                {currentModelDetails.name}
               </span>
             </div>
           </SelectValue>
@@ -163,13 +215,12 @@ export const ModelPicker = ({
             {/* Model selector column */}
             <div className="sm:border-r border-border/40 bg-muted/20 p-0 pr-1">
               <SelectGroup className="space-y-1">
-                {MODELS.map((id) => {
-                  const modelId = id as modelID;
+                {allModels.map(({ id, info }) => {
                   return (
                     <SelectItem
                       key={id}
                       value={id}
-                      onMouseEnter={() => setHoveredModel(modelId)}
+                      onMouseEnter={() => setHoveredModel(id)}
                       onMouseLeave={() => setHoveredModel(null)}
                       className={cn(
                         "!px-2 sm:!px-3 py-1.5 sm:py-2 cursor-pointer rounded-md text-xs transition-colors duration-150",
@@ -182,13 +233,13 @@ export const ModelPicker = ({
                     >
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-1.5">
-                          {getProviderIcon(modelDetails[modelId].provider)}
+                          {getProviderIcon(info.provider)}
                           <span className="font-medium truncate">
-                            {modelDetails[modelId].name}
+                            {info.name}
                           </span>
                         </div>
                         <span className="text-[10px] sm:text-xs text-muted-foreground">
-                          {modelDetails[modelId].provider}
+                          {info.provider}
                         </span>
                       </div>
                     </SelectItem>

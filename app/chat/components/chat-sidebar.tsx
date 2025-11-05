@@ -8,6 +8,7 @@ import {
   ChevronsUpDown,
   Github,
   Key,
+  Brain,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +26,7 @@ import {
 import { Badge } from "~/chat/components/ui/badge";
 import { MCPServerManager } from "./mcp-server-manager";
 import { ApiKeyManager } from "./api-key-manager";
+import { CustomModelManager } from "./custom-model-manager";
 import { ThemeToggle } from "./theme-toggle";
 import { cn } from "~/chat/lib/utils";
 
@@ -33,6 +35,7 @@ import { useMCP } from "~/chat/lib/context/mcp-context";
 export function ChatSidebar() {
   const [mcpSettingsOpen, setMcpSettingsOpen] = useState(false);
   const [apiKeySettingsOpen, setApiKeySettingsOpen] = useState(false);
+  const [customModelSettingsOpen, setCustomModelSettingsOpen] = useState(false);
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
@@ -126,11 +129,28 @@ export function ChatSidebar() {
                 <SidebarMenuButton
                   onClick={() => setApiKeySettingsOpen(true)}
                   className="w-full flex items-center gap-2 transition-all hover:bg-secondary/50 active:bg-secondary/70 cursor-pointer"
+                  tooltip={isCollapsed ? "API Keys" : undefined}
                 >
                   <Key className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
-                  <span className="flex-grow text-sm text-foreground/80">
-                    API Keys
-                  </span>
+                  {!isCollapsed && (
+                    <span className="flex-grow text-sm text-foreground/80">
+                      API Keys
+                    </span>
+                  )}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setCustomModelSettingsOpen(true)}
+                  className="w-full flex items-center gap-2 transition-all hover:bg-secondary/50 active:bg-secondary/70 cursor-pointer"
+                  tooltip={isCollapsed ? "Custom Models" : undefined}
+                >
+                  <Brain className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                  {!isCollapsed && (
+                    <span className="flex-grow text-sm text-foreground/80">
+                      Custom Models
+                    </span>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem className="mt-auto">
@@ -190,6 +210,11 @@ export function ChatSidebar() {
         <ApiKeyManager
           open={apiKeySettingsOpen}
           onOpenChange={setApiKeySettingsOpen}
+        />
+
+        <CustomModelManager
+          open={customModelSettingsOpen}
+          onOpenChange={setCustomModelSettingsOpen}
         />
       </SidebarFooter>
     </Sidebar>
