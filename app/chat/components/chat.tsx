@@ -42,13 +42,17 @@ export default function Chat() {
 
     loadCustomModels();
 
-    // Listen for storage events to update when models change
+    // Listen for storage events (from other tabs) and custom events (same tab)
     const handleStorageChange = () => {
       loadCustomModels();
     };
 
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("customModelsChanged", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("customModelsChanged", handleStorageChange);
+    };
   }, []);
 
   // Get MCP server data from context

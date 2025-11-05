@@ -60,8 +60,8 @@ export function CustomModelManager({
         JSON.stringify(updatedModels),
       );
       setModels(updatedModels);
-      // Trigger a storage event to notify other components
-      window.dispatchEvent(new Event("storage"));
+      // Dispatch custom event for same-window updates
+      window.dispatchEvent(new CustomEvent("customModelsChanged"));
     } catch (error) {
       console.error("Error saving custom models:", error);
       toast.error("Failed to save custom models");
@@ -90,10 +90,12 @@ export function CustomModelManager({
         );
         toast.success("Model updated successfully");
       } else {
-        // Add new model
+        // Add new model with more robust ID generation
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(2, 9);
         const newModel: CustomModelConfig = {
           ...formData,
-          id: `custom-${Date.now()}`,
+          id: `custom-${timestamp}-${random}`,
         };
         updatedModels = [...models, newModel];
         toast.success("Model added successfully");

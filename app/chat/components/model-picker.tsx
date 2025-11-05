@@ -84,25 +84,31 @@ export const ModelPicker = ({
 
     loadModels();
 
-    // Listen for storage events
+    // Listen for storage events (from other tabs) and custom events (same tab)
     const handleStorageChange = () => {
       loadModels();
     };
 
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("customModelsChanged", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("customModelsChanged", handleStorageChange);
+    };
   }, []);
 
   // Ensure we always have a valid model ID
   const validModelId =
-    allModels.find((m) => m.id === selectedModel)?.id || defaultModel;
+    allModels.length > 0
+      ? allModels.find((m) => m.id === selectedModel)?.id || defaultModel
+      : defaultModel;
 
-  // If the selected model is invalid, update it to the default
+  // If the selected model is invalid, update it to the default (only after models are loaded)
   useEffect(() => {
-    if (selectedModel !== validModelId && allModels.length > 0) {
+    if (allModels.length > 0 && selectedModel !== validModelId) {
       setSelectedModel(validModelId);
     }
-  }, [selectedModel, validModelId, setSelectedModel, allModels]);
+  }, [selectedModel, validModelId, setSelectedModel, allModels.length]);
 
   // Function to get the appropriate icon for each provider
   const getProviderIcon = (provider: string) => {

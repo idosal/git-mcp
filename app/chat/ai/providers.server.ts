@@ -75,7 +75,16 @@ export const getModel = (
       });
       languageModels[config.id] = customClient(config.modelName);
     } catch (error) {
-      console.error(`Error creating custom model ${config.id}:`, error);
+      console.error(
+        `Error creating custom model ${config.id}:`,
+        {
+          label: config.label,
+          baseURL: config.baseURL,
+          modelName: config.modelName,
+          provider: config.provider,
+        },
+        error,
+      );
     }
   });
 

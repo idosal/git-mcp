@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from "../lib/constants";
+
 export interface ModelInfo {
   provider: string;
   name: string;
@@ -72,7 +74,7 @@ export const defaultModel: modelID = "qwen-qwq";
 export function getCustomModels(): CustomModelConfig[] {
   if (typeof window === "undefined") return [];
   try {
-    const stored = localStorage.getItem("custom-models");
+    const stored = localStorage.getItem(STORAGE_KEYS.CUSTOM_MODELS);
     return stored ? JSON.parse(stored) : [];
   } catch {
     return [];
