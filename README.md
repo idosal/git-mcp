@@ -373,6 +373,38 @@ We welcome contributions, feedback, and ideas! Please review our [contribution](
    pnpm dev
    ```
 
+### Docker Deployment
+
+GitMCP can be easily deployed using Docker and Docker Compose.
+
+1. **Quick start with Docker Compose**
+   ```bash
+   # Clone the repository
+   git clone https://github.com/idosal/git-mcp.git
+   cd git-mcp
+   
+   # Copy environment file and add your API keys
+   cp .env.example .env
+   
+   # Build and start
+   docker-compose up -d
+   ```
+
+2. **Using the quick start script**
+   ```bash
+   ./docker-start.sh
+   ```
+
+3. **Manual Docker build**
+   ```bash
+   docker build -t gitmcp:latest .
+   docker run -d -p 5173:5173 --name gitmcp gitmcp:latest
+   ```
+
+The application will be available at `http://localhost:5173`
+
+For detailed Docker configuration and deployment options, see [DOCKER.md](DOCKER.md).
+
 #### Using MCP Inspector for Testing
 
 1. Install the MCP Inspector tool:

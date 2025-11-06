@@ -1,0 +1,74 @@
+# Docker ignore file
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+
+# Build outputs
+build/
+dist/
+.next/
+out/
+
+# Cache
+.cache/
+.vite/
+.react-router/
+
+# Test coverage
+coverage/
+
+# Development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Wrangler specific (not needed in Docker)
+.wrangler/
+wrangler.toml
+wrangler.jsonc
+worker-configuration.d.ts
+
+# Testing
+tests/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+playwright.config.ts
+vitest.config.ts
+
+# Documentation
+README.md
+LICENSE
+SECURITY.md
+*.md

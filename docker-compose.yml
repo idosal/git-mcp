@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  gitmcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gitmcp-app
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=5173
+      # Add your API keys here or use .env file
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - XAI_API_KEY=${XAI_API_KEY:-}
+    volumes:
+      # Mount volume for persistent data if needed
+      - gitmcp-data:/app/data
+    restart: unless-stopped
+    networks:
+      - gitmcp-network
+
+volumes:
+  gitmcp-data:
+    driver: local
+
+networks:
+  gitmcp-network:
+    driver: bridge

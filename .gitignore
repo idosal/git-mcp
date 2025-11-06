@@ -183,3 +183,7 @@ dist
 playwright-results/
 playwright-report/
 test-results/
+# Docker
+docker-compose.override.yml
+.env.docker
+gitmcp-backup.tar.gz
