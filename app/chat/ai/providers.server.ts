@@ -9,7 +9,11 @@ import {
   extractReasoningMiddleware,
   type LanguageModel,
 } from "ai";
-import type { modelID, StorageKey } from "./providers.shared";
+import type {
+  modelID,
+  StorageKey,
+  CustomModelConfig,
+} from "./providers.shared";
 
 const middleware = extractReasoningMiddleware({
   tagName: "think",
@@ -18,6 +22,7 @@ const middleware = extractReasoningMiddleware({
 export const getModel = (
   env: CloudflareEnvironment,
   apiKeys: Partial<Record<StorageKey, string>>,
+  customModels: CustomModelConfig[] = [],
 ) => {
   // Helper to get API keys from environment variables first, then localStorage
   const getApiKey = (key: StorageKey): string | undefined => {
@@ -51,7 +56,7 @@ export const getModel = (
     apiKey: getApiKey("XAI_API_KEY"),
   });
 
-  const languageModels: Record<modelID, LanguageModel> = {
+  const languageModels: Record<string, LanguageModel> = {
     "gpt-4.1-mini": openaiClient("gpt-4.1-mini"),
     "claude-3-7-sonnet": anthropicClient("claude-3-7-sonnet-20250219"),
     "qwen-qwq": wrapLanguageModel({
@@ -60,6 +65,30 @@ export const getModel = (
     }),
     "grok-3-mini": xaiClient("grok-3-mini-latest"),
   };
+
+  // Add custom models to the language models
+  customModels.forEach((config) => {
+    try {
+      const customClient = createOpenAI({
+        apiKey: config.apiKey,
+        baseURL: config.baseURL,
+      });
+      languageModels[config.id] = customClient(config.modelName);
+    } catch (error) {
+      // TODO: Surface these errors to the UI via a toast notification or error state
+      // For now, log detailed information (excluding sensitive API key)
+      console.error(
+        `Error creating custom model ${config.id}:`,
+        {
+          label: config.label,
+          baseURL: config.baseURL,
+          modelName: config.modelName,
+          provider: config.provider,
+        },
+        error,
+      );
+    }
+  });
 
   const model = customProvider({
     languageModels,

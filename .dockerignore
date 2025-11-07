@@ -1,0 +1,77 @@
+# Docker ignore file
+# Note: These exclusions apply to the initial Docker build context.
+# Files can still be copied between build stages in multi-stage builds.
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Build outputs (excluded from initial context, but built during Docker build)
+build/
+dist/
+.next/
+out/
+
+# Cache (excluded from initial context, but copied from builder stage)
+.cache/
+.vite/
+.react-router/
+
+# Test coverage
+coverage/
+
+# Development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Wrangler specific (not needed in Docker)
+.wrangler/
+wrangler.toml
+wrangler.jsonc
+worker-configuration.d.ts
+
+# Testing
+tests/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+playwright.config.ts
+vitest.config.ts
+
+# Documentation
+README.md
+LICENSE
+SECURITY.md
+*.md
