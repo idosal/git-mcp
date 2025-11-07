@@ -17,8 +17,13 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+# Check if Docker Compose is installed and determine which version to use
+DOCKER_COMPOSE_CMD=""
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+elif docker compose version &> /dev/null 2>&1; then
+    DOCKER_COMPOSE_CMD="docker compose"
+else
     echo "❌ Error: Docker Compose is not installed"
     echo "Please install Docker Compose from https://docs.docker.com/compose/install/"
     exit 1
@@ -51,30 +56,30 @@ case $choice in
     1)
         echo ""
         echo "🚀 Building and starting GitMCP..."
-        docker-compose up -d --build
+        $DOCKER_COMPOSE_CMD up -d --build
         echo ""
         echo "✅ GitMCP is now running!"
         echo "🌐 Access it at: http://localhost:5173"
         echo ""
-        echo "📊 To view logs, run: docker-compose logs -f"
+        echo "📊 To view logs, run: $DOCKER_COMPOSE_CMD logs -f"
         ;;
     2)
         echo ""
         echo "🛑 Stopping GitMCP..."
-        docker-compose down
+        $DOCKER_COMPOSE_CMD down
         echo "✅ GitMCP stopped"
         ;;
     3)
         echo ""
         echo "📊 Showing logs (Ctrl+C to exit)..."
-        docker-compose logs -f
+        $DOCKER_COMPOSE_CMD logs -f
         ;;
     4)
         echo ""
         echo "🔨 Rebuilding from scratch..."
-        docker-compose down
-        docker-compose build --no-cache
-        docker-compose up -d
+        $DOCKER_COMPOSE_CMD down
+        $DOCKER_COMPOSE_CMD build --no-cache
+        $DOCKER_COMPOSE_CMD up -d
         echo ""
         echo "✅ GitMCP rebuilt and started!"
         echo "🌐 Access it at: http://localhost:5173"
@@ -84,8 +89,7 @@ case $choice in
         read -p "⚠️  This will remove all data. Are you sure? (yes/no): " confirm
         if [ "$confirm" = "yes" ]; then
             echo "🗑️  Removing everything..."
-            docker-compose down -v
-            docker rmi gitmcp-gitmcp 2>/dev/null || true
+            $DOCKER_COMPOSE_CMD down -v --rmi local
             echo "✅ Everything removed"
         else
             echo "❌ Cancelled"

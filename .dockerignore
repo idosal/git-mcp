@@ -1,17 +1,20 @@
 # Docker ignore file
+# Note: These exclusions apply to the initial Docker build context.
+# Files can still be copied between build stages in multi-stage builds.
+
 # Dependencies
 node_modules/
 npm-debug.log
 yarn-error.log
-pnpm-lock.yaml
+package-lock.json
 
-# Build outputs
+# Build outputs (excluded from initial context, but built during Docker build)
 build/
 dist/
 .next/
 out/
 
-# Cache
+# Cache (excluded from initial context, but copied from builder stage)
 .cache/
 .vite/
 .react-router/

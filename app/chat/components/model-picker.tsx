@@ -42,8 +42,9 @@ export const ModelPicker = ({
   setSelectedModel,
 }: ModelPickerProps) => {
   const [hoveredModel, setHoveredModel] = useState<string | null>(null);
-  const [customModels, setCustomModels] = useState<CustomModelConfig[]>([]);
-  const [allModels, setAllModels] = useState<{ id: string; info: any }[]>([]);
+  const [allModels, setAllModels] = useState<{ id: string; info: ModelInfo }[]>(
+    [],
+  );
 
   // Load custom models from localStorage
   useEffect(() => {
@@ -53,7 +54,6 @@ export const ModelPicker = ({
         const customModelsList: CustomModelConfig[] = stored
           ? JSON.parse(stored)
           : [];
-        setCustomModels(customModelsList);
 
         // Combine built-in and custom models
         const builtInModels = MODELS.map((id) => ({

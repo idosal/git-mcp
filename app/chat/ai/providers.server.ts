@@ -75,6 +75,8 @@ export const getModel = (
       });
       languageModels[config.id] = customClient(config.modelName);
     } catch (error) {
+      // TODO: Surface these errors to the UI via a toast notification or error state
+      // For now, log detailed information (excluding sensitive API key)
       console.error(
         `Error creating custom model ${config.id}:`,
         {

@@ -16,6 +16,11 @@ import type { CustomModelConfig } from "../ai/providers.shared";
 import { Trash2, Plus, Edit2 } from "lucide-react";
 import { ScrollArea } from "~/chat/components/ui/scroll-area";
 
+// SECURITY NOTE: API keys are stored in localStorage which is accessible to any JavaScript
+// code running on the page. This creates a potential XSS vulnerability. For production
+// environments, consider using more secure storage mechanisms like httpOnly cookies or
+// backend session stores. Users should ensure they trust all scripts running on this page.
+
 interface CustomModelManagerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -80,6 +85,14 @@ export function CustomModelManager({
       return;
     }
 
+    // Validate URL format
+    try {
+      new URL(formData.baseURL);
+    } catch {
+      toast.error("Please enter a valid API Base URL");
+      return;
+    }
+
     try {
       let updatedModels: CustomModelConfig[];
 
@@ -90,12 +103,10 @@ export function CustomModelManager({
         );
         toast.success("Model updated successfully");
       } else {
-        // Add new model with more robust ID generation
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substring(2, 9);
+        // Add new model with UUID for guaranteed uniqueness
         const newModel: CustomModelConfig = {
           ...formData,
-          id: `custom-${timestamp}-${random}`,
+          id: `custom-${crypto.randomUUID()}`,
         };
         updatedModels = [...models, newModel];
         toast.success("Model added successfully");
