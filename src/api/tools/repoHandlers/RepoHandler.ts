@@ -1,10 +1,12 @@
 import type { RepoData } from "../../../shared/repoData.js";
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 
 export interface Tool {
   name: string;
   description: string;
   paramsSchema: any;
   cb: (args: any) => Promise<any>;
+  annotations?: ToolAnnotations;
 }
 
 export interface RepoHandler {

@@ -8,6 +8,7 @@ import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
 import { getDefaultRepoHandler } from "./DefaultRepoHandler.js";
 import { z } from "zod";
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 
 class ReactRouterRepoHandler implements RepoHandler {
   name = "react-router";
@@ -34,6 +35,10 @@ class ReactRouterRepoHandler implements RepoHandler {
           ctx,
         });
       },
+      annotations: {
+        title: "Search Documentation",
+        readOnlyHint: true,
+      } as ToolAnnotations,
     };
 
     // Filter out the default search tool and add our specific implementation

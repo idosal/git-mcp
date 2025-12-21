@@ -7,6 +7,7 @@ import {
   fetchThreeJsUrlsAsMarkdown,
 } from "./threejs/utils.js";
 import { searchRepositoryDocumentation } from "../commonTools.js";
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 
 const GET_REFERENCE_DOCS_LIST_TOOL_NAME = "get_threejs_reference_docs_list";
 const GET_SPECIFIC_DOCS_CONTENT_TOOL_NAME = "get_threejs_specific_docs_content";
@@ -25,6 +26,10 @@ class ThreejsRepoHandler implements RepoHandler {
         cb: async () => {
           return await getReferenceDocsListAsMarkdown({ env });
         },
+        annotations: {
+          title: "Get Three.js Reference Docs List",
+          readOnlyHint: true,
+        } as ToolAnnotations,
       },
       {
         name: GET_SPECIFIC_DOCS_CONTENT_TOOL_NAME,
@@ -47,6 +52,10 @@ class ThreejsRepoHandler implements RepoHandler {
             documents: args.documents,
           });
         },
+        annotations: {
+          title: "Get Three.js Specific Docs Content",
+          readOnlyHint: true,
+        } as ToolAnnotations,
       },
       {
         name: "search_threejs_documentation",
@@ -66,6 +75,10 @@ class ThreejsRepoHandler implements RepoHandler {
             fallbackSearch: noopFallbackSearch,
           });
         },
+        annotations: {
+          title: "Search Three.js Documentation",
+          readOnlyHint: true,
+        } as ToolAnnotations,
       },
       {
         name: "fetch_threejs_urls_inside_docs",
@@ -87,6 +100,10 @@ class ThreejsRepoHandler implements RepoHandler {
         cb: async ({ urls }) => {
           return await fetchThreeJsUrlsAsMarkdown(urls);
         },
+        annotations: {
+          title: "Fetch Three.js URLs Inside Docs",
+          readOnlyHint: true,
+        } as ToolAnnotations,
       },
     ];
   }
