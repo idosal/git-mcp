@@ -38,7 +38,7 @@ class ReactRouterRepoHandler implements RepoHandler {
       annotations: {
         title: "Search Documentation",
         readOnlyHint: true,
-      } as ToolAnnotations,
+      },
     };
 
     // Filter out the default search tool and add our specific implementation

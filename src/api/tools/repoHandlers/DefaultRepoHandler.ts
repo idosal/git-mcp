@@ -38,7 +38,7 @@ class DefaultRepoHandler implements RepoHandler {
         annotations: {
           title: "Fetch Documentation",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
       {
         name: searchToolName,
@@ -59,7 +59,7 @@ class DefaultRepoHandler implements RepoHandler {
         annotations: {
           title: "Search Documentation",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
       {
         name: codeSearchToolName,
@@ -87,7 +87,7 @@ class DefaultRepoHandler implements RepoHandler {
         annotations: {
           title: "Search Code",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
     ];
   }

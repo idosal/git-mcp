@@ -29,7 +29,7 @@ export function getMcpTools(
       annotations: {
         title: "Fetch URL Content",
         readOnlyHint: true,
-      } as ToolAnnotations,
+      },
     },
   ];
 }

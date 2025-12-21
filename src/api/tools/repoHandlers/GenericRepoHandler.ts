@@ -86,7 +86,7 @@ class GenericRepoHandler implements RepoHandler {
         annotations: {
           title: "Match Library to Repository",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
       {
         name: "fetch_generic_documentation",
@@ -110,7 +110,7 @@ class GenericRepoHandler implements RepoHandler {
         annotations: {
           title: "Fetch Generic Documentation",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
       {
         name: "search_generic_documentation",
@@ -137,7 +137,7 @@ class GenericRepoHandler implements RepoHandler {
         annotations: {
           title: "Search Generic Documentation",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
       {
         name: "search_generic_code",
@@ -170,7 +170,7 @@ class GenericRepoHandler implements RepoHandler {
         annotations: {
           title: "Search Generic Code",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
     ];
   }

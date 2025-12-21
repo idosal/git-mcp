@@ -29,7 +29,7 @@ class ThreejsRepoHandler implements RepoHandler {
         annotations: {
           title: "Get Three.js Reference Docs List",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
       {
         name: GET_SPECIFIC_DOCS_CONTENT_TOOL_NAME,
@@ -55,7 +55,7 @@ class ThreejsRepoHandler implements RepoHandler {
         annotations: {
           title: "Get Three.js Specific Docs Content",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
       {
         name: "search_threejs_documentation",
@@ -78,7 +78,7 @@ class ThreejsRepoHandler implements RepoHandler {
         annotations: {
           title: "Search Three.js Documentation",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
       {
         name: "fetch_threejs_urls_inside_docs",
@@ -103,7 +103,7 @@ class ThreejsRepoHandler implements RepoHandler {
         annotations: {
           title: "Fetch Three.js URLs Inside Docs",
           readOnlyHint: true,
-        } as ToolAnnotations,
+        },
       },
     ];
   }
