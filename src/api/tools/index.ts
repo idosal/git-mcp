@@ -3,6 +3,7 @@ import { getRepoData } from "../../shared/repoData.js";
 import { fetchUrlContent } from "./commonTools.js";
 import { getHandlerByRepoData } from "./repoHandlers/handlers.js";
 import type { Tool } from "./repoHandlers/RepoHandler.js";
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 
 export function getMcpTools(
   env: Env,
@@ -24,6 +25,10 @@ export function getMcpTools(
       },
       cb: async ({ url }) => {
         return fetchUrlContent({ url, env });
+      },
+      annotations: {
+        title: "Fetch URL Content",
+        readOnlyHint: true,
       },
     },
   ];

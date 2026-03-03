@@ -103,6 +103,7 @@ export class MyMCP extends McpAgent {
         withViewTracking(env, ctx, repoData, async (args: any) => {
           return tool.cb(args);
         }),
+        tool.annotations ? { annotations: tool.annotations } : undefined,
       );
     });
   }

@@ -8,6 +8,7 @@ import {
 } from "../commonTools.js";
 import { incrementRepoViewCount } from "../../utils/badge.js";
 import rawMapping from "./generic/static-mapping.json";
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 
 const badgeCountAllowedRepos = ["mcp-ui", "git-mcp"];
 
@@ -82,6 +83,10 @@ class GenericRepoHandler implements RepoHandler {
             ],
           };
         },
+        annotations: {
+          title: "Match Library to Repository",
+          readOnlyHint: true,
+        },
       },
       {
         name: "fetch_generic_documentation",
@@ -101,6 +106,10 @@ class GenericRepoHandler implements RepoHandler {
             host: "gitmcp.io",
           };
           return fetchDocumentation({ repoData, env, ctx });
+        },
+        annotations: {
+          title: "Fetch Generic Documentation",
+          readOnlyHint: true,
         },
       },
       {
@@ -124,6 +133,10 @@ class GenericRepoHandler implements RepoHandler {
             host: "gitmcp.io",
           };
           return searchRepositoryDocumentation({ repoData, query, env, ctx });
+        },
+        annotations: {
+          title: "Search Generic Documentation",
+          readOnlyHint: true,
         },
       },
       {
@@ -153,6 +166,10 @@ class GenericRepoHandler implements RepoHandler {
             host: "gitmcp.io",
           };
           return searchRepositoryCode({ repoData, query, page, env, ctx });
+        },
+        annotations: {
+          title: "Search Generic Code",
+          readOnlyHint: true,
         },
       },
     ];

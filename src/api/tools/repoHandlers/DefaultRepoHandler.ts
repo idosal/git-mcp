@@ -13,6 +13,7 @@ import {
 import { z } from "zod";
 import type { RepoData } from "../../../shared/repoData.js";
 import type { RepoHandler, Tool } from "./RepoHandler.js";
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 
 class DefaultRepoHandler implements RepoHandler {
   name = "default";
@@ -34,6 +35,10 @@ class DefaultRepoHandler implements RepoHandler {
         cb: async () => {
           return fetchDocumentation({ repoData, env, ctx });
         },
+        annotations: {
+          title: "Fetch Documentation",
+          readOnlyHint: true,
+        },
       },
       {
         name: searchToolName,
@@ -50,6 +55,10 @@ class DefaultRepoHandler implements RepoHandler {
             env,
             ctx,
           });
+        },
+        annotations: {
+          title: "Search Documentation",
+          readOnlyHint: true,
         },
       },
       {
@@ -74,6 +83,10 @@ class DefaultRepoHandler implements RepoHandler {
             env,
             ctx,
           });
+        },
+        annotations: {
+          title: "Search Code",
+          readOnlyHint: true,
         },
       },
     ];
