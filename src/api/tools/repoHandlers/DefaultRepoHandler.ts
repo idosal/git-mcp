@@ -2,6 +2,7 @@ import {
   fetchDocumentation,
   searchRepositoryDocumentation,
   searchRepositoryCode,
+  searchRepositoryIssues,
   fetchUrlContent,
   generateFetchToolName,
   generateFetchToolDescription,
@@ -9,6 +10,8 @@ import {
   generateSearchToolDescription,
   generateCodeSearchToolName,
   generateCodeSearchToolDescription,
+  generateIssueSearchToolName,
+  generateIssueSearchToolDescription,
 } from "../commonTools.js";
 import { z } from "zod";
 import type { RepoData } from "../../../shared/repoData.js";
@@ -26,6 +29,9 @@ class DefaultRepoHandler implements RepoHandler {
     const codeSearchToolName = generateCodeSearchToolName(repoData);
     const codeSearchToolDescription =
       generateCodeSearchToolDescription(repoData);
+    const issueSearchToolName = generateIssueSearchToolName(repoData);
+    const issueSearchToolDescription =
+      generateIssueSearchToolDescription(repoData);
 
     return [
       {
@@ -87,6 +93,37 @@ class DefaultRepoHandler implements RepoHandler {
         annotations: {
           title: "Search Code",
           readOnlyHint: true,
+        },
+      },
+      {
+        name: issueSearchToolName,
+        description: issueSearchToolDescription,
+        paramsSchema: {
+          query: z
+            .string()
+            .describe("The search query to find relevant issues"),
+          state: z
+            .enum(["open", "closed", "all"])
+            .optional()
+            .describe(
+              "Filter issues by state. Defaults to all if not specified.",
+            ),
+          page: z
+            .number()
+            .optional()
+            .describe(
+              "Page number to retrieve (starting from 1). Each page contains 30 results.",
+            ),
+        },
+        cb: async ({ query, state, page }) => {
+          return searchRepositoryIssues({
+            repoData,
+            query,
+            state,
+            page,
+            env,
+            ctx,
+          });
         },
       },
     ];
