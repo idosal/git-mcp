@@ -31,13 +31,22 @@ export const loader = async ({ request }: { request: Request }) => {
   const url = new URL(request.url);
   const host = url.host;
   const pathname = url.pathname;
+  const protocol = url.protocol;
 
   const { urlType, owner, repo } = getRepoData({
     requestHost: host,
     requestUrl: pathname,
   });
 
-  return { urlType, owner, repo, url: url.toString() };
+  let urlString = url.toString();
+
+  if (urlType == "github") {
+    urlString = `${protocol}//${host}/${owner}/${repo}`;
+  } else if (urlType == "subdomain") {
+    urlString = `${protocol}//${host}/${repo}`;
+  }
+
+  return { urlType, owner, repo, url: urlString };
 };
 
 export function HydrateFallback() {

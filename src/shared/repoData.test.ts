@@ -37,6 +37,22 @@ const testCases: {
     },
   },
   {
+    title: "long gitmcp.io",
+    input: {
+      requestHost: "gitmcp.io",
+      requestUrls: [
+        "https://gitmcp.io/mrdoob/three.js/test",
+        "/mrdoob/three.js/test",
+      ],
+    },
+    expected: {
+      owner: "mrdoob",
+      repo: "three.js",
+      urlType: "github",
+      host: "gitmcp.io",
+    },
+  },
+  {
     title: "myOwner.gitmcp.io",
     input: {
       requestHost: "ownerName.gitmcp.io",
@@ -47,6 +63,22 @@ const testCases: {
       repo: "repoName",
       urlType: "subdomain",
       host: "ownerName.gitmcp.io",
+    },
+  },
+  {
+    title: "long myOwner.gitmcp.io",
+    input: {
+      requestHost: "keyboardkit.gitmcp.io",
+      requestUrls: [
+        "https://keyboardkit.gitmcp.io/KeyboardKit/documentation/keyboardkit",
+        "/KeyboardKit/documentation/keyboardkit",
+      ],
+    },
+    expected: {
+      owner: "keyboardkit",
+      repo: "KeyboardKit",
+      urlType: "subdomain",
+      host: "keyboardkit.gitmcp.io",
     },
   },
   {
