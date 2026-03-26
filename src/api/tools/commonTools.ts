@@ -695,13 +695,13 @@ export async function searchRepositoryCode({
       },
     };
   } catch (error) {
-    console.error(`Error in searchRepositoryCode: ${error}`);
+    console.error("Error in searchRepositoryCode:", error);
     return {
       searchQuery: query,
       content: [
         {
           type: "text" as const,
-          text: `### Code Search Results for: "${query}"\n\nAn error occurred while searching code: ${error}`,
+          text: `### Code Search Results for: "${query}"\n\nAn error occurred while searching code. Please try again later.`,
         },
       ],
     };
@@ -766,14 +766,14 @@ export async function fetchUrlContent({ url, env }: { url: string; env: Env }) {
       ],
     };
   } catch (error) {
-    console.error(`Error fetching ${url}: ${error}`);
+    console.error(`Error fetching ${url}:`, error);
     return {
       url,
       status: "error",
       content: [
         {
           type: "text" as const,
-          text: `Error fetching content from ${url}: ${error}`,
+          text: `Error fetching content from ${url}. Please try again later.`,
         },
       ],
     };

@@ -196,10 +196,10 @@ export async function action({
           );
         }
       }
-      const message =
-        error instanceof Error ? error.message : "An error occurred.";
-      console.error(error);
-      return message;
+      // Log the full error server-side for debugging, but return a generic
+      // message to the client to avoid leaking stack traces or internal paths.
+      console.error("Chat stream error:", error);
+      return "An unexpected error occurred. Please try again later.";
     },
   });
 }
