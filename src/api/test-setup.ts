@@ -56,15 +56,11 @@ export async function handleR2TestSetup(
       );
       console.log(`Uploaded hardcoded content to ${file.bucketPath} in R2`);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
       console.error(
         `Error uploading hardcoded content to ${file.bucketPath} in R2:`,
-        errorMessage,
+        error,
       );
-      results.push(
-        `Failed to upload hardcoded content to ${file.bucketPath}: ${errorMessage}`,
-      );
+      results.push(`Failed to upload hardcoded content to ${file.bucketPath}`);
       errors++;
     }
   }
