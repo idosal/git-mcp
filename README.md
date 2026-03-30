@@ -397,3 +397,8 @@ GitMCP is provided "as is" without warranty of any kind. While we strive to ensu
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=idosal/git-mcp&type=Timeline)](https://www.star-history.com/#idosal/git-mcp&Timeline)
+
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/idosal-git-mcp).
+
