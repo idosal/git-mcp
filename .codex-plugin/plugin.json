@@ -1,0 +1,29 @@
+{
+  "name": "git-mcp",
+  "version": "0.1.0",
+  "description": "GitMCP plugin for Codex - eliminate code hallucinations with up-to-date GitHub project docs",
+  "author": {
+    "name": "idosal",
+    "url": "https://github.com/idosal"
+  },
+  "homepage": "https://gitmcp.io",
+  "repository": "https://github.com/idosal/git-mcp",
+  "license": "Apache-2.0",
+  "keywords": [
+    "mcp",
+    "git",
+    "github",
+    "documentation",
+    "reverse-engineering"
+  ],
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "GitMCP",
+    "shortDescription": "Access up-to-date GitHub project docs and code via MCP",
+    "longDescription": "GitMCP is a free, open-source remote MCP server that transforms any GitHub project into a documentation hub. Enables Codex to access current docs and source code, eliminating code hallucinations.",
+    "developerName": "idosal",
+    "category": "Productivity",
+    "websiteURL": "https://gitmcp.io"
+  },
+  "skills": "./skills/"
+}
