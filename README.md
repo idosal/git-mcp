@@ -214,6 +214,36 @@ For more details on configuring MCP servers in Augment Code, visit [the Augment 
 
 > **Note:** Remember to replace `{owner}` and `{repo}` with the actual GitHub username/organization and repository name. You can also use the dynamic endpoint `https://gitmcp.io/docs` to allow your AI to access any repository on demand.
 
+## 🔄 GitMCP vs GitHub MCP
+
+While both GitMCP and GitHub MCP give AI assistants access to repository data, they serve fundamentally different purposes.
+
+### Key Differences
+
+| Aspect | GitMCP | GitHub MCP |
+|--------|--------|------------|
+| **Focus** | Documentation-grounded code comprehension | Full GitHub platform operations |
+| **Auth Required** | None (for public repos) | OAuth or Personal Access Token |
+| **Repo Scope** | Any public GitHub repo or GitHub Pages site | Repos you have authenticated access to |
+| **Read / Write** | Read-only | Read + write (issues, PRs, releases, etc.) |
+| **Setup** | Zero-config — just add a URL | Requires GitHub app or token configuration |
+| **Search** | Documentation-first semantic search | GitHub API-based file/code search |
+| **Privacy** | No query logging; self-hostable | Routed through GitHub infrastructure |
+
+### When to Use GitMCP
+- You want AI tools to use **up-to-date docs from any public repo** — including libraries you don't own
+- You need **zero-setup context injection** with no authentication overhead
+- You want to **eliminate hallucinations** about third-party libraries or frameworks
+- You need AI to access **GitHub Pages documentation** alongside source code
+- You want **no query logging** or prefer to self-host
+
+### When to Use GitHub MCP
+- You need to **create or manage issues, PRs, and releases** in your own repos
+- Your workflow involves **CI/CD monitoring or GitHub Actions**
+- You need **write access** to GitHub resources through AI
+- You are fully within the **GitHub ecosystem** and need deep platform integration
+
+> In short: GitHub MCP gives AI *hands on your GitHub account*. GitMCP gives AI *understanding of any repository's documentation* — instantly, with no setup.
 ## ⚙ How It Works
 
 GitMCP connects your AI assistant to GitHub repositories using the Model Context Protocol (MCP), a standard that lets AI tools request additional information from external sources.
