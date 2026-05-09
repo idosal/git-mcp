@@ -60,6 +60,10 @@ describe("Tools Module", () => {
             description:
               'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.',
           },
+          search_myrepo_issues: {
+            description:
+              'Search open or closed issues within the GitHub repository: "myorg/myrepo".',
+          },
         },
       },
       // default handler - subdomain
@@ -83,6 +87,10 @@ describe("Tools Module", () => {
             description:
               'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.',
           },
+          search_myrepo_issues: {
+            description:
+              'Search open or closed issues within the GitHub repository: "myorg/myrepo".',
+          },
         },
       },
       // generic handler
@@ -97,6 +105,10 @@ describe("Tools Module", () => {
           search_generic_code: {
             description:
               "Search for code in any GitHub repository by providing owner, project name, and search query. Returns matching files. Supports pagination with 30 results per page.",
+          },
+          search_generic_issues: {
+            description:
+              "Search issues in any GitHub repository by providing owner, project name, and search query. Supports filtering by state and pagination with 30 results per page.",
           },
           fetch_generic_url_content: {
             description:

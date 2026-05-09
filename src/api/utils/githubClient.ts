@@ -268,6 +268,48 @@ export async function searchCode(
 }
 
 /**
+ * Search for issues in a GitHub repository
+ * @param query - Search query
+ * @param owner - Repository owner
+ * @param repo - Repository name
+ * @param env - Environment for GitHub token
+ * @param page - Page number (1-indexed)
+ * @param perPage - Results per page (max 100)
+ * @param state - Issue state filter
+ */
+export async function searchIssues(
+  query: string,
+  owner: string,
+  repo: string,
+  env: Env,
+  page: number = 1,
+  perPage: number = 30,
+  state: "open" | "closed" | "all" = "all",
+): Promise<any> {
+  const validPerPage = Math.min(Math.max(1, perPage), 100);
+
+  let searchQuery = `${query} repo:${owner}/${repo} type:issue`;
+  if (state !== "all") {
+    searchQuery += ` state:${state}`;
+  }
+
+  const searchUrl =
+    `https://api.github.com/search/issues?q=${encodeURIComponent(searchQuery)}` +
+    `&page=${page}&per_page=${validPerPage}`;
+
+  const response = await githubApiRequest(searchUrl, {}, env);
+
+  if (!response || !response.ok) {
+    console.warn(
+      `GitHub API issue search failed: ${response?.status} ${response?.statusText}`,
+    );
+    return null;
+  }
+
+  return response.json();
+}
+
+/**
  * Search for a specific filename in a GitHub repository
  * @param filename - Filename to search for
  * @param owner - Repository owner
