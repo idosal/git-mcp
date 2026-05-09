@@ -42,8 +42,9 @@ export function getRepoData(requestData: RequestData): RepoData {
   // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
   if (requestHost.includes(".gitmcp.io")) {
     const subdomain = requestHost.split(".")[0];
+    const repo = path.split("/")?.at(0) ?? null;
     logData.owner = subdomain;
-    logData.repo = path;
+    logData.repo = repo;
     logData.urlType = "subdomain";
     log("getRepoDataLog", JSON.stringify(logData, null, 2));
 
@@ -56,7 +57,7 @@ export function getRepoData(requestData: RequestData): RepoData {
 
     return {
       owner: subdomain,
-      repo: path || null,
+      repo: repo || null,
       host: requestHost,
       urlType: "subdomain",
     };
