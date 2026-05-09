@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gitmcp": {
+      "type": "url",
+      "url": "https://gitmcp.io/docs"
+    }
+  }
+}
