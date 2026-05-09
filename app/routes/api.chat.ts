@@ -1,9 +1,9 @@
 import { getModel } from "~/chat/ai/providers.server";
 import type { modelID } from "~/chat/ai/providers.shared";
 import { streamText, type ToolSet, type UIMessage } from "ai";
-
 import type { StorageKey } from "~/chat/ai/providers.shared";
 import { MCPClientManager } from "agents/mcp/client";
+import { validateAndFilterTools } from "src/api/utils/toolValidation";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 60;
@@ -120,10 +120,34 @@ export async function action({
       const { id } = await mcp.connect(url);
       if (mcp.mcpConnections[id]?.connectionState === "ready") {
         const mcptools = await mcp.unstable_getAITools();
-        tools = { ...tools, ...mcptools };
+        // Validate and filter tools before merging
+        const validatedTools = validateAndFilterTools(mcptools);
+        const validToolCount = Object.keys(validatedTools).length;
+        const totalToolCount = Object.keys(mcptools).length;
+
+        if (validToolCount < totalToolCount) {
+          console.warn(
+            `[${url}] Some tools were invalid: ${totalToolCount - validToolCount} tools filtered out`,
+          );
+        }
+
+        if (validToolCount === 0) {
+          console.error(`[${url}] No valid tools found after validation`);
+        } else {
+          tools = { ...tools, ...validatedTools };
+        }
       }
     } catch (error) {
       console.error("Error getting tools for url", url, error);
+      // Log more detailed error information for debugging
+      if (error instanceof Error) {
+        console.error("Error details:", {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+          url: url,
+        });
+      }
     }
   }
 
