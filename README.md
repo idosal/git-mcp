@@ -1,5 +1,10 @@
 # GitMCP
 
+<div align="center">
+  <a href="README.md">English</a> • 
+  <a href="README.zh-CN.md">中文</a>
+</div>
+
 <p align="center">
   <img width="884" alt="image" src="https://github.com/user-attachments/assets/2bf3e3df-556c-49c6-ab7b-36c279d53bba" />
 </p>
