@@ -99,6 +99,8 @@ export default function Content({
         return "https://www.cursor.com/favicon.ico";
       case "Claude Desktop":
         return "https://claude.ai/favicon.ico";
+      case "Zed":
+        return "https://zed.dev/favicon.ico";
       case "Windsurf":
         return "https://codeium.com/favicon.ico";
       case "VSCode":
@@ -239,6 +241,7 @@ export default function Content({
                 "Cursor",
                 "Claude Desktop",
                 "Windsurf",
+                "Zed",
                 "VSCode",
                 "Cline",
                 "Highlight AI",
@@ -361,6 +364,25 @@ export default function Content({
                   id="windsurf"
                   popoutUrl="windsurf://"
                   name="Windsurf"
+                />
+              </div>
+            </div>
+            <div id="tab-zed" className="tab-content hidden">
+              <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
+                <p className="text-sm text-slate-700 mb-2">
+                  Add this MCP to your Zed context servers config:
+                </p>
+                <CodeExample
+                  code={`{
+  "context_servers": {
+    "${serverName}": {
+      "url": "${url}"
+    }
+  }
+}`}
+                  id="zed"
+                  name="Zed"
+                  popoutUrl="https://zed.dev/docs/assistant/context-servers"
                 />
               </div>
             </div>
@@ -623,6 +645,19 @@ export default function Content({
                 className="h-6 w-6 mr-2"
               />
               Windsurf
+            </a>
+            <a
+              href="https://zed.dev"
+              className="text-blue-600 hover:text-blue-800 flex items-center transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src={getToolFaviconUrl("Zed")}
+                alt="Zed"
+                className="h-6 w-6 mr-2"
+              />
+              Zed
             </a>
             <a
               href="https://code.visualstudio.com/"
