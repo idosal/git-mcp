@@ -145,9 +145,22 @@ export default {
       request.headers.get("accept")?.includes("text/event-stream") &&
       !!url.pathname &&
       url.pathname !== "/";
-
+  
+    // Handle Streamable HTTP transport: MCP clients using the HTTP transport
+    // send POST with JSON payload (no text/event-stream Accept header).
+    const isStreamableHttp =
+      ((request.method === "POST" &&
+        request.headers.get("content-type")?.includes("application/json")) ||
+        request.headers.get("accept")?.includes("application/json")) &&
+      !request.headers.get("accept")?.includes("text/html") &&
+      !url.pathname.startsWith("/api/");
+  
     ctx.props.requestUrl = request.url;
-
+  
+    if (isStreamableHttp) {
+      return await MyMCP.serve("/*").fetch(request, env, ctx);
+    }
+  
     if (isStreamMethod) {
       return await MyMCP.serve("/*").fetch(request, env, ctx);
     } else {
