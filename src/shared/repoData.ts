@@ -26,17 +26,7 @@ export function getRepoData(requestData: RequestData): RepoData {
     requestUrl,
     requestHost,
   };
-  const protocol = requestHost.includes("localhost") ? "http" : "https";
-  let fullUrl = new URL(`${protocol}://${requestHost}`);
-  if (requestUrl) {
-    if (requestUrl.startsWith("/")) {
-      fullUrl = new URL(`${protocol}://${requestHost}${requestUrl}`);
-    } else if (requestUrl.startsWith("http")) {
-      fullUrl = new URL(requestUrl);
-    } else {
-      fullUrl = new URL(`${protocol}://${requestUrl}`);
-    }
-  }
+  const fullUrl = resolveRequestUrl(requestHost, requestUrl);
   const path = fullUrl.pathname.split("/").filter(Boolean).join("/");
 
   // Check for subdomain pattern: {subdomain}.gitmcp.io/{path}
@@ -110,6 +100,83 @@ export function getRepoData(requestData: RequestData): RepoData {
 
 function log(...args: any[]) {
   console.log(...args);
+}
+
+const BLOCKED_HOSTNAMES = new Set([
+  "localhost",
+  "127.0.0.1",
+  "0.0.0.0",
+  "::1",
+]);
+
+function isPrivateIpv4(hostname: string): boolean {
+  const match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!match) {
+    return false;
+  }
+  const octets = match.slice(1).map((part) => Number(part));
+  if (octets.some((octet) => octet > 255)) {
+    return false;
+  }
+  const [a, b] = octets;
+  return (
+    a === 10 ||
+    a === 127 ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    (a === 169 && b === 254)
+  );
+}
+
+function isAllowedRequestHost(hostname: string, requestHost: string): boolean {
+  const normalizedHost = hostname.toLowerCase();
+  const normalizedRequestHost = requestHost.toLowerCase();
+
+  if (BLOCKED_HOSTNAMES.has(normalizedHost) || isPrivateIpv4(normalizedHost)) {
+    return normalizedRequestHost.includes("localhost");
+  }
+
+  if (normalizedHost === normalizedRequestHost) {
+    return true;
+  }
+
+  const allowedHosts = new Set([
+    "gitmcp.io",
+    "www.gitmcp.io",
+    "github.com",
+    "www.github.com",
+    HOST_TEMP_URL.toLowerCase(),
+    "git-mcp.idosalomon.workers.dev",
+  ]);
+
+  return (
+    allowedHosts.has(normalizedHost) || normalizedHost.endsWith(".gitmcp.io")
+  );
+}
+
+function resolveRequestUrl(requestHost: string, requestUrl?: string): URL {
+  const protocol = requestHost.includes("localhost") ? "http" : "https";
+  let fullUrl = new URL(`${protocol}://${requestHost}`);
+  if (requestUrl) {
+    if (requestUrl.startsWith("/")) {
+      fullUrl = new URL(`${protocol}://${requestHost}${requestUrl}`);
+    } else if (requestUrl.startsWith("http")) {
+      fullUrl = new URL(requestUrl);
+      if (!isAllowedRequestHost(fullUrl.hostname, requestHost)) {
+        throw new Error(
+          `Blocked request to untrusted host: ${fullUrl.hostname}`,
+        );
+      }
+    } else {
+      fullUrl = new URL(`${protocol}://${requestUrl}`);
+      if (!isAllowedRequestHost(fullUrl.hostname, requestHost)) {
+        throw new Error(
+          `Blocked request to untrusted host: ${fullUrl.hostname}`,
+        );
+      }
+    }
+  }
+  return fullUrl;
 }
 
 export const HOST_TEMP_URL = "remote-mcp-server-cf.idosalomon.workers.dev";

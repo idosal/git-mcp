@@ -172,6 +172,17 @@ const flatTestCases = {
     "localhost:3000/docs",
   ],
 };
+describe("getRepoData security", () => {
+  it("blocks SSRF via arbitrary absolute requestUrl hosts", () => {
+    expect(() =>
+      getRepoData({
+        requestHost: "gitmcp.io",
+        requestUrl: "http://internal-service:8080/admin",
+      }),
+    ).toThrow(/Blocked request to untrusted host/);
+  });
+});
+
 describe("getRepoDataFromUrl", () => {
   Object.entries(flatTestCases).forEach(([testCase, urls]) => {
     it(`should return the correct repo data for ${testCase}`, () => {
