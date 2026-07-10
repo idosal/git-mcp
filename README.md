@@ -91,6 +91,16 @@ Update your Cursor configuration file at `~/.cursor/mcp.json`:
    }
    ```
 
+#### Connecting Autohand Code
+
+Add a repository-specific GitMCP endpoint from the command line:
+
+```bash
+autohand mcp add --transport http gitmcp https://gitmcp.io/{owner}/{repo}
+```
+
+Add `--scope project` after `add` to keep the server configuration in the current project. See [Autohand Code](https://github.com/autohandai/code-cli/) for current installation and CLI details.
+
 #### Connecting Claude Desktop
 
 1. In Claude Desktop, go to Settings > Developer > Edit Config
