@@ -35,7 +35,7 @@ First of all, thank you for your interest in contributing to GitMCP! We apprecia
 Before you start working on GitMCP, make sure you have the following installed:
 
 - [Node.js](https://nodejs.org/) (version 18 or higher recommended)
-- [pnpm](https://pnpm.io/) (version 8.15.7 or higher)
+- [pnpm](https://pnpm.io/) (version 10.7.1 or compatible (see `packageManager` in package.json))
 - Git
 
 ### Setting Up Your Development Environment
