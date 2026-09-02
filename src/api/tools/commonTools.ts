@@ -458,7 +458,7 @@ export async function searchRepositoryDocumentationAutoRag({
 
     if (filteredData.length > 0) {
       responseText +=
-        "### Sources:\nImportant: you can fetch the full content of any source using the fetch_url_content tool\n";
+        "### Sources:\nImportant: you can fetch the full content of any source using the fetch_generic_url_content tool\n";
       const defaultBranch = await getRepoBranch(
         repoData.owner,
         repoData.repo,
