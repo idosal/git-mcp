@@ -89,13 +89,20 @@ export class MyMCP extends McpAgent {
     });
 
     getMcpTools(env, host, canonicalUrl, ctx).forEach((tool) => {
-      this.server.tool(
-        tool.name,
-        tool.description,
-        tool.paramsSchema,
-        async (args: any) => tool.cb(args),
-        tool.annotations ? { annotations: tool.annotations } : undefined,
-      );
+      const cb = async (args: any) => tool.cb(args);
+      // Annotations must come between paramsSchema and the callback;
+      // McpServer.tool() ignores any argument after the callback.
+      if (tool.annotations) {
+        this.server.tool(
+          tool.name,
+          tool.description,
+          tool.paramsSchema,
+          tool.annotations,
+          cb,
+        );
+      } else {
+        this.server.tool(tool.name, tool.description, tool.paramsSchema, cb);
+      }
     });
   }
 }
