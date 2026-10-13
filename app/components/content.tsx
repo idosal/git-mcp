@@ -101,6 +101,8 @@ export default function Content({
         return "https://claude.ai/favicon.ico";
       case "Windsurf":
         return "https://codeium.com/favicon.ico";
+      case "Zed":
+        return "https://zed.dev/favicon.ico";
       case "VSCode":
         return "https://code.visualstudio.com/assets/favicon.ico";
       case "Cline":
@@ -239,6 +241,7 @@ export default function Content({
                 "Cursor",
                 "Claude Desktop",
                 "Windsurf",
+                "Zed",
                 "VSCode",
                 "Cline",
                 "Highlight AI",
@@ -361,6 +364,32 @@ export default function Content({
                   id="windsurf"
                   popoutUrl="windsurf://"
                   name="Windsurf"
+                />
+              </div>
+            </div>
+            <div id="tab-zed" className="tab-content hidden">
+              <div className="bg-slate-50 p-3 sm:p-4 rounded-md border border-slate-200">
+                <p className="text-sm text-slate-700 mb-2">
+                  To add this MCP to Zed, update your{" "}
+                  <code className="bg-slate-200 px-1.5 py-0.5 rounded text-blue-700 break-words">
+                    ~/.config/zed/settings.json
+                  </code>
+                  :
+                </p>
+                <CodeExample
+                  code={`{
+  "context_servers": {
+    "${serverName}": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "${url}"
+      ]
+    }
+  }
+}`}
+                  id="zed"
+                  name="Zed"
                 />
               </div>
             </div>

@@ -122,6 +122,23 @@ Update your Windsurf configuration file at `~/.codeium/windsurf/mcp_config.json`
    }
    ```
 
+#### Connecting Zed
+
+Update your Zed settings file at `~/.config/zed/settings.json`:
+   ```json
+   {
+     "context_servers": {
+       "gitmcp": {
+         "command": "npx",
+         "args": [
+           "mcp-remote",
+           "https://gitmcp.io/{owner}/{repo}"
+         ]
+       }
+     }
+   }
+   ```
+
 #### Connecting VSCode
 
 Update your VSCode configuration file at `.vscode/mcp.json`:
