@@ -322,6 +322,7 @@ You can customize the badge's appearance with parameters:
 |-----------|-------------|---------|---------|
 | `color` | Color for the badge value | `aquamarine` | `?color=green` |
 | `label` | Badge label | `GitMCP` | `Documentation`
+| [CrakSEO/skills](https://github.com/CrakSEO/skills) | Connect Claude/Cursor/Codex to CrakSEO remote MCP servers for keyword research, SERP, backlinks, rank tracking, site audit, local SEO, AI visibility, Search Console and URL indexing | Claude Code, Cursor, Codex | MIT |
 
 Please reach out if you need help!
 
