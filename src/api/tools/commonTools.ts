@@ -15,6 +15,16 @@ import {
   cacheFetchDocResult,
   withAutoragCache,
 } from "../utils/cache.js";
+import {
+  WIKI_HOME_PAGE,
+  formatWikiPageList,
+  getWikiPageUrl,
+  getWikiPagesListUrl,
+  getWikiRawPageUrl,
+  normalizeWikiPageName,
+  parseWikiPageList,
+  wikiSlugToTitle,
+} from "../utils/wiki.js";
 
 // Define the return type for fetchDocumentation
 export type FetchDocumentationResult = {
@@ -786,6 +796,179 @@ export async function fetchUrlContent({ url, env }: { url: string; env: Env }) {
   }
 }
 
+/**
+ * List the pages of a repository's GitHub wiki.
+ * The Home page is listed first if it exists.
+ */
+async function listWikiPages(
+  owner: string,
+  repo: string,
+  env: Env,
+): Promise<{ pages: string[]; homeContent: string | null }> {
+  const [pagesResult, homeResult] = await Promise.all([
+    fetchFileWithRobotsTxtCheck(getWikiPagesListUrl(owner, repo), env),
+    fetchFileWithRobotsTxtCheck(
+      getWikiRawPageUrl(owner, repo, WIKI_HOME_PAGE),
+      env,
+    ),
+  ]);
+
+  const pages = pagesResult.content
+    ? parseWikiPageList(pagesResult.content, owner, repo)
+    : [];
+  const homeContent = homeResult.content;
+
+  return {
+    pages: homeContent ? [WIKI_HOME_PAGE, ...pages] : pages,
+    homeContent,
+  };
+}
+
+/**
+ * Fetch a page from the repository's GitHub wiki.
+ * Without a page, returns the list of wiki pages together with the Home page.
+ */
+export async function fetchRepositoryWiki({
+  repoData,
+  page,
+  env,
+}: {
+  repoData: RepoData;
+  page?: string | null;
+  env: Env;
+}): Promise<{
+  page: string | null;
+  url: string | null;
+  status: "success" | "not_found" | "blocked" | "error";
+  content: { type: "text"; text: string }[];
+}> {
+  const { owner, repo } = repoData;
+  if (!owner || !repo) {
+    return {
+      page: null,
+      url: null,
+      status: "error",
+      content: [
+        {
+          type: "text" as const,
+          text: "No repository specified. Cannot fetch the GitHub wiki.",
+        },
+      ],
+    };
+  }
+
+  const slug = normalizeWikiPageName(page);
+  const wikiUrl = getWikiPageUrl(owner, repo, slug || WIKI_HOME_PAGE);
+
+  try {
+    if (!slug) {
+      const { pages, homeContent } = await listWikiPages(owner, repo, env);
+      if (pages.length === 0) {
+        return {
+          page: null,
+          url: null,
+          status: "not_found",
+          content: [
+            {
+              type: "text" as const,
+              text: `No GitHub wiki pages found for ${owner}/${repo}. The repository may not have a wiki, or it may be empty.`,
+            },
+          ],
+        };
+      }
+
+      let text = `# ${owner}/${repo} wiki\n\n## Pages\n\n${formatWikiPageList(pages)}\n\nCall this tool again with one of the page names above to read that page.`;
+      if (homeContent) {
+        text += `\n\n## ${WIKI_HOME_PAGE}\n\nSource: ${wikiUrl}\n\n${homeContent}`;
+      }
+
+      return {
+        page: homeContent ? WIKI_HOME_PAGE : null,
+        url: homeContent ? wikiUrl : null,
+        status: "success",
+        content: [{ type: "text" as const, text }],
+      };
+    }
+
+    let resolvedSlug = slug;
+    let result = await fetchFileWithRobotsTxtCheck(
+      getWikiRawPageUrl(owner, repo, resolvedSlug),
+      env,
+    );
+
+    if (result.blockedByRobots) {
+      return {
+        page: resolvedSlug,
+        url: wikiUrl,
+        status: "blocked",
+        content: [
+          {
+            type: "text" as const,
+            text: `Access to ${wikiUrl} is disallowed by robots.txt. GitMCP respects robots.txt directives.`,
+          },
+        ],
+      };
+    }
+
+    let pages: string[] | null = null;
+    if (!result.content) {
+      // Wiki page names are case-sensitive; retry with the exact name if only the case differs
+      pages = (await listWikiPages(owner, repo, env)).pages;
+      const caseInsensitiveMatch = pages.find(
+        (candidate) =>
+          candidate !== slug && candidate.toLowerCase() === slug.toLowerCase(),
+      );
+      if (caseInsensitiveMatch) {
+        resolvedSlug = caseInsensitiveMatch;
+        result = await fetchFileWithRobotsTxtCheck(
+          getWikiRawPageUrl(owner, repo, resolvedSlug),
+          env,
+        );
+      }
+    }
+
+    if (!result.content) {
+      let text = `Wiki page "${wikiSlugToTitle(slug)}" was not found for ${owner}/${repo}.`;
+      text +=
+        pages && pages.length > 0
+          ? ` Available pages:\n\n${formatWikiPageList(pages)}`
+          : " The repository may not have a wiki, or the page may not use Markdown.";
+      return {
+        page: slug,
+        url: wikiUrl,
+        status: "not_found",
+        content: [{ type: "text" as const, text }],
+      };
+    }
+
+    const resolvedUrl = getWikiPageUrl(owner, repo, resolvedSlug);
+    return {
+      page: resolvedSlug,
+      url: resolvedUrl,
+      status: "success",
+      content: [
+        {
+          type: "text" as const,
+          text: `# ${wikiSlugToTitle(resolvedSlug)}\n\nSource: ${resolvedUrl}\n\n${result.content}`,
+        },
+      ],
+    };
+  } catch (error) {
+    console.error(`Error fetching wiki for ${owner}/${repo}: ${error}`);
+    return {
+      page: slug || null,
+      url: wikiUrl,
+      status: "error",
+      content: [
+        {
+          type: "text" as const,
+          text: `Error fetching the GitHub wiki for ${owner}/${repo}: ${error}`,
+        },
+      ],
+    };
+  }
+}
+
 export const LIMIT = 51;
 
 /**
@@ -996,6 +1179,27 @@ export function generateCodeSearchToolDescription({
   repo,
 }: RepoData): string {
   return `Search for code within the GitHub repository: "${owner}/${repo}" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.`;
+}
+
+/**
+ * Generate a dynamic tool name for the wiki tool based on the URL
+ * @param repoData - The repository data object
+ * @returns A descriptive string for the tool name
+ */
+export function generateWikiToolName({ urlType, repo }: RepoData): string {
+  if (urlType == "subdomain" || urlType == "github") {
+    return enforceToolNameLengthLimit("fetch_", repo, "_wiki");
+  }
+  return "fetch_wiki";
+}
+
+/**
+ * Generate a dynamic description for the wiki tool based on the URL
+ * @param repoData - The repository data object
+ * @returns A descriptive string for the tool
+ */
+export function generateWikiToolDescription({ owner, repo }: RepoData): string {
+  return `Fetch pages from the GitHub wiki of "${owner}/${repo}". Call without a page to list the wiki pages and get the Home page, then pass a page name to read that page. Useful when the documentation refers to the wiki or does not cover the question.`;
 }
 
 /**

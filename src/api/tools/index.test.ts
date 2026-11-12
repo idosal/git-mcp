@@ -60,6 +60,10 @@ describe("Tools Module", () => {
             description:
               'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.',
           },
+          fetch_myrepo_wiki: {
+            description:
+              'Fetch pages from the GitHub wiki of "myorg/myrepo". Call without a page to list the wiki pages and get the Home page, then pass a page name to read that page. Useful when the documentation refers to the wiki or does not cover the question.',
+          },
         },
       },
       // default handler - subdomain
@@ -82,6 +86,10 @@ describe("Tools Module", () => {
           search_myrepo_code: {
             description:
               'Search for code within the GitHub repository: "myorg/myrepo" using the GitHub Search API (exact match). Returns matching files for you to query further if relevant.',
+          },
+          fetch_myrepo_wiki: {
+            description:
+              'Fetch pages from the GitHub wiki of "myorg/myrepo". Call without a page to list the wiki pages and get the Home page, then pass a page name to read that page. Useful when the documentation refers to the wiki or does not cover the question.',
           },
         },
       },
