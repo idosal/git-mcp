@@ -9,6 +9,9 @@ import {
   generateSearchToolDescription,
   generateCodeSearchToolName,
   generateCodeSearchToolDescription,
+  fetchRepositoryWiki,
+  generateWikiToolName,
+  generateWikiToolDescription,
 } from "../commonTools.js";
 import { z } from "zod";
 import type { RepoData } from "../../../shared/repoData.js";
@@ -26,6 +29,8 @@ class DefaultRepoHandler implements RepoHandler {
     const codeSearchToolName = generateCodeSearchToolName(repoData);
     const codeSearchToolDescription =
       generateCodeSearchToolDescription(repoData);
+    const wikiToolName = generateWikiToolName(repoData);
+    const wikiToolDescription = generateWikiToolDescription(repoData);
 
     return [
       {
@@ -86,6 +91,25 @@ class DefaultRepoHandler implements RepoHandler {
         },
         annotations: {
           title: "Search Code",
+          readOnlyHint: true,
+        },
+      },
+      {
+        name: wikiToolName,
+        description: wikiToolDescription,
+        paramsSchema: {
+          page: z
+            .string()
+            .optional()
+            .describe(
+              'Name of the wiki page to fetch, e.g. "Getting Started". Omit to list the wiki pages and get the Home page.',
+            ),
+        },
+        cb: async ({ page }) => {
+          return fetchRepositoryWiki({ repoData, page, env });
+        },
+        annotations: {
+          title: "Fetch Wiki",
           readOnlyHint: true,
         },
       },

@@ -292,6 +292,12 @@ This tool searches through the actual code in the repository using GitHub's code
 
 **When it's useful:** When you want examples of how something is implemented or need technical details not covered in documentation
 
+### `fetch_<repo-name>_wiki`
+
+This tool reads the repository's GitHub wiki. Called without a page, it lists the wiki pages and returns the Home page; called with a page name (for example `Getting Started`), it returns that page's Markdown.
+
+**When it's useful:** When a project keeps guides, FAQs or design notes in its wiki rather than in the repository
+
 > **Note:** When using the dynamic endpoint (`gitmcp.io/docs`), these tools are named slightly differently (`fetch_generic_documentation`, `search_generic_code`, and `search_generic_documentation`) and need additional information about which repository to access.
 
 ## 📊 Badge
